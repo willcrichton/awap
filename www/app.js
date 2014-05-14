@@ -1,5 +1,5 @@
 var ws = io.connect(document.baseURI);
-var blocks, board, curBlock = 0, rotation = 0, curPos;
+var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos;
 
 function getTile(x, y) {
     return $('.tile.' + x + 'x' + y);
@@ -20,8 +20,6 @@ function rotate(block) {
         }
     }
 
-    console.log(rotation, block[1]);
-
     return newBlock;
 }
 
@@ -34,6 +32,43 @@ function highlightBlock(active) {
         if (active) tile.addClass('hover');
         else tile.removeClass('hover');
     }
+}
+
+function updateBlockList() {
+    var $blocks = $('#blocks');
+    $blocks.html('');
+    for (var i = 0; i < blocks.length; i++) {
+        var block = blocks[i], $block = $('<div class="block"></div>');
+        $block.data('index', i);
+        $blocks.append($block);
+
+        var maxX = 0, maxY = 0;
+        for (var j = 0; j < block.length; j++) {
+            var $tile = $('<div class="tile p' + myNum + '"></div>');
+            $block.append($tile);
+
+            var dim = $tile.width();
+            $tile.css({
+                left: dim * block[j].x,
+                top: dim * block[j].y
+            });
+
+            maxX = block[j].x > maxX ? block[j].x : maxX;
+            maxY = block[j].y > maxY ? block[j].y : maxY;
+        }
+
+        var tileDim = $block.find('.tile').width();
+        $block.css({
+            width: (1 + maxX) * tileDim,
+            height: (1 + maxY) * tileDim
+        });
+    }
+
+    $blocks.find('.block').click(function() {
+        highlightBlock(false);
+        curBlock = $(this).data('index');
+        highlightBlock(true);
+    });
 }
 
 $(document).keyup(function(e) {
@@ -49,17 +84,17 @@ $(document).keyup(function(e) {
 });
 
 ws.on('setup', function(state) {
-    console.log(state);
     blocks = state.blocks;
     board = state.board;
-
+    myNum = state.number;
+    
     var $board = $('#board');
     $board.html('');
     for (var y = 0; y < board.dimension; y++) {
         for (var x = 0; x < board.dimension; x++) {
-            var $sqr = $('<div class="' + x + 'x' + y + ' tile"></div>');
-            $sqr.data('pos', {x: x, y: y});
-            $board.append($sqr);
+            var $tile = $('<div class="' + x + 'x' + y + ' tile"></div>');
+            $tile.data('pos', {x: x, y: y});
+            $board.append($tile);
         }
     }
 
@@ -80,6 +115,8 @@ ws.on('setup', function(state) {
             pos: pos
         });
     });
+    
+    updateBlockList();
 });
 
 ws.on('moveResponse', function(resp) {
@@ -99,4 +136,6 @@ ws.on('update', function(state) {
             }
         }
     }
+
+    updateBlockList();
 });

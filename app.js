@@ -185,11 +185,6 @@ Game.prototype = {
 };
 
 io.sockets.on('connection', function (socket) {
-    // socket.id;
-    // socket.emit('channel', {obj})
-    // socket.broadcast.emit('channel', {obj})
-    // socket.on('channel', callback);
-
     var pl = new Player(socket);
     var G = new Game([pl]);
 

@@ -4,30 +4,50 @@
 
 #container {
   padding: 10px;
-  width: 1000px;
-  margin: 0 auto; }
+  width: 820px;
+  margin: 0 auto;
+  overflow: auto; }
+
+.tile.hover {
+  background: #ffbbbb; }
+
+.tile.p0 {
+  background: red; }
+
+.tile.p1 {
+  background: yellow; }
+
+.tile.p2 {
+  background: green; }
+
+.tile.p3 {
+  background: blue; }
+
+#blocks {
+  width: 150px;
+  min-height: 1px;
+  overflow: auto;
+  float: left; }
+  #blocks .block {
+    position: relative;
+    float: left;
+    margin: 5px;
+    cursor: pointer; }
+  #blocks .tile {
+    width: 12px;
+    height: 12px;
+    position: absolute; }
 
 #board {
   position: relative;
   border-left: 1px solid black;
   border-top: 1px solid black;
   overflow: auto;
-  margin: 0 auto; }
+  float: left; }
   #board .tile {
+    float: left;
+    cursor: pointer;
     width: 32px;
     height: 32px;
     border-right: 1px solid black;
-    border-bottom: 1px solid black;
-    float: left;
-    background: white;
-    cursor: pointer; }
-  #board .tile.hover {
-    background: #ffbbbb; }
-  #board .tile.p0 {
-    background: red; }
-  #board .tile.p1 {
-    background: yellow; }
-  #board .tile.p2 {
-    background: green; }
-  #board .tile.p3 {
-    background: blue; }
+    border-bottom: 1px solid black; }
