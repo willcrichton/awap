@@ -64,11 +64,15 @@ function updateBlockList() {
         });
     }
 
+    curBlock = 0;
     $blocks.find('.block').click(function() {
         highlightBlock(false);
         curBlock = $(this).data('index');
         highlightBlock(true);
     });
+
+    highlightBlock(false);
+    highlightBlock(true);
 }
 
 $(document).keyup(function(e) {
