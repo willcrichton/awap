@@ -25,6 +25,8 @@ var Player = function(socket) {
 
 Player.prototype = {
     clientState: function() {
+
+        // TODO: include other players' block states
         return {
             blocks: this.blocks,
             board: this.game.board,
@@ -43,7 +45,7 @@ Player.prototype = {
 
         this.socket.emit('setup', this.clientState());
     },
-
+    
     update: function() {
         this.socket.emit('update', this.clientState());
     }
@@ -113,6 +115,7 @@ Board.prototype = {
 }
 
 
+// TODO: more blocks
 var BLOCKS = [
     [[0, 0], [0, 1], [1, 0]],
     [[0,0], [0, 1], [0, 2]],
@@ -177,18 +180,19 @@ Game.prototype = {
             }
         }
 
-        if (this.board.placeBlock(pl.number, newBlock, move.pos)) {
-            pl.blocks.splice(move.block, 1);
-            this.turn = (this.turn + 1) % this.players.length;
-            this.players.forEach(function(pl) { pl.update(); });
-            return true;
-        } else {
-            return false;
-        }
+        if (!this.board.placeBlock(pl.number, newBlock, move.pos)) return false;
+        
+        pl.blocks.splice(move.block, 1);
+        this.turn = (this.turn + 1) % this.players.length;
+        this.players.forEach(function(pl) { pl.update(); });
+
+        return true;
     }
 };
 
 io.sockets.on('connection', function (socket) {
+
+    // TODO: lobby system
     var pl = new Player(socket);
     var G = new Game([pl]);
 
@@ -197,7 +201,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function() {
-        // TODO: end game
+        // TODO: quit game and notify other players
     });
 });
 

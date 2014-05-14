@@ -153,4 +153,6 @@ ws.on('update', function(state) {
     }
 
     updateBlockList();
+
+    // TODO: check if game over and display message
 });
