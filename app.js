@@ -1,13 +1,18 @@
+///////////////////
+// BLOKUS SERVER //
+///////////////////
+
+// create the static file server
 var nodestatic = require('node-static');
 var fs = new nodestatic.Server('./www');
-
 var server = require('http').createServer(function(request, response) {
     request.addListener('end', function() {
         fs.serve(request, response);
     }).resume();
 });
-
 server.listen(8080);
+
+// spin up the websocket server
 var io = require('socket.io').listen(server, {log: false});
 
 var Player = function(socket) {
@@ -59,15 +64,44 @@ var Board = function() {
 
 Board.prototype = {
     placeBlock: function(plNum, block, point) {
+        var onAbsCorner = false, onRelCorner = false;
+        var N = this.dimension - 1, corner;
+
+        switch (plNum) {
+        case 0: corner = {x: 0, y: 0}; break
+        case 1: corner = {x: N, y: 0}; break
+        case 2: corner = {x: N, y: N}; break
+        case 3: corner = {x: 0, y: N}; break
+        }
+
         for (var i = 0; i < block.length; i++) {
             var x = point.x + block[i].x, y = point.y + block[i].y;
+
+            // TODO: informative errors
             if (x >= this.dimension || x < 0 ||
                 y >= this.dimension || y < 0 ||
-                this.grid[x][y] >= 0)
+                this.grid[x][y] >= 0 ||
+                (x > 0 && this.grid[x - 1][y] == plNum) || 
+                (y > 0 && this.grid[x][y - 1] == plNum) ||
+                (x < N && this.grid[x + 1][y] == plNum) ||
+                (y < N && this.grid[x][y + 1] == plNum))
             {
                 return false;
             }
+
+            onAbsCorner = onAbsCorner || (x === corner.x && y === corner.y);
+            onRelCorner = onRelCorner ||
+                (x > 0 && y > 0 && this.grid[x - 1][y - 1] == plNum) ||
+                (x > 0 && y < N && this.grid[x - 1][y + 1] == plNum) ||
+                (x < N && y > 0 && this.grid[x + 1][y - 1] == plNum) ||
+                (x < N && y < N && this.grid[x + 1][y + 1] == plNum);
         }
+
+        // ensure initial play is on the player's absolute corner of the board
+        if (this.grid[corner.x][corner.y] < 0 && !onAbsCorner) return false;
+
+        // ensure that placed block is on the corner of another block players owns
+        if (!onAbsCorner && !onRelCorner) return false;
 
         for (var i = 0; i < block.length; i++) {
             var x = point.x + block[i].x, y = point.y + block[i].y;
@@ -80,6 +114,7 @@ Board.prototype = {
 
 
 var BLOCKS = [
+    [[0, 0], [0, 1], [1, 0]],
     [[0,0], [0, 1]]
 ];
 
@@ -116,10 +151,12 @@ var Game = function(players) {
 
 Game.prototype = {
     doMove: function(pl, move) {
+
+        // TODO: informative errors
         if (this.turn != pl.number) return false;
         if (move.block === undefined || move.pos === undefined || move.rotation === undefined ||
-            !move.pos.x || !move.pos.y || move.block < 0 || move.block >= pl.blocks.length ||
-            move.rotation < 0 || move.rotation > 3) 
+            move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
+            move.block >= pl.blocks.length || move.rotation < 0 || move.rotation > 3) 
         { 
             console.log(move.pos, move.block);
             return false; 

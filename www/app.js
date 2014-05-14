@@ -54,6 +54,7 @@ ws.on('setup', function(state) {
     board = state.board;
 
     var $board = $('#board');
+    $board.html('');
     for (var y = 0; y < board.dimension; y++) {
         for (var x = 0; x < board.dimension; x++) {
             var $sqr = $('<div class="' + x + 'x' + y + ' tile"></div>');
