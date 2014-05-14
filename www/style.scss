@@ -1,0 +1,35 @@
+* { margin: 0; padding: 0; }
+
+#container {
+    padding: 10px;
+    width: 1000px;
+    margin: 0 auto;
+}
+
+#board { 
+    position: relative;
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    overflow: auto;
+    margin: 0 auto;
+
+    $size: 32px;
+    .tile {
+        width: $size;
+        height: $size;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        float: left;
+        background: white;
+        cursor: pointer;
+    }
+
+    .tile.hover {
+        background: #ffbbbb;
+    }
+
+    .tile.p0 { background: red; }
+    .tile.p1 { background: yellow; }
+    .tile.p2 { background: green; }
+    .tile.p3 { background: blue; }
+}

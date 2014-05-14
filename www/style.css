@@ -1,0 +1,33 @@
+* {
+  margin: 0;
+  padding: 0; }
+
+#container {
+  padding: 10px;
+  width: 1000px;
+  margin: 0 auto; }
+
+#board {
+  position: relative;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  overflow: auto;
+  margin: 0 auto; }
+  #board .tile {
+    width: 32px;
+    height: 32px;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    float: left;
+    background: white;
+    cursor: pointer; }
+  #board .tile.hover {
+    background: #ffbbbb; }
+  #board .tile.p0 {
+    background: red; }
+  #board .tile.p1 {
+    background: yellow; }
+  #board .tile.p2 {
+    background: green; }
+  #board .tile.p3 {
+    background: reblue; }
