@@ -118,7 +118,7 @@ var BLOCKS = [
     [[0,0], [0, 1]]
 ];
 
-var NUM_BLOCKS = 1;
+var NUM_BLOCKS = 2;
 
 var Game = function(players) {
     this.turn = 0;
@@ -137,9 +137,9 @@ var Game = function(players) {
     }
 
     for (var i = 0; i < NUM_BLOCKS; i++) {
-        var newBlock = [];
-        for (var j = 0; j < BLOCKS[idx].length; j++) {
-            newBlock[j] = {x: BLOCKS[idx][j][0], y: BLOCKS[idx][j][1]}
+        var oldBlock = BLOCKS[blockIds[i]], newBlock = [];
+        for (var j = 0; j < oldBlock.length; j++) {
+            newBlock[j] = {x: oldBlock[j][0], y: oldBlock[j][1]}
         }
         blocks.push(newBlock);
     }
@@ -174,6 +174,7 @@ Game.prototype = {
         }
 
         if (this.board.placeBlock(pl.number, newBlock, move.pos)) {
+            pl.blocks.splice(move.block, 1);
             this.turn = (this.turn + 1) % this.players.length;
             this.players.forEach(function(pl) { pl.update(); });
             return true;
