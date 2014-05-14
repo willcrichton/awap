@@ -37,12 +37,14 @@ function highlightBlock(active) {
 function updateBlockList() {
     var $blocks = $('#blocks');
     $blocks.html('');
+
+    var maxHeight = 0;
     for (var i = 0; i < blocks.length; i++) {
         var block = blocks[i], $block = $('<div class="block"></div>');
         $block.data('index', i);
         $blocks.append($block);
 
-        var maxX = 0, maxY = 0;
+        var maxX = 0, maxY = 0, minX = 0, minY = 0;
         for (var j = 0; j < block.length; j++) {
             var $tile = $('<div class="tile p' + myNum + '"></div>');
             $block.append($tile);
@@ -53,16 +55,25 @@ function updateBlockList() {
                 top: dim * block[j].y
             });
 
-            maxX = block[j].x > maxX ? block[j].x : maxX;
-            maxY = block[j].y > maxY ? block[j].y : maxY;
+            maxX = Math.max(maxX, block[j].x);
+            maxY = Math.max(maxY, block[j].y);
+
+            minX = Math.min(minX, block[j].x);
+            minY = Math.min(minY, block[j].y);
         }
 
         var tileDim = $block.find('.tile').width();
         $block.css({
-            width: (1 + maxX) * tileDim,
-            height: (1 + maxY) * tileDim
+            width: (1 + maxX - minX) * tileDim,
+            height: (1 + maxY - minY) * tileDim,
+            left: -minX * tileDim,
+            top: -minY * tileDim
         });
+
+        maxHeight = Math.max(maxHeight, $block.height() - minY * tileDim);
     }
+
+    $('.block').css('height', maxHeight);
 
     curBlock = 0;
     $blocks.find('.block').click(function() {
