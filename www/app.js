@@ -26,7 +26,7 @@ function rotate(block) {
 function highlightBlock(active) {
     if (curPos === undefined) return;
 
-    var block = rotate(blocks[curBlock]);
+    var block = rotate(blocks[myNum][curBlock]);
     for (var i = 0; i < block.length; i++) {
         var tile = getTile(curPos.x + block[i].x, curPos.y + block[i].y);
         if (active) tile.addClass('hover');
@@ -40,47 +40,54 @@ function updateBlockList() {
 
     var maxHeight = 0;
     for (var i = 0; i < blocks.length; i++) {
-        var block = blocks[i], $block = $('<div class="block"></div>');
-        $block.data('index', i);
-        $blocks.append($block);
+        var $group = $('<div class="blockgroup p' + i + '"></div>');
+        $blocks.append($group);
 
-        var maxX = 0, maxY = 0, minX = 0, minY = 0;
-        for (var j = 0; j < block.length; j++) {
-            var $tile = $('<div class="tile p' + myNum + '"></div>');
-            $block.append($tile);
-
-            var dim = $tile.width();
-            $tile.css({
-                left: dim * block[j].x,
-                top: dim * block[j].y
+        for (var j = 0; j < blocks[i].length; j++) {
+            var block = blocks[i][j], $block = $('<div class="block"></div>');
+            $block.data('index', j);
+            $group.append($block);
+            
+            var maxX = 0, maxY = 0, minX = 0, minY = 0;
+            for (var k = 0; k < block.length; k++) {
+                var $tile = $('<div class="tile p' + i + '"></div>');
+                $block.append($tile);
+                
+                var dim = $tile.width();
+                $tile.css({
+                    left: dim * block[k].x,
+                    top: dim * block[k].y
+                });
+                
+                maxX = Math.max(maxX, block[k].x);
+                maxY = Math.max(maxY, block[k].y);
+                
+                minX = Math.min(minX, block[k].x);
+                minY = Math.min(minY, block[k].y);
+            }
+            
+            var tileDim = $block.find('.tile').width();
+            $block.css({
+                width: (1 + maxX - minX) * tileDim,
+                height: (1 + maxY - minY) * tileDim,
+                left: -minX * tileDim,
+                top: -minY * tileDim
             });
-
-            maxX = Math.max(maxX, block[j].x);
-            maxY = Math.max(maxY, block[j].y);
-
-            minX = Math.min(minX, block[j].x);
-            minY = Math.min(minY, block[j].y);
+            
+            maxHeight = Math.max(maxHeight, $block.height() - minY * tileDim);
         }
-
-        var tileDim = $block.find('.tile').width();
-        $block.css({
-            width: (1 + maxX - minX) * tileDim,
-            height: (1 + maxY - minY) * tileDim,
-            left: -minX * tileDim,
-            top: -minY * tileDim
-        });
-
-        maxHeight = Math.max(maxHeight, $block.height() - minY * tileDim);
     }
 
     $('.block').css('height', maxHeight);
 
     curBlock = 0;
-    $blocks.find('.block').click(function() {
+    $('.blockgroup.p' + myNum).find('.block').click(function() {
         highlightBlock(false);
         curBlock = $(this).data('index');
         highlightBlock(true);
     });
+
+    $('.blockgroup:not(.p' + myNum + ') .block').css('cursor', 'default');
 
     highlightBlock(false);
     highlightBlock(true);
@@ -102,6 +109,9 @@ ws.on('setup', function(state) {
     blocks = state.blocks;
     board = state.board;
     myNum = state.number;
+
+    $('#waiting').hide();
+    $(document.body).addClass('p' + myNum);
     
     var $board = $('#board');
     $board.html('');
@@ -153,6 +163,20 @@ ws.on('update', function(state) {
     }
 
     updateBlockList();
+});
 
-    // TODO: check if game over and display message
+ws.on('end', function(msg) {
+    alert(msg);
+    $('#blocks, #board').html('');
+    $('#waiting').show();
+});
+
+$(window).load(function() {
+    var count = 1;
+    var $ellipsis = $('#waiting span');
+    setInterval(function() {
+        $ellipsis.html('');
+        for (var i = 0; i < count; i++) $ellipsis.append('.');
+        count = (count + 1) % 4;
+    }, 300);
 });

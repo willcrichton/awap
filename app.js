@@ -28,15 +28,14 @@ Player.prototype = {
 
         // TODO: include other players' block states
         return {
-            blocks: this.blocks,
+            blocks: this.game.players.map(function(p){ return p.blocks; }),
             board: this.game.board,
             turn: this.game.turn,
             number: this.number
         }
     },
 
-    setup: function(game, blocks) {
-        this.blocks = blocks;
+    setup: function(game) {
         this.game = game;
 
         for (var i = 0; i < game.players.length; i++) {
@@ -48,6 +47,15 @@ Player.prototype = {
     
     update: function() {
         this.socket.emit('update', this.clientState());
+    },
+
+    isInGame: function() {
+        return this.game !== null;
+    },
+
+    quit: function(msg) {
+        this.game = null;
+        this.socket.emit('end', msg);
     }
 };
 
@@ -152,7 +160,11 @@ var Game = function(players) {
     }
 
     for (var i = 0; i < this.players.length; i++) {
-        this.players[i].setup(this, blocks.slice(0));
+        this.players[i].blocks = blocks.slice(0);
+    }
+
+    for (var i = 0; i < this.players.length; i++) {
+        this.players[i].setup(this);
     }
 };
 
@@ -187,21 +199,35 @@ Game.prototype = {
         this.players.forEach(function(pl) { pl.update(); });
 
         return true;
+    },
+
+    quit: function() {
+        for (var i = 0; i < this.players.length; i++) {
+            this.players[i].quit("A player quit the game.");
+        }
     }
 };
 
 io.sockets.on('connection', function (socket) {
 
-    // TODO: lobby system
-    var pl = new Player(socket);
-    var G = new Game([pl]);
+    socket.player = new Player(socket);
+
+    var waitingPlayers = [];
+    for (var k in io.sockets.sockets) {
+        var pl = io.sockets.sockets[k].player;
+        if (!pl.isInGame()) waitingPlayers.push(pl);
+    }
+
+    if (waitingPlayers.length >= 4) {
+        new Game(waitingPlayers.slice(0, 4));
+    }
 
     socket.on('move', function(move) {
-        socket.emit('moveResponse', G.doMove(pl, move));
+        socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
     });
 
     socket.on('disconnect', function() {
-        // TODO: quit game and notify other players
+        socket.player.game.quit();
     });
 });
 

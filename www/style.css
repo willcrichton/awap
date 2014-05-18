@@ -8,19 +8,37 @@
   margin: 0 auto;
   overflow: auto; }
 
-.tile.hover {
-  background: #ffbbbb; }
+#waiting {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 400px;
+  text-align: left;
+  height: 50px;
+  font-size: 36px; }
 
-.tile.p0 {
+.p0 .tile.hover {
+  background: #fbb; }
+
+.p1 .tile.hover {
+  background: #ffb; }
+
+.p2 .tile.hover {
+  background: #bfb; }
+
+.p3 .tile.hover {
+  background: #bbf; }
+
+.p0 .tile.p0, .p1 .tile.p0, .p2 .tile.p0, .p3 .tile.p0 {
   background: red; }
-
-.tile.p1 {
+.p0 .tile.p1, .p1 .tile.p1, .p2 .tile.p1, .p3 .tile.p1 {
   background: yellow; }
-
-.tile.p2 {
+.p0 .tile.p2, .p1 .tile.p2, .p2 .tile.p2, .p3 .tile.p2 {
   background: green; }
-
-.tile.p3 {
+.p0 .tile.p3, .p1 .tile.p3, .p2 .tile.p3, .p3 .tile.p3 {
   background: blue; }
 
 #blocks {
@@ -28,6 +46,13 @@
   min-height: 1px;
   overflow: auto;
   float: left; }
+  #blocks .blockgroup {
+    overflow: auto;
+    border-top: 1px solid black;
+    padding-top: 15px; }
+  #blocks .blockgroup:first-child {
+    border-top: none;
+    margin-top: 1px; }
   #blocks .block {
     position: relative;
     float: left;
