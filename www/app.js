@@ -111,10 +111,15 @@ ws.on('setup', function(state) {
     myNum = state.number;
 
     $('#waiting').hide();
-    $(document.body).addClass('p' + myNum);
-    
+    $(document.body).attr('class', '').addClass('p' + myNum);
+
     var $board = $('#board');
     $board.html('');
+
+    for (var i = 0; i < state.blocks.length; i++) { 
+        $board.append('<div class="corner"></div>');
+    }
+
     for (var y = 0; y < board.dimension; y++) {
         for (var x = 0; x < board.dimension; x++) {
             var $tile = $('<div class="' + x + 'x' + y + ' tile"></div>');
@@ -142,6 +147,8 @@ ws.on('setup', function(state) {
     });
     
     updateBlockList();
+
+    $board.append('<div class="clear"></div>');
 });
 
 ws.on('moveResponse', function(resp) {

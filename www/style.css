@@ -21,21 +21,21 @@
   font-size: 36px; }
 
 .p0 .tile.hover {
-  background: #fbb; }
+  background: #ffcccc; }
 
 .p1 .tile.hover {
-  background: #ffb; }
+  background: #f8f8c7; }
 
 .p2 .tile.hover {
-  background: #bfb; }
+  background: #4dff4d; }
 
 .p3 .tile.hover {
-  background: #bbf; }
+  background: #ccccff; }
 
 .p0 .tile.p0, .p1 .tile.p0, .p2 .tile.p0, .p3 .tile.p0 {
   background: red; }
 .p0 .tile.p1, .p1 .tile.p1, .p2 .tile.p1, .p3 .tile.p1 {
-  background: yellow; }
+  background: #d9d91a; }
 .p0 .tile.p2, .p1 .tile.p2, .p2 .tile.p2, .p3 .tile.p2 {
   background: green; }
 .p0 .tile.p3, .p1 .tile.p3, .p2 .tile.p3, .p3 .tile.p3 {
@@ -47,7 +47,7 @@
   overflow: auto;
   float: left; }
   #blocks .blockgroup {
-    overflow: auto;
+    overflow: hidden;
     border-top: 1px solid black;
     padding-top: 15px; }
   #blocks .blockgroup:first-child {
@@ -67,7 +67,6 @@
   position: relative;
   border-left: 1px solid black;
   border-top: 1px solid black;
-  overflow: auto;
   float: left; }
   #board .tile {
     float: left;
@@ -76,3 +75,29 @@
     height: 32px;
     border-right: 1px solid black;
     border-bottom: 1px solid black; }
+  #board .corner {
+    position: absolute;
+    width: 66px;
+    height: 66px; }
+  #board .corner:nth-child(1) {
+    border-top: 2px solid red;
+    border-left: 2px solid red;
+    top: -2px;
+    left: -1px; }
+  #board .corner:nth-child(2) {
+    border-top: 2px solid #d9d91a;
+    border-right: 2px solid #d9d91a;
+    top: -2px;
+    right: -1px; }
+  #board .corner:nth-child(3) {
+    border-bottom: 2px solid green;
+    border-right: 2px solid green;
+    bottom: -1px;
+    right: -1px; }
+  #board .corner:nth-child(4) {
+    border-bottom: 2px solid blue;
+    border-left: 2px solid blue;
+    bottom: -1px;
+    left: -1px; }
+  #board .clear {
+    clear: both; }

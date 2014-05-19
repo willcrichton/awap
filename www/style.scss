@@ -17,16 +17,22 @@
     font-size: 36px;
 }
 
-.p0 .tile.hover { background: #fbb; }
-.p1 .tile.hover { background: #ffb; }
-.p2 .tile.hover { background: #bfb; }
-.p3 .tile.hover { background: #bbf; }
+$red: red;
+$yellow: #D9D91A;
+$green: green;
+$blue: blue;
+$light: 40%;
+
+.p0 .tile.hover { background: lighten($red, $light); }
+.p1 .tile.hover { background: lighten($yellow, $light); }
+.p2 .tile.hover { background: lighten($green, $light); }
+.p3 .tile.hover { background: lighten($blue, $light); }
 
 .p0, .p1, .p2, .p3 {
-    .tile.p0 { background: red; }
-    .tile.p1 { background: yellow; }
-    .tile.p2 { background: green; }
-    .tile.p3 { background: blue; }
+    .tile.p0 { background: $red; }
+    .tile.p1 { background: $yellow; }
+    .tile.p2 { background: $green; }
+    .tile.p3 { background: $blue; }
 }
 
 #blocks {
@@ -36,7 +42,7 @@
     float: left;
 
     .blockgroup {
-        overflow: auto;
+        overflow: hidden;
         border-top: 1px solid black;
         padding-top: 15px;
     }
@@ -65,7 +71,6 @@
     position: relative;
     border-left: 1px solid black;
     border-top: 1px solid black;
-    overflow: auto;
     float: left;
  
     $tileSize: 32px;
@@ -77,4 +82,42 @@
         border-right: 1px solid black;
         border-bottom: 1px solid black;
     }
+
+    $bwidth: 2px;    
+    .corner {
+        position: absolute;
+        width: 2 * $tileSize + $bwidth;
+        height: 2 * $tileSize + $bwidth;
+    }
+
+    $border: $bwidth solid;
+    .corner:nth-child(1) {
+        border-top: $border $red;
+        border-left: $border $red;
+        top: -2px;
+        left: -1px;
+    }
+
+    .corner:nth-child(2) {
+        border-top: $border $yellow;
+        border-right: $border $yellow;
+        top: -2px;
+        right: -1px; 
+    }
+
+    .corner:nth-child(3) {
+        border-bottom: $border $green;
+        border-right: $border $green;
+        bottom: -1px;
+        right: -1px;
+    }
+
+    .corner:nth-child(4) {
+        border-bottom: $border $blue;
+        border-left: $border $blue;
+        bottom: -1px;
+        left: -1px;
+    }
+
+    .clear { clear: both; }
 }
