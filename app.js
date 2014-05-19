@@ -208,6 +208,7 @@ Game.prototype = {
     }
 };
 
+var NUM_PLAYERS = 1;
 io.sockets.on('connection', function (socket) {
 
     socket.player = new Player(socket);
@@ -218,8 +219,8 @@ io.sockets.on('connection', function (socket) {
         if (!pl.isInGame()) waitingPlayers.push(pl);
     }
 
-    if (waitingPlayers.length >= 4) {
-        new Game(waitingPlayers.slice(0, 4));
+    if (waitingPlayers.length >= NUM_PLAYERS) {
+        new Game(waitingPlayers.slice(0, NUM_PLAYERS));
     }
 
     socket.on('move', function(move) {
@@ -227,7 +228,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function() {
-        socket.player.game.quit();
+        if (socket.player.game) {
+            socket.player.game.quit();
+        }
     });
 });
 
