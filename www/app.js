@@ -1,5 +1,5 @@
 var ws = io.connect(document.baseURI);
-var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos;
+var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
 
 function getTile(x, y) {
     return $('.tile.' + x + 'x' + y);
@@ -40,7 +40,7 @@ function updateBlockList() {
 
     var maxHeight = 0;
     for (var i = 0; i < blocks.length; i++) {
-        var $group = $('<div class="blockgroup p' + i + '"></div>');
+        var $group = $('<div class="blockgroup p' + i + ' ' + (i == turn ? 'active' : '') + '"></div>');
         $blocks.append($group);
 
         for (var j = 0; j < blocks[i].length; j++) {
@@ -109,6 +109,7 @@ ws.on('setup', function(state) {
     blocks = state.blocks;
     board = state.board;
     myNum = state.number;
+    turn = state.turn;
 
     $('#waiting').hide();
     $(document.body).attr('class', '').addClass('p' + myNum);
