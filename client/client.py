@@ -17,6 +17,7 @@ def write(message):
     stdin_handle.write(message + "\n")
     stdin_handle.flush()
 
+# All events from socket go to the GameNamespace
 class GameNamespace(BaseNamespace):
     def on_setup(self, *args):
         state = args[0]

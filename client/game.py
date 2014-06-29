@@ -1,6 +1,7 @@
 import sys
 import json
 
+# Simple point class that supports equality, addition, and rotations
 class Point:
     x = 0
     y = 0
@@ -33,25 +34,30 @@ class Game:
     dimension = -1
     turn = -1
 
-    def __init__(self, args):
-        self.update(args)
+    # find_move is your place to start. When it's your turn,
+    # find_move will be called and you must return where to go.
+    # You must return a tuple (block index, # rotations, x, y)
+    def find_move(self):
 
-    def update(self, args):
-        if 'error' in args:
-            return
+        ########################
+        # INSERT AI LOGIC HERE #
+        ########################
 
-        self.my_number = args['number']
-        self.dimension = args['board']['dimension']
-        self.turn = args['turn']
-        self.grid = args['board']['grid']
-        self.blocks = args['blocks'][self.my_number]
-
+        # Here's a sample naive implementation
+        N = self.dimension
         for index, block in enumerate(self.blocks):
-            self.blocks[index] = [Point(offset) for offset in block]
+            for i in range(0, N * N):
+                x = i / N
+                y = i % N
+        
+                for rotations in range(0, 4):
+                    new_block = self.rotate_block(block, rotations)
+                    if self.can_place(new_block, Point(x, y)):
+                        return (index, rotations, x, y)
+                
+        return (0, 0, 0, 0)
 
-    def is_my_turn(self):
-        return self.turn == self.my_number
-
+    # Checks if a block can be placed at the given point
     def can_place(self, block, point):
         onAbsCorner = False
         onRelCorner = False
@@ -80,31 +86,34 @@ class Game:
                 (x < N and y < N and self.grid[x + 1][y + 1] == self.my_number)
             )
             
-        # first block must touch player's corner
         if self.grid[corner.x][corner.y] < 0 and not onAbsCorner: return False
-
-        # plays must be touching the corner of another block player owns
         if not onAbsCorner and not onRelCorner: return False
 
         return True
 
+    # rotates block 90deg counterclockwise
     def rotate_block(self, block, num_rotations):
         return [offset.rotate(num_rotations) for offset in block]
 
-    # returns (block index, rotation, X, Y)
-    def find_move(self):
-        N = self.dimension
+    def __init__(self, args):
+        self.update(args)
+
+    # updates local variables with state from the server
+    def update(self, args):
+        if 'error' in args:
+            return
+
+        self.my_number = args['number']
+        self.dimension = args['board']['dimension']
+        self.turn = args['turn']
+        self.grid = args['board']['grid']
+        self.blocks = args['blocks'][self.my_number]
+
         for index, block in enumerate(self.blocks):
-            for i in range(0, N * N):
-                x = i / N
-                y = i % N
-        
-                for rotations in range(0, 4):
-                    new_block = self.rotate_block(block, rotations)
-                    if self.can_place(new_block, Point(x, y)):
-                        return (index, rotations, x, y)
-                
-        return (0, 0, 0, 0)
+            self.blocks[index] = [Point(offset) for offset in block]
+
+    def is_my_turn(self):
+        return self.turn == self.my_number
 
 def get_state():
     return json.loads(raw_input())
