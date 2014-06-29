@@ -208,7 +208,7 @@ Game.prototype = {
     }
 };
 
-var NUM_PLAYERS = 4;
+var NUM_PLAYERS = 1;
 io.sockets.on('connection', function (socket) {
 
     socket.player = new Player(socket);
