@@ -2,12 +2,16 @@
 // BLOKUS SERVER //
 ///////////////////
 
-// create the static file server
 var nodestatic = require('node-static');
-var fs = new nodestatic.Server('./www');
+var fs = require('fs');
+var path = require('path');
+var childProcess = require('child_process');
+
+// create the static file server
+var fileserver = new nodestatic.Server('./www');
 var server = require('http').createServer(function(request, response) {
     request.addListener('end', function() {
-        fs.serve(request, response);
+        fileserver.serve(request, response);
     }).resume();
 });
 server.listen(8080);
@@ -15,12 +19,13 @@ server.listen(8080);
 // spin up the websocket server
 var io = require('socket.io').listen(server, {log: false});
 
-var Player = function(socket) {
+var Player = function(socket, teamId) {
     this.socket = socket;
     this.id = socket.id;
     this.blocks = [];
     this.game = null;
     this.number = -1;
+    this.teamId = teamId;
 };
 
 Player.prototype = {
@@ -172,12 +177,11 @@ Game.prototype = {
     doMove: function(pl, move) {
 
         // TODO: informative errors
-        if (this.turn != pl.number) return false;
-        if (move.block === undefined || move.pos === undefined || move.rotation === undefined ||
+        if (this.turn != pl.number ||
+            move.block === undefined || move.pos === undefined || move.rotation === undefined ||
             move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
             move.block >= pl.blocks.length || move.rotation < 0 || move.rotation > 3) 
         { 
-            console.log(move.pos, move.block);
             return false; 
         }
 
@@ -185,10 +189,10 @@ Game.prototype = {
         for (var i = 0; i < oldBlock.length; i++) {
             var cx = oldBlock[i].x, cy = oldBlock[i].y;
             switch (move.rotation) {
-            case 0: newBlock[i] = {x: cx, y: cy}; break
             case 1: newBlock[i] = {x: -cy, y: cx}; break
             case 2: newBlock[i] = {x: -cx, y: -cy}; break
             case 3: newBlock[i] = {x: cy, y: -cx}; break
+            default: newBlock[i] = {x: cx, y: cy}; break
             }
         }
 
@@ -208,20 +212,50 @@ Game.prototype = {
     }
 };
 
+function getPlayerByTeam(teamId) {
+    var sockets = io.sockets.clients();
+    for (var i = 0; i < sockets.length; i++) {
+        var player = sockets[i].player;
+        if (player.teamId == teamId) return player;
+    }
+
+    return null;
+}
+
+var children = []
+children.push(childProcess.exec('./run.sh bot1'));
+children.push(childProcess.exec('./run.sh bot2'));
+children.push(childProcess.exec('./run.sh bot3'));
+
+process.on('exit', function() {
+    children.forEach(function(child) {
+        child.kill();
+    });
+});
+
 var NUM_PLAYERS = 1;
 io.sockets.on('connection', function (socket) {
 
-    socket.player = new Player(socket);
-
-    var waitingPlayers = [];
-    for (var k in io.sockets.sockets) {
-        var pl = io.sockets.sockets[k].player;
-        if (!pl.isInGame()) waitingPlayers.push(pl);
-    }
-
-    if (waitingPlayers.length >= NUM_PLAYERS) {
-        new Game(waitingPlayers.slice(0, NUM_PLAYERS));
-    }
+    socket.on('teamId', function(teamId) {
+        console.log(teamId);
+        socket.player = new Player(socket, teamId);
+        
+        if (teamId.toLowerCase() == 'test') {
+            // TODO: spin up three AIs to play w/ anon
+            new Game(['test', 'bot1', 'bot2', 'bot3'].map(getPlayerByTeam));
+        } else {
+            var filePath = path.join(__dirname + '/matches');
+            var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
+            
+            matches.split("\n").forEach(function(line) {
+                var players = line.split(" ");
+                if (players.indexOf(teamId) > -1 && !socket.player.isInGame()) {
+                    console.log(players.map(getPlayerByTeam));
+                    new Game(players.map(getPlayerByTeam));
+                }
+            });
+        }
+    });
 
     socket.on('move', function(move) {
         socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));

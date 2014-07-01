@@ -179,6 +179,10 @@ ws.on('end', function(msg) {
     $('#waiting').show();
 });
 
+ws.on('connect', function() {
+    ws.emit('teamId', 'test');
+});
+
 $(window).load(function() {
     var count = 1;
     var $ellipsis = $('#waiting span');

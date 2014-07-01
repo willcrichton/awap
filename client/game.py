@@ -63,7 +63,7 @@ class Game:
         onRelCorner = False
         N = self.dimension - 1
 
-        corners = [Point(0, 0), Point(N, 0), Point(N, N), Point(N, N)]
+        corners = [Point(0, 0), Point(N, 0), Point(N, N), Point(0, N)]
         corner = corners[self.my_number]
 
         for offset in block:

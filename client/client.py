@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from socketIO_client import SocketIO, BaseNamespace
 from subprocess import Popen, PIPE, STDOUT
+from argparse import ArgumentParser
 import pty
 import os
 import sys
@@ -8,6 +9,7 @@ import fileinput
 import threading
 import json
 
+team_id = ''
 stdin_handle = None
 
 def write(message):
@@ -19,6 +21,9 @@ def write(message):
 
 # All events from socket go to the GameNamespace
 class GameNamespace(BaseNamespace):
+    def on_connect(self, *args):
+        self.emit('teamId', team_id)
+    
     def on_setup(self, *args):
         state = args[0]
         write(state)
@@ -32,19 +37,17 @@ class GameNamespace(BaseNamespace):
         if not resp: write(json.dumps({'error': 'fail'}))
 
 def main():
-    # Check for input args
-    if (len(sys.argv)<2):
-        print "Usage: python " + sys.argv[0] + " <your binary path and args>"
-        print "e.g. python " + sys.argv[0] + " python echo.py"
-        print "e.g. python " + sys.argv[0] + " 'python echo.py'"
-        exit(1)
 
     # Set up command to run using arguments
-    cmd = " ".join(sys.argv[1:])
-    master, slave = pty.openpty()
+    parser = ArgumentParser()
+    parser.add_argument("command")
+    parser.add_argument("teamid", default='test')
+    args = parser.parse_args()
 
     # Set up pipes
-    pipe = Popen(['python','game.py'], stdin=PIPE, stdout=PIPE)
+    global team_id
+    team_id = args.teamid
+    pipe = Popen(args.command.split(' '), stdin=PIPE, stdout=PIPE)
 
     global stdin_handle
     stdin_handle = pipe.stdin
