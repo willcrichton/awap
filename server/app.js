@@ -216,7 +216,7 @@ function getPlayerByTeam(teamId) {
     var sockets = io.sockets.clients();
     for (var i = 0; i < sockets.length; i++) {
         var player = sockets[i].player;
-        if (player.teamId == teamId) return player;
+        if (player && player.teamId == teamId) return player;
     }
 
     return null;
@@ -237,12 +237,12 @@ var NUM_PLAYERS = 1;
 io.sockets.on('connection', function (socket) {
 
     socket.on('teamId', function(teamId) {
-        console.log(teamId);
         socket.player = new Player(socket, teamId);
         
         if (teamId.toLowerCase() == 'test') {
-            // TODO: spin up three AIs to play w/ anon
-            new Game(['test', 'bot1', 'bot2', 'bot3'].map(getPlayerByTeam));
+            var players = ['bot1', 'bot2', 'bot3'].map(getPlayerByTeam);
+            players.push(socket.player);
+            new Game(players);
         } else {
             var filePath = path.join(__dirname + '/matches');
             var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
