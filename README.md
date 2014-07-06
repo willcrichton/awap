@@ -9,5 +9,5 @@ To get the game server running:
   3. Go to `localhost:8080`
 
 To get the game client running:
-  1. Run `pip install` from inside `client/`
+  1. Run `pip install -r requirements.txt` from inside `client/`
   2. Run `./run.sh`
