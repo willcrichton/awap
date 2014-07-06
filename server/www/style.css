@@ -1,10 +1,14 @@
+@import url("http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700,300");
 * {
   margin: 0;
   padding: 0; }
 
+body {
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif; }
+
 #container {
   padding: 10px;
-  width: 830px;
+  width: 1160px;
   margin: 0 auto;
   overflow: auto; }
 
@@ -32,17 +36,17 @@
 .p3 .tile.hover {
   background: #ccccff; }
 
-.p0 .tile.p0, .p1 .tile.p0, .p2 .tile.p0, .p3 .tile.p0 {
+.spectate .tile.p0, .p0 .tile.p0, .p1 .tile.p0, .p2 .tile.p0, .p3 .tile.p0 {
   background: red; }
-.p0 .tile.p1, .p1 .tile.p1, .p2 .tile.p1, .p3 .tile.p1 {
+.spectate .tile.p1, .p0 .tile.p1, .p1 .tile.p1, .p2 .tile.p1, .p3 .tile.p1 {
   background: #eeee1a; }
-.p0 .tile.p2, .p1 .tile.p2, .p2 .tile.p2, .p3 .tile.p2 {
+.spectate .tile.p2, .p0 .tile.p2, .p1 .tile.p2, .p2 .tile.p2, .p3 .tile.p2 {
   background: green; }
-.p0 .tile.p3, .p1 .tile.p3, .p2 .tile.p3, .p3 .tile.p3 {
+.spectate .tile.p3, .p0 .tile.p3, .p1 .tile.p3, .p2 .tile.p3, .p3 .tile.p3 {
   background: blue; }
 
 #blocks {
-  width: 160px;
+  width: 480px;
   min-height: 1px;
   overflow: auto;
   float: left;
@@ -89,12 +93,12 @@
   #board .corner:nth-child(1) {
     border-top: 5px solid red;
     border-left: 5px solid red;
-    top: -5px;
-    left: -5px; }
+    top: -6px;
+    left: -6px; }
   #board .corner:nth-child(2) {
     border-top: 5px solid #eeee1a;
     border-right: 5px solid #eeee1a;
-    top: -5px;
+    top: -6px;
     right: -4px; }
   #board .corner:nth-child(3) {
     border-bottom: 5px solid green;
@@ -105,6 +109,9 @@
     border-bottom: 5px solid blue;
     border-left: 5px solid blue;
     bottom: -5px;
-    left: -5px; }
+    left: -6px; }
   #board .clear {
     clear: both; }
+
+#games {
+  margin-left: 20px; }

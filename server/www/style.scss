@@ -1,8 +1,14 @@
+@import url('http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700,300');
+
 * { margin: 0; padding: 0; }
+
+body {
+    font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+}
 
 #container {
     padding: 10px;
-    width: 830px;
+    width: 1160px;
     margin: 0 auto;
     overflow: auto;
 }
@@ -28,7 +34,7 @@ $light: 40%;
 .p2 .tile.hover { background: lighten($green, $light); }
 .p3 .tile.hover { background: lighten($blue, $light); }
 
-.p0, .p1, .p2, .p3 {
+.spectate, .p0, .p1, .p2, .p3 {
     .tile.p0 { background: $red; }
     .tile.p1 { background: $yellow; }
     .tile.p2 { background: $green; }
@@ -36,7 +42,7 @@ $light: 40%;
 }
 
 #blocks {
-    width: 160px;
+    width: 480px;
     min-height: 1px;
     overflow: auto;
     float: left;
@@ -103,14 +109,14 @@ $light: 40%;
     .corner:nth-child(1) {
         border-top: $border $red;
         border-left: $border $red;
-        top: -$bwidth;
-        left: -$bwidth;
+        top: -$bwidth - 1;
+        left: -$bwidth - 1;
     }
 
     .corner:nth-child(2) {
         border-top: $border $yellow;
         border-right: $border $yellow;
-        top: -$bwidth;
+        top: -$bwidth - 1;
         right: -$bwidth + 1; 
     }
 
@@ -125,8 +131,12 @@ $light: 40%;
         border-bottom: $border $blue;
         border-left: $border $blue;
         bottom: -$bwidth;
-        left: -$bwidth;
+        left: -$bwidth - 1;
     }
 
     .clear { clear: both; }
+}
+
+#games {
+    margin-left: 20px;
 }

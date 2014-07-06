@@ -6,6 +6,15 @@ var nodestatic = require('node-static');
 var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
+var crypto = require('crypto');
+
+var TEAMS = {
+    'will' : 'Will Crichton',
+    'test' : 'Anonymous',
+    'bot1' : 'Bot 1',
+    'bot2' : 'Bot 2',
+    'bot3' : 'Bot 3'
+}
 
 // create the static file server
 var fileserver = new nodestatic.Server('./www');
@@ -19,41 +28,15 @@ server.listen(8080);
 // spin up the websocket server
 var io = require('socket.io').listen(server, {log: false});
 
-var Player = function(socket, teamId) {
+var Player = function(socket) {
     this.socket = socket;
     this.id = socket.id;
     this.blocks = [];
     this.game = null;
     this.number = -1;
-    this.teamId = teamId;
 };
 
 Player.prototype = {
-    clientState: function() {
-
-        // TODO: include other players' block states
-        return {
-            blocks: this.game.players.map(function(p){ return p.blocks; }),
-            board: this.game.board,
-            turn: this.game.turn,
-            number: this.number
-        }
-    },
-
-    setup: function(game) {
-        this.game = game;
-
-        for (var i = 0; i < game.players.length; i++) {
-            if (game.players[i].id == this.id) { this.number = i; }
-        }
-
-        this.socket.emit('setup', this.clientState());
-    },
-    
-    update: function() {
-        this.socket.emit('update', this.clientState());
-    },
-
     isInGame: function() {
         return this.game !== null;
     },
@@ -130,20 +113,37 @@ Board.prototype = {
 
 // TODO: more blocks
 var BLOCKS = [
-    [[0, 0], [0, 1], [1, 0]],
-    [[0,0], [0, 1], [0, 2]],
-    [[0, 0], [0, 1], [1, 0], [0, 2]],
-    [[0, 0], [1, 1], [1, 0], [1, 2], [2, 1]],
-    [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2]],
-    [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]]
+    [[0, 0]], // single
+    [[0, 0], [0, 1]], // double
+    [[0, 0], [0, 1], [1, 0]], // elbow
+    [[0, 0], [0, 1], [0, 2]], // tiny line
+    [[0, 0], [0, 1], [1, 0], [1, 1]], // square
+    [[0, 0], [1, 0], [2, 0], [1, 1]], // little T
+    [[0, 0], [1, 0], [2, 0], [3, 0]], // little line
+    [[0, 0], [0, 1], [1, 0], [0, 2]], // little L
+    [[0, 0], [1, 0], [1, 1], [2, 1]], // tetris S
+    [[0, 0], [1, 0], [2, 0], [3, 0], [0, 1]], // big L
+    [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1]], // big T
+    [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2]], // corner piece
+    [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1]], // elongated S
+    [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]], // Z shape
+    [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], // big line
+    [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], // chair
+    [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2]], // staircase
+    [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]], // corner capper
+    [[0, 0], [1, 0], [1, 1], [1, 2], [2, 1]], // weird dual-elbow
+    [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]], // plus sign
+    [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor
 ];
 
-var NUM_BLOCKS = 6;
+var NUM_BLOCKS = BLOCKS.length;
 
 var Game = function(players) {
     this.turn = 0;
     this.players = players;
     this.board = new Board();
+    this.over = false;
+    this.gameId = crypto.randomBytes(20).toString('hex');
 
     var blockIds = [], blocks = [];
     for (var i = 0; i < NUM_BLOCKS; i++) {
@@ -169,7 +169,7 @@ var Game = function(players) {
     }
 
     for (var i = 0; i < this.players.length; i++) {
-        this.players[i].setup(this);
+        this.sendSetup(this.players[i]);
     }
 };
 
@@ -200,26 +200,86 @@ Game.prototype = {
         
         pl.blocks.splice(move.block, 1);
         this.turn = (this.turn + 1) % this.players.length;
-        this.players.forEach(function(pl) { pl.update(); });
+        io.sockets.in(this.gameId).emit('update', this.clientState());
+
+        //this.players.forEach(function(pl) { pl.update(); });
 
         return true;
     },
 
     quit: function() {
+        this.over = true;
+
         for (var i = 0; i < this.players.length; i++) {
             this.players[i].quit("A player quit the game.");
         }
+    },
+
+    sanitize: function() {
+        return {
+            id: this.gameId,
+            players: this.players.map(function(player) {
+                return TEAMS[player.teamId]
+            })
+        }
+    },
+
+    clientState: function() {
+        return {
+            blocks: this.players.map(function(p){ return p.blocks; }),
+            board: this.board,
+            turn: this.turn
+        }
+    },
+
+    sendSetup: function(player) {
+        var number = this.players.indexOf(player);
+        var state = this.clientState();
+        state.number = number;
+
+        player.game = this;
+        player.number = number;
+        player.socket.join(this.gameId);
+        player.socket.emit('setup', state);
     }
 };
 
 function getPlayerByTeam(teamId) {
     var sockets = io.sockets.clients();
+
     for (var i = 0; i < sockets.length; i++) {
         var player = sockets[i].player;
         if (player && player.teamId == teamId) return player;
     }
 
     return null;
+}
+
+function getGameById(gameId) {
+    for (var i = 0; i < games.length; i++) {
+        var game = games[i];
+        if (game.gameId == gameId) {
+            return game;
+        }
+    }
+
+    return null;
+}
+
+function getCurrentGames() {
+    var currentGames = []
+    games.forEach(function(game) {
+        if (!game.over) {
+            currentGames.push(game.sanitize());
+        }
+    });
+
+    return currentGames;
+}
+
+function addGame(game) {
+    games.push(game);
+    io.sockets.emit('games', getCurrentGames());
 }
 
 var children = []
@@ -234,15 +294,20 @@ process.on('exit', function() {
 });
 
 var NUM_PLAYERS = 1;
+var games = []
 io.sockets.on('connection', function (socket) {
 
+    socket.player = new Player(socket);
+    socket.emit('games', getCurrentGames());
+
     socket.on('teamId', function(teamId) {
-        socket.player = new Player(socket, teamId);
-        
+        socket.player.teamId = teamId;
+        console.log('Player ' + teamId + ' has joined.');
+
         if (teamId.toLowerCase() == 'test') {
             var players = ['bot1', 'bot2', 'bot3'].map(getPlayerByTeam);
             players.push(socket.player);
-            new Game(players);
+            addGame(new Game(players));
         } else {
             var filePath = path.join(__dirname + '/matches');
             var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
@@ -251,7 +316,7 @@ io.sockets.on('connection', function (socket) {
                 var players = line.split(" ");
                 if (players.indexOf(teamId) > -1 && !socket.player.isInGame()) {
                     console.log(players.map(getPlayerByTeam));
-                    new Game(players.map(getPlayerByTeam));
+                    addGame(new Game(players.map(getPlayerByTeam)));
                 }
             });
         }
@@ -262,8 +327,16 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function() {
-        if (socket.player.game) {
+        if (socket.player && socket.player.game && socket.player.number !== -1) {
             socket.player.game.quit();
+        }
+    });
+
+    socket.on('spectate', function(room) {
+        var game = getGameById(room);
+
+        if (game !== null) {
+            game.sendSetup(socket.player);
         }
     });
 });
