@@ -10,4 +10,4 @@ To get the game server running:
 
 To get the game client running:
   1. Run `pip install` from inside `client/`
-  2. Run `python client.py 'python game.py'`
+  2. Run `./run.sh`
