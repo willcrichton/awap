@@ -283,9 +283,10 @@ function addGame(game) {
 }
 
 var children = []
-children.push(childProcess.exec('./run.sh bot1'));
-children.push(childProcess.exec('./run.sh bot2'));
-children.push(childProcess.exec('./run.sh bot3'));
+children.push(childProcess.exec('../client/run.sh bot1'));
+children.push(childProcess.exec('../client/run.sh bot2'));
+children.push(childProcess.exec('../client/run.sh bot3'));
+
 
 process.on('exit', function() {
     children.forEach(function(child) {
