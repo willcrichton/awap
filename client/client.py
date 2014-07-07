@@ -40,8 +40,8 @@ def main():
 
     # Set up command to run using arguments
     parser = ArgumentParser()
-    parser.add_argument("command")
-    parser.add_argument("teamid", default='test')
+    parser.add_argument("command", help="A game.py file for AI input")
+    parser.add_argument("teamid", default='test', help="A teamid for serverside? identification, default is test")
     args = parser.parse_args()
 
     # Set up pipes

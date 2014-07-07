@@ -133,7 +133,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]], // corner capper
     [[0, 0], [1, 0], [1, 1], [1, 2], [2, 1]], // weird dual-elbow
     [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]], // plus sign
-    [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor
+    [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
 var NUM_BLOCKS = BLOCKS.length;
