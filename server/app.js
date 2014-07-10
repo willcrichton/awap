@@ -313,8 +313,9 @@ process.on('exit', function() {
 //Basic server functionality
 var NUM_PLAYERS = 1; //Useless?
 var games = [] //List of all games, not just running games
-io.sockets.on('connection', function (socket) {
+io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
 
+io.sockets.on('connection', function (socket) {
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); //only relevant to lobby.js
 
@@ -345,9 +346,14 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function() {
+        console.log(socket.player.teamId + ' has disconnected.');
         if (socket.player && socket.player.game && socket.player.number !== -1) {
             socket.player.game.quit();
         }
+    });
+
+    socket.on('info', function(info) {
+        console.log(socket.player.teamId + 'says, "' + info + '".');
     });
 
     socket.on('spectate', function(room) {
