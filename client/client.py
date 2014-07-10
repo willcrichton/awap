@@ -1,3 +1,9 @@
+#################################################################################
+# Client.py - Communicates with server via socketIO and AI via stdin/stdout
+# Gets moves via stdin in the form of "# # # #" (block index, # rotations, x, y)
+# Consists mainly of setup, helper funtions, and a loop that gets moves.
+#################################################################################
+
 #!/usr/bin/python
 from socketIO_client import SocketIO, BaseNamespace
 from subprocess import Popen, PIPE, STDOUT
@@ -12,6 +18,7 @@ import json
 team_id = ''
 stdin_handle = None
 
+#write message to stdout
 def write(message):
     if type(message) is not str:
         message = json.dumps(message)

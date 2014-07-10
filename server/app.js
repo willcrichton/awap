@@ -1,6 +1,7 @@
-///////////////////
-// BLOKUS SERVER //
-///////////////////
+//////////////////////////////////////////////////////////////////////////////
+// app.js - BLOKUS SERVER 
+// Responsible for creating, managing, and verifying games and gamestate
+//////////////////////////////////////////////////////////////////////////////
 
 var nodestatic = require('node-static');
 var fs = require('fs');
@@ -47,9 +48,10 @@ Player.prototype = {
     }
 };
 
+//Board is 2d array with -1 for no block and a players number for their block
 var Board = function() {
-    this.dimension = 20;
-    this.grid = [];
+    this.dimension = 20; //Square board is assumed 
+    this.grid = []; 
 
     // populate the board with empty values
     for (var i = 0; i < this.dimension; i++) {
@@ -65,6 +67,7 @@ Board.prototype = {
         var onAbsCorner = false, onRelCorner = false;
         var N = this.dimension - 1, corner;
 
+        //Determine which corner is players starting corner
         switch (plNum) {
         case 0: corner = {x: 0, y: 0}; break
         case 1: corner = {x: N, y: 0}; break
@@ -76,6 +79,7 @@ Board.prototype = {
             var x = point.x + block[i].x, y = point.y + block[i].y;
 
             // TODO: informative errors
+            // Check bounds and illegal plays
             if (x >= this.dimension || x < 0 ||
                 y >= this.dimension || y < 0 ||
                 this.grid[x][y] >= 0 ||
@@ -87,6 +91,7 @@ Board.prototype = {
                 return false;
             }
 
+            //Check to make sure piece is placed on starting or continuing corner
             onAbsCorner = onAbsCorner || (x === corner.x && y === corner.y);
             onRelCorner = onRelCorner ||
                 (x > 0 && y > 0 && this.grid[x - 1][y - 1] == plNum) ||
@@ -143,8 +148,10 @@ var Game = function(players) {
     this.players = players;
     this.board = new Board();
     this.over = false;
-    this.gameId = crypto.randomBytes(20).toString('hex');
+    this.gameId = crypto.randomBytes(20).toString('hex');//unique ID
 
+    //Generate a random list of Ids
+    // TODO: This should be re-written to be O(n) (Fisher-Yates)
     var blockIds = [], blocks = [];
     for (var i = 0; i < NUM_BLOCKS; i++) {
         while (true) {
@@ -156,6 +163,7 @@ var Game = function(players) {
         }
     }
 
+    //Convert array blocks to x,y blocks, then sort by the above permutation
     for (var i = 0; i < NUM_BLOCKS; i++) {
         var oldBlock = BLOCKS[blockIds[i]], newBlock = [];
         for (var j = 0; j < oldBlock.length; j++) {
@@ -164,6 +172,7 @@ var Game = function(players) {
         blocks.push(newBlock);
     }
 
+    //Give each player a copy of the blocks
     for (var i = 0; i < this.players.length; i++) {
         this.players[i].blocks = blocks.slice(0);
     }
@@ -177,6 +186,7 @@ Game.prototype = {
     doMove: function(pl, move) {
 
         // TODO: informative errors
+        //Check for invalid or out of turn moves.
         if (this.turn != pl.number ||
             move.block === undefined || move.pos === undefined || move.rotation === undefined ||
             move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
@@ -185,6 +195,7 @@ Game.prototype = {
             return false; 
         }
 
+        //Properly rotate old block. (Maybe this should be a function)
         var oldBlock = pl.blocks[move.block], newBlock = [];
         for (var i = 0; i < oldBlock.length; i++) {
             var cx = oldBlock[i].x, cy = oldBlock[i].y;
@@ -244,6 +255,7 @@ Game.prototype = {
     }
 };
 
+//Returns first connected player that has a matching teamId
 function getPlayerByTeam(teamId) {
     var sockets = io.sockets.clients();
 
@@ -255,6 +267,7 @@ function getPlayerByTeam(teamId) {
     return null;
 }
 
+//Returns first (and hopefully only) game with matching gameId
 function getGameById(gameId) {
     for (var i = 0; i < games.length; i++) {
         var game = games[i];
@@ -266,6 +279,7 @@ function getGameById(gameId) {
     return null;
 }
 
+//
 function getCurrentGames() {
     var currentGames = []
     games.forEach(function(game) {
@@ -282,11 +296,12 @@ function addGame(game) {
     io.sockets.emit('games', getCurrentGames());
 }
 
+
+//Have the server spin up the bots
 var children = []
 children.push(childProcess.exec('../client/run.sh bot1'));
 children.push(childProcess.exec('../client/run.sh bot2'));
 children.push(childProcess.exec('../client/run.sh bot3'));
-
 
 process.on('exit', function() {
     children.forEach(function(child) {
@@ -294,12 +309,14 @@ process.on('exit', function() {
     });
 });
 
-var NUM_PLAYERS = 1;
-var games = []
+
+//Basic server functionality
+var NUM_PLAYERS = 1; //Useless?
+var games = [] //List of all games, not just running games
 io.sockets.on('connection', function (socket) {
 
     socket.player = new Player(socket);
-    socket.emit('games', getCurrentGames());
+    socket.emit('games', getCurrentGames()); //only relevant to lobby.js
 
     socket.on('teamId', function(teamId) {
         socket.player.teamId = teamId;

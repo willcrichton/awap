@@ -1,3 +1,9 @@
+#############################################################################
+# Game.py - Responsible for generating moves to give to client.py            
+# Moves via stdout in the form of "# # # #" (block index, # rotations, x, y) 
+# Important function is find_move, which should contain the main AI          
+#############################################################################
+
 import sys
 import json
 
@@ -31,7 +37,7 @@ class Game:
     blocks = []
     grid = []
     my_number = -1
-    dimension = -1
+    dimension = -1 #Board is assumed to be square
     turn = -1
 
     # find_move is your place to start. When it's your turn,
