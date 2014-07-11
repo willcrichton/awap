@@ -149,6 +149,7 @@ var Game = function(players) {
     this.board = new Board();
     this.over = false;
     this.gameId = crypto.randomBytes(20).toString('hex');//unique ID
+    this.timesAdvanced = 0;
 
     //Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
@@ -180,6 +181,7 @@ var Game = function(players) {
     for (var i = 0; i < this.players.length; i++) {
         this.sendSetup(this.players[i]);
     }
+    console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
 };
 
 Game.prototype = {
@@ -212,8 +214,9 @@ Game.prototype = {
         pl.blocks.splice(move.block, 1);
         this.turn = (this.turn + 1) % this.players.length;
         io.sockets.in(this.gameId).emit('update', this.clientState());
-
-        //this.players.forEach(function(pl) { pl.update(); });
+        
+        this.clearTimer();
+        this.setTimer();
 
         return true;
     },
@@ -223,6 +226,29 @@ Game.prototype = {
 
         for (var i = 0; i < this.players.length; i++) {
             this.players[i].quit("A player quit the game.");
+        }
+    },
+
+    setTimer: function() {
+        var _this = this;
+        this.moveTimer = setTimeout(function() {
+            _this.advance();
+        }, 1000);
+    },
+
+    clearTimer: function() {
+        this.timesAdvanced = 0;
+        if(typeof this.moveTimer != undefined){
+            clearTimeout(this.moveTimer);
+        }
+    },
+
+    advance: function() {
+        if(this.timesAdvanced < 3){
+            this.turn = (this.turn + 1) % this.players.length;
+            io.sockets.in(this.gameId).emit('update', this.clientState());
+            this.setTimer();
+            this.timesAdvanced += 1;
         }
     },
 

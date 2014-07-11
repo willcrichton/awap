@@ -2,7 +2,7 @@
 
 RUN_AI="python game.py"
 RUN_AI2="python ../client/game.py"
-TEAM_ID="will"
+TEAM_ID="test"
 
 if [ "$1" != "" ]; then
     TEAM_ID=$1
