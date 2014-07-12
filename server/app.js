@@ -332,17 +332,17 @@ function addGame(game) {
 }
 
 
-//Have the server spin up the bots
-// var children = []
-// children.push(childProcess.exec('../client/run.sh bot1'));
-// children.push(childProcess.exec('../client/run.sh bot2'));
-// children.push(childProcess.exec('../client/run.sh bot3'));
+Have the server spin up the bots
+var children = []
+children.push(childProcess.exec('../client/run.sh bot1'));
+children.push(childProcess.exec('../client/run.sh bot2'));
+children.push(childProcess.exec('../client/run.sh bot3'));
 
-// process.on('exit', function() {
-//     children.forEach(function(child) {
-//         child.kill();
-//     });
-// });
+process.on('exit', function() {
+    children.forEach(function(child) {
+        child.kill();
+    });
+});
 
 
 //Basic server functionality
