@@ -29,15 +29,20 @@ def write(message):
 # All events from socket go to the GameNamespace
 class GameNamespace(BaseNamespace):
     def on_connect(self, *args):
+        print 'Connected to server'
         self.emit('teamId', team_id)
     
     def on_setup(self, *args):
-        state = args[0]
-        write(state)
+        initState = args[0]
+        write(initState)
 
     def on_update(self, *args):
         state = args[0]
         write(state)
+
+    def on_moveRequest(self, *args):
+        moveReq = args[0]
+        write(moveReq)
 
     def on_moveResponse(self, *args):
         resp = args[0]

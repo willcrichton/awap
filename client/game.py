@@ -102,20 +102,25 @@ class Game:
         return [offset.rotate(num_rotations) for offset in block]
 
     def __init__(self, args):
-        self.update(args)
+        self.interpret_data(args, False)
 
     # updates local variables with state from the server
-    def update(self, args):
+    def interpret_data(self, args, game):
         if 'error' in args: return # TODO: notify about error state
 
         if 'number' in args: self.my_number = args['number']
-        self.dimension = args['board']['dimension']
-        self.turn = args['turn']
-        self.grid = args['board']['grid']
-        self.blocks = args['blocks'][self.my_number]
 
-        for index, block in enumerate(self.blocks):
-            self.blocks[index] = [Point(offset) for offset in block]
+        if 'board' in args: 
+            self.dimension = args['board']['dimension']
+            self.turn = args['turn']
+            self.grid = args['board']['grid']
+            self.blocks = args['blocks'][self.my_number]
+
+            for index, block in enumerate(self.blocks):
+                self.blocks[index] = [Point(offset) for offset in block]
+
+        if (('move' in args) and (args['move'] == 1)):
+            send_command(" ".join(str(x) for x in game.find_move()))
 
     def is_my_turn(self):
         return self.turn == self.my_number
@@ -138,7 +143,7 @@ def main():
         if game.is_my_turn():
             send_command(" ".join(str(x) for x in game.find_move()))
 
-        game.update(get_state())
+        game.interpret_data(get_state(),game)
 
 if __name__ == "__main__":
     main()

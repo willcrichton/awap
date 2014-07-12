@@ -214,6 +214,7 @@ Game.prototype = {
         pl.blocks.splice(move.block, 1);
         this.turn = (this.turn + 1) % this.players.length;
         io.sockets.in(this.gameId).emit('update', this.clientState());
+        this.sendMoveRequest();
         
         this.clearTimer();
         this.setTimer();
@@ -243,10 +244,20 @@ Game.prototype = {
         }
     },
 
+    sendMoveRequest: function(){
+        // this.players.forEach(function(player, index) {
+        //     if(index == this.turn){
+        //         player.socket.emit('moveRequest', {move: 1});
+        //     }
+        // });
+        this.players[this.turn].socket.emit('moveRequest', {move: 1});
+    },
+
     advance: function() {
         if(this.timesAdvanced < 3){
             this.turn = (this.turn + 1) % this.players.length;
             io.sockets.in(this.gameId).emit('update', this.clientState());
+            this.sendMoveRequest();
             this.setTimer();
             this.timesAdvanced += 1;
         }
@@ -324,16 +335,16 @@ function addGame(game) {
 
 
 //Have the server spin up the bots
-var children = []
-children.push(childProcess.exec('../client/run.sh bot1'));
-children.push(childProcess.exec('../client/run.sh bot2'));
-children.push(childProcess.exec('../client/run.sh bot3'));
+// var children = []
+// children.push(childProcess.exec('../client/run.sh bot1'));
+// children.push(childProcess.exec('../client/run.sh bot2'));
+// children.push(childProcess.exec('../client/run.sh bot3'));
 
-process.on('exit', function() {
-    children.forEach(function(child) {
-        child.kill();
-    });
-});
+// process.on('exit', function() {
+//     children.forEach(function(child) {
+//         child.kill();
+//     });
+// });
 
 
 //Basic server functionality
