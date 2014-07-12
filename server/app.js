@@ -182,7 +182,6 @@ var Game = function(players) {
         this.sendSetup(this.players[i]);
     }
 
-    _this = this;
     setTimeout(this.sendMoveRequest, 5000)
     console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
 };
@@ -332,7 +331,7 @@ function addGame(game) {
 }
 
 
-Have the server spin up the bots
+//Have the server spin up the bots
 var children = []
 children.push(childProcess.exec('../client/run.sh bot1'));
 children.push(childProcess.exec('../client/run.sh bot2'));
