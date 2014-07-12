@@ -181,6 +181,9 @@ var Game = function(players) {
     for (var i = 0; i < this.players.length; i++) {
         this.sendSetup(this.players[i]);
     }
+
+    _this = this;
+    setTimeout(this.sendMoveRequest, 5000)
     console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
 };
 
@@ -245,11 +248,6 @@ Game.prototype = {
     },
 
     sendMoveRequest: function(){
-        // this.players.forEach(function(player, index) {
-        //     if(index == this.turn){
-        //         player.socket.emit('moveRequest', {move: 1});
-        //     }
-        // });
         this.players[this.turn].socket.emit('moveRequest', {move: 1});
     },
 

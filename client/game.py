@@ -140,9 +140,6 @@ def main():
         #if len(game.blocks) == 0:
         #    exit('Game is over')
 
-        if game.is_my_turn():
-            send_command(" ".join(str(x) for x in game.find_move()))
-
         game.interpret_data(get_state(),game)
 
 if __name__ == "__main__":
