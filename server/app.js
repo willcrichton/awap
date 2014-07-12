@@ -349,6 +349,7 @@ io.sockets.on('connection', function (socket) {
         socket.player.teamId = teamId;
         console.log('Player ' + teamId + ' has joined.');
 
+        //Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test') {
             var players = ['bot1', 'bot2', 'bot3'].map(getPlayerByTeam);
             players.push(socket.player);
@@ -368,7 +369,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('move', function(move) {
-        socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
+        if(socket.player.game != null){
+            socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
+        }
     });
 
     socket.on('disconnect', function() {

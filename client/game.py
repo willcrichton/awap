@@ -131,8 +131,9 @@ def main():
     game = Game(get_state())
 
     while True:
-        if len(game.blocks) == 0:
-            exit('Game is over')
+        #I don't think the client should close, so multiple games can occour.
+        #if len(game.blocks) == 0:
+        #    exit('Game is over')
 
         if game.is_my_turn():
             send_command(" ".join(str(x) for x in game.find_move()))
