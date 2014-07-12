@@ -215,8 +215,9 @@ Game.prototype = {
         pl.blocks.splice(move.block, 1);
         this.turn = (this.turn + 1) % this.players.length;
         io.sockets.in(this.gameId).emit('update', this.clientState());
-        this.sendMoveRequest();
+        this.sendMoveRequest();//Ask the next player for their move
         
+        //Clear the last players timer and set the current players timer
         this.clearTimer();
         this.setTimer();
 
@@ -231,13 +232,16 @@ Game.prototype = {
         }
     },
 
+    // starts a timer 3 second that will advance to the
+    // next player if no move has been made before it is done
     setTimer: function() {
         var _this = this;
         this.moveTimer = setTimeout(function() {
             _this.advance();
-        }, 1000);
+        }, 3300);
     },
 
+    //gets rid of the turn timeout timer
     clearTimer: function() {
         this.timesAdvanced = 0;
         if(typeof this.moveTimer != undefined){
@@ -245,10 +249,13 @@ Game.prototype = {
         }
     },
 
+    //Sends a request for a move to the current player
     sendMoveRequest: function(){
-        this.players[this.turn].socket.emit('moveRequest', {move: 1});
+        currplayer = this.players[this.turn];
+        setTimeout(function(){currplayer.socket.emit('moveRequest', {move: 1});}, 300);
     },
 
+    //Skips the current player, and will stop advancing if all players skip.
     advance: function() {
         if(this.timesAdvanced < 3){
             this.turn = (this.turn + 1) % this.players.length;
@@ -256,6 +263,9 @@ Game.prototype = {
             this.sendMoveRequest();
             this.setTimer();
             this.timesAdvanced += 1;
+        }
+        else{
+            this.over = true; //need to do other game ending things
         }
     },
 
@@ -394,7 +404,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('spectate', function(room) {
         var game = getGameById(room);
-        game.sendMoveRequest();
+        game.sendMoveRequest(); //start the game once there is a spectator.
 
         if (game !== null) {
             game.sendSetup(socket.player);
