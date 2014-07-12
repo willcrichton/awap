@@ -182,7 +182,6 @@ var Game = function(players) {
         this.sendSetup(this.players[i]);
     }
 
-    setTimeout(this.sendMoveRequest, 5000)
     console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
 };
 
@@ -395,6 +394,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('spectate', function(room) {
         var game = getGameById(room);
+        game.sendMoveRequest();
 
         if (game !== null) {
             game.sendSetup(socket.player);
