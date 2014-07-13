@@ -5,7 +5,9 @@
     "description": "AWAP server",
     "dependencies": {
         "socket.io": "0.9.16",
-        "node-static": "0.7.0"
+        "node-static": "0.7.0",
+        "http-auth": "2.1.8",
+        "express": "3.x"
     }
 }
     

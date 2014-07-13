@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 var nodestatic = require('node-static');
+var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
@@ -15,19 +16,32 @@ var TEAMS = {
     'bot1' : 'Bot 1',
     'bot2' : 'Bot 2',
     'bot3' : 'Bot 3'
-}
+};
 
-// create the static file server
+//use express to protect admin page
+var server = express();
+auth = express.basicAuth('username', 'password');
+server.get('/admin', auth, function(req, res) {
+    res.send('Hello World');
+});
+
+
+//catch all other requests with the static file server
 var fileserver = new nodestatic.Server('./www');
-var server = require('http').createServer(function(request, response) {
+
+server.get('/*', function(request, response) {
     request.addListener('end', function() {
         fileserver.serve(request, response);
     }).resume();
 });
-server.listen(8080);
+
+ioServer = server.listen(8080);
 
 // spin up the websocket server
-var io = require('socket.io').listen(server, {log: false});
+var io = require('socket.io').listen(ioServer, {log: false});
+
+
+
 
 var Player = function(socket) {
     this.socket = socket;
@@ -238,7 +252,7 @@ Game.prototype = {
         var _this = this;
         this.moveTimer = setTimeout(function() {
             _this.advance();
-        }, 3300);
+        }, 2300);
     },
 
     //gets rid of the turn timeout timer
@@ -359,6 +373,7 @@ var games = [] //List of all games, not just running games
 io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
+
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); //only relevant to lobby.js
 
