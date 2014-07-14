@@ -24,7 +24,7 @@ var fileserver = new nodestatic.Server('./www', {cache: 600});
 //use express to protect admin page
 var server = express();
 auth = express.basicAuth('user', 'password12345');
-server.get('/admin.html', auth, function(req, res) {
+server.get('/admin*', auth, function(req, res) {
     req.addListener('end', function() {
         fileserver.serve(req, res);
     }).resume();
