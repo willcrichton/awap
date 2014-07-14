@@ -18,17 +18,19 @@ var TEAMS = {
     'bot3' : 'Bot 3'
 };
 
+
+var fileserver = new nodestatic.Server('./www', {cache: 600});
+
 //use express to protect admin page
 var server = express();
-auth = express.basicAuth('username', 'password');
-server.get('/admin', auth, function(req, res) {
-    res.send('Hello World');
+auth = express.basicAuth('user', 'password12345');
+server.get('/admin.html', auth, function(req, res) {
+    req.addListener('end', function() {
+        fileserver.serve(req, res);
+    }).resume();
 });
 
-
 //catch all other requests with the static file server
-var fileserver = new nodestatic.Server('./www');
-
 server.get('/*', function(request, response) {
     request.addListener('end', function() {
         fileserver.serve(request, response);
@@ -39,8 +41,6 @@ ioServer = server.listen(8080);
 
 // spin up the websocket server
 var io = require('socket.io').listen(ioServer, {log: false});
-
-
 
 
 var Player = function(socket) {
