@@ -9,13 +9,14 @@ var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
+var testing = false;
 
 var TEAMS = {
     'will' : 'Will Crichton',
     'test' : 'Anonymous',
-    'bot1' : 'Bot 1',
-    'bot2' : 'Bot 2',
-    'bot3' : 'Bot 3'
+    'bot_1' : 'Bot 1',
+    'bot_2' : 'Bot 2',
+    'bot_3' : 'Bot 3'
 };
 
 
@@ -324,6 +325,17 @@ function getPlayerByTeam(teamId) {
     return null;
 }
 
+function getUniqueTeamId (teamId) {
+    newTeamId = String(teamId);
+    i = 1;
+    while(teams.indexOf(newTeamId) != -1){
+        newTeamId = newTeamId.replace(/_\d+/,"");
+        newTeamId += ("_" + i);
+        i++;
+    }
+    return newTeamId;
+}
+
 //Returns first (and hopefully only) game with matching gameId
 function getGameById(gameId) {
     for (var i = 0; i < games.length; i++) {
@@ -355,21 +367,24 @@ function addGame(game) {
 
 
 //Have the server spin up the bots
-var children = []
-children.push(childProcess.exec('../client/run.sh bot1'));
-children.push(childProcess.exec('../client/run.sh bot2'));
-children.push(childProcess.exec('../client/run.sh bot3'));
+if(testing){
+    var children = []
+    children.push(childProcess.exec('../client/run.sh bot_1'));
+    children.push(childProcess.exec('../client/run.sh bot_2'));
+    children.push(childProcess.exec('../client/run.sh bot_3'));
 
-process.on('exit', function() {
-    children.forEach(function(child) {
-        child.kill();
+    process.on('exit', function() {
+        children.forEach(function(child) {
+            child.kill();
+        });
     });
-});
+}
 
 
 //Basic server functionality
 var NUM_PLAYERS = 1; //Useless?
-var games = [] //List of all games, not just running games
+var games = []; //List of all games, not just running games
+var teams = []; //All teams who have ever connected, as well as prelisted teams
 io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
@@ -377,13 +392,15 @@ io.sockets.on('connection', function (socket) {
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); //only relevant to lobby.js
 
-    socket.on('teamId', function(teamId) {
+    socket.on('teamId', function(tID) {
+        teamId = getUniqueTeamId(tID);
         socket.player.teamId = teamId;
+        teams.push(teamId);
         console.log('Player ' + teamId + ' has joined.');
 
         //Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test') {
-            var players = ['bot1', 'bot2', 'bot3'].map(getPlayerByTeam);
+            var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
             players.push(socket.player);
             addGame(new Game(players));
         } else {
@@ -400,6 +417,13 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
+    socket.on('infoRequest', function() {
+        socket.emit('returnInfo',{
+            games: getCurrentGames(),
+            teams: teams
+        });
+    });
+
     socket.on('move', function(move) {
         if(socket.player.game != null){
             socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
@@ -408,6 +432,9 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function() {
         console.log(socket.player.teamId + ' has disconnected.');
+        if(socket.player.teamId != undefined){
+            teams.splice(teams.indexOf(socket.player.teamId), 1);
+        }
         if (socket.player && socket.player.game && socket.player.number !== -1) {
             socket.player.game.quit();
         }
