@@ -9,7 +9,7 @@ var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
-var testing = false;
+var testing = true;
 
 var TEAMS = {
     'will' : 'Will Crichton',
