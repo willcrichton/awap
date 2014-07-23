@@ -3,6 +3,22 @@
 // Responsible for creating, managing, and verifying games and gamestate
 //////////////////////////////////////////////////////////////////////////////
 
+/*GENERAL TODO: - Finish updateCanMove method
+                - Somewhere in the move cycle check if a player can move and
+                  if they can't, skip them.
+                - Somewhere periodically run updateCanMove and checkIsOver,
+                  to keep game state accurate
+*/
+/*NOTES: Will, I tried to improve matching, but ended up with no time to 
+         finish. What I currently have gets a list of planned games from the 
+         matches file, and puts people into them if they are open. I then tried
+         to get sequential matches working, but that required game ending to 
+         work, which required our move checking to be working. I got a lot of 
+         starter code to the issue done such as updateCanMove, checkIsOver, 
+         and the canMove property of player, but updateCanMove isn't finished
+         and nothing currently does anything with those methods at the moment.
+*/
+
 var nodestatic = require('node-static');
 var express = require('express');
 var fs = require('fs');
@@ -12,11 +28,15 @@ var crypto = require('crypto');
 var testing = true;
 
 var TEAMS = {
-    'will' : 'Will Crichton',
-    'test' : 'Anonymous',
+    'will'  : 'Will Crichton',
+    'test'  : 'Anonymous',
     'bot_1' : 'Bot 1',
     'bot_2' : 'Bot 2',
-    'bot_3' : 'Bot 3'
+    'bot_3' : 'Bot 3',
+    'p1'    : 'Bill',
+    'p2'    : 'Bob',
+    'p3'    : 'Joe',
+    'p4'    : 'Ted'
 };
 
 
@@ -50,6 +70,7 @@ var Player = function(socket) {
     this.blocks = [];
     this.game = null;
     this.number = -1;
+    this.canMove = false;
 };
 
 Player.prototype = {
@@ -195,6 +216,7 @@ var Game = function(players) {
 
     for (var i = 0; i < this.players.length; i++) {
         this.sendSetup(this.players[i]);
+        this.players[i].canMove = true;
     }
 
     console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
@@ -272,7 +294,7 @@ Game.prototype = {
 
     //Skips the current player, and will stop advancing if all players skip.
     advance: function() {
-        if(this.timesAdvanced < 3){
+        if(this.timesAdvanced < 7){
             this.turn = (this.turn + 1) % this.players.length;
             io.sockets.in(this.gameId).emit('update', this.clientState());
             this.sendMoveRequest();
@@ -280,7 +302,8 @@ Game.prototype = {
             this.timesAdvanced += 1;
         }
         else{
-            this.over = true; //need to do other game ending things
+            console.log("Ending Game");
+            this.quit();
         }
     },
 
@@ -310,6 +333,41 @@ Game.prototype = {
         player.number = number;
         player.socket.join(this.gameId);
         player.socket.emit('setup', state);
+    },
+
+    getScore: function(player) {
+        //gets the number of squares on the board that belong to the player
+        numSquares = this.board.grid.reduce(function(s1, xs) {
+            return s1 + xs.reduce(function(s2, x) {
+                if (x == player.number) {
+                    return s2+1;
+                } else{
+                    return s2;
+                };
+            }, 0);
+        }, 0);
+        return numSquares;
+    },
+
+    checkIsOver: function() {
+        return this.players.every(function(currPlayer) {
+            return !currPlayer.canMove;
+        });
+    },
+
+    updateCanMove: function() {
+        for (var i = 0; i < this.players.length; i++) {
+            if(this.players[i].canMove){
+                currBlocks = this.players[i].blocks.sort(function(a,b) {
+                    return a.length - b.length;
+                });
+                ////////////////////
+                //TODO: Check if any block can fit in any space,
+                //      and break if a move is found, if no move is found
+                //      set this.players[i].canMove to false
+                /////////////////////
+            }
+        }
     }
 };
 
@@ -328,6 +386,8 @@ function getPlayerByTeam(teamId) {
 function getUniqueTeamId (teamId) {
     newTeamId = String(teamId);
     i = 1;
+    var teams = connectedPlayers.map(function(p) {return p.teamId; })
+
     while(teams.indexOf(newTeamId) != -1){
         newTeamId = newTeamId.replace(/_\d+/,"");
         newTeamId += ("_" + i);
@@ -344,11 +404,28 @@ function getGameById(gameId) {
             return game;
         }
     }
-
     return null;
 }
 
-//
+//Gets open players, looks at planned game and starts first open game
+function startOpenGames () {
+    var openTeams = connectedPlayers.filter(function(player) {
+        return !player.isInGame();
+    }).map(function(player) {
+        return player.teamId;
+    });
+
+    for (var i = 0; i < plannedGames.length; i++) {
+        if(plannedGames[i].every(function(t) {return openTeams.indexOf(t) >= 0; })) {
+            console.log(plannedGames[i]);
+            addGame(new Game(plannedGames[i].map(getPlayerByTeam)));
+            plannedGames.splice(i, 1);
+            break;
+        }
+    }
+
+}
+
 function getCurrentGames() {
     var currentGames = []
     games.forEach(function(game) {
@@ -384,7 +461,18 @@ if(testing){
 //Basic server functionality
 var NUM_PLAYERS = 1; //Useless?
 var games = []; //List of all games, not just running games
-var teams = []; //All teams who have ever connected, as well as prelisted teams
+var connectedPlayers = []; //All players who are connected
+var plannedGames = [];
+
+//Generate planned games
+var filePath = path.join(__dirname + '/matches');
+var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
+matches.split("\n").forEach(function(line) {
+    var players = line.split(" ");
+    plannedGames.push(players);
+});
+
+
 io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
@@ -395,8 +483,8 @@ io.sockets.on('connection', function (socket) {
     socket.on('teamId', function(tID) {
         teamId = getUniqueTeamId(tID);
         socket.player.teamId = teamId;
-        teams.push(teamId);
         console.log('Player ' + teamId + ' has joined.');
+        connectedPlayers.push(socket.player);
 
         //Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test') {
@@ -404,16 +492,7 @@ io.sockets.on('connection', function (socket) {
             players.push(socket.player);
             addGame(new Game(players));
         } else {
-            var filePath = path.join(__dirname + '/matches');
-            var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
-            
-            matches.split("\n").forEach(function(line) {
-                var players = line.split(" ");
-                if (players.indexOf(teamId) > -1 && !socket.player.isInGame()) {
-                    console.log(players.map(getPlayerByTeam));
-                    addGame(new Game(players.map(getPlayerByTeam)));
-                }
-            });
+            startOpenGames();
         }
     });
 
@@ -433,7 +512,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function() {
         console.log(socket.player.teamId + ' has disconnected.');
         if(socket.player.teamId != undefined){
-            teams.splice(teams.indexOf(socket.player.teamId), 1);
+            connectedPlayers.splice(connectedPlayers.indexOf(socket.player), 1);
         }
         if (socket.player && socket.player.game && socket.player.number !== -1) {
             socket.player.game.quit();
@@ -446,9 +525,9 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('spectate', function(room) {
         var game = getGameById(room);
-        game.sendMoveRequest(); //start the game once there is a spectator.
 
         if (game !== null) {
+            game.sendMoveRequest(); //start the game once there is a spectator.
             game.sendSetup(socket.player);
         }
     });
