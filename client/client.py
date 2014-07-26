@@ -78,7 +78,6 @@ def main():
                 # Script died or game is over
                 exit()
 
-            print 'received from script', args
             socket.emit('move', {
                 'block': int(args[0]),
                 'rotation': int(args[1]),

@@ -187,7 +187,7 @@ var init = (function() {
 
     ws.on('end', function(msg) {
         alert(msg);
-        $('#blocks, #board').html('');
+        $('#blocks, #board').hide();
         $('#waiting').show();
     });
 

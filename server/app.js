@@ -68,8 +68,6 @@ var NUM_BLOCKS = BLOCKS.length;
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
 
-var NUM_PLAYERS = 1;
-
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
 var server = express();
@@ -108,7 +106,6 @@ Player.prototype = {
 
     quit: function(msg) {
         this.game = null;
-        this.socket.emit('end', msg);
     }
 };
 
@@ -264,9 +261,8 @@ Game.prototype = {
         pl.blocks.splice(move.block, 1);
 
         this.updateCanMove();
-        console.log(this.players.map(function(pl) { return pl.canMove; }));
         if (this.checkIsOver()) {
-            io.sockets.in(this.gameId).emit('update', this.clientState());
+            this.getRoom().emit('update', this.clientState());
             this.quit();
             return;
         }
@@ -275,7 +271,7 @@ Game.prototype = {
             this.turn = (this.turn + 1) % this.players.length;   
         } while (!this.players[this.turn].canMove);
 
-        io.sockets.in(this.gameId).emit('update', this.clientState());
+        this.getRoom().emit('update', this.clientState());
         this.sendMoveRequest();//Ask the next player for their move
         
         //Clear the last players timer and set the current players timer
@@ -285,13 +281,18 @@ Game.prototype = {
         return true;
     },
 
+    getRoom: function() {
+        return io.sockets.in(this.gameId);
+    },
+
     quit: function() {
         if (this.over) return;
         this.over = true;
 
         var scores = this.players.map(this.getScore.bind(this));
+        this.getRoom().emit('end', scores);
         this.players.forEach(function(player) {
-            player.quit(scores);
+            player.quit();
         });
     },
 
@@ -325,7 +326,7 @@ Game.prototype = {
                 this.turn = (this.turn + 1) % this.players.length;   
             } while (!this.players[this.turn].canMove)
 
-            io.sockets.in(this.gameId).emit('update', this.clientState());
+            this.getRoom().emit('update', this.clientState());
             this.sendMoveRequest();
             this.clearTimer();
             this.setTimer();
@@ -547,7 +548,8 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function() {
-        console.log(socket.player.teamId + ' has disconnected.');
+        var teamId = socket.player.teamId;
+        console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
         if(socket.player.teamId != undefined){
             connectedPlayers.splice(connectedPlayers.indexOf(socket.player), 1);
         }
