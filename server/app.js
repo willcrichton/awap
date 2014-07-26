@@ -39,10 +39,39 @@ var TEAMS = {
     'p4'    : 'Ted'
 };
 
+var BLOCKS = [
+    [[0, 0]], // single
+    [[0, 0], [0, 1]], // double
+    [[0, 0], [0, 1], [1, 0]], // elbow
+    [[0, 0], [0, 1], [0, 2]], // tiny line
+    [[0, 0], [0, 1], [1, 0], [1, 1]], // square
+    [[0, 0], [1, 0], [2, 0], [1, 1]], // little T
+    [[0, 0], [1, 0], [2, 0], [3, 0]], // little line
+    [[0, 0], [0, 1], [1, 0], [0, 2]], // little L
+    [[0, 0], [1, 0], [1, 1], [2, 1]], // tetris S
+    [[0, 0], [1, 0], [2, 0], [3, 0], [0, 1]], // big L
+    [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1]], // big T
+    [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2]], // corner piece
+    [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1]], // elongated S
+    [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]], // Z shape
+    [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], // big line
+    [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], // chair
+    [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2]], // staircase
+    [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]], // corner capper
+    [[0, 0], [1, 0], [1, 1], [1, 2], [2, 1]], // weird dual-elbow
+    [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]], // plus sign
+    [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
+];
 
-var fileserver = new nodestatic.Server('./www', {cache: 600});
+var NUM_BLOCKS = BLOCKS.length;
+
+var TURN_LENGTH = 5000;
+var DELAY_BETWEEN_TURNS = 300;
+
+var NUM_PLAYERS = 1;
 
 //use express to protect admin page
+var fileserver = new nodestatic.Server('./www', {cache: 600});
 var server = express();
 auth = express.basicAuth('user', 'password12345');
 server.get('/admin*', auth, function(req, res) {
@@ -62,7 +91,6 @@ ioServer = server.listen(8080);
 
 // spin up the websocket server
 var io = require('socket.io').listen(ioServer, {log: false});
-
 
 var Player = function(socket) {
     this.socket = socket;
@@ -99,7 +127,7 @@ var Board = function() {
 };
 
 Board.prototype = {
-    placeBlock: function(plNum, block, point) {
+    canPlaceBlock: function(plNum, block, point) {
         var onAbsCorner = false, onRelCorner = false;
         var N = this.dimension - 1, corner;
 
@@ -141,6 +169,14 @@ Board.prototype = {
 
         // ensure that placed block is on the corner of another block players owns
         if (!onAbsCorner && !onRelCorner) return false;
+        
+        return true;
+    },
+    
+    placeBlock: function(plNum, block, point) {
+        if (!this.canPlaceBlock(plNum, block, point)) {
+            return false;
+        }
 
         for (var i = 0; i < block.length; i++) {
             var x = point.x + block[i].x, y = point.y + block[i].y;
@@ -151,41 +187,12 @@ Board.prototype = {
     }
 }
 
-
-// TODO: more blocks
-var BLOCKS = [
-    [[0, 0]], // single
-    [[0, 0], [0, 1]], // double
-    [[0, 0], [0, 1], [1, 0]], // elbow
-    [[0, 0], [0, 1], [0, 2]], // tiny line
-    [[0, 0], [0, 1], [1, 0], [1, 1]], // square
-    [[0, 0], [1, 0], [2, 0], [1, 1]], // little T
-    [[0, 0], [1, 0], [2, 0], [3, 0]], // little line
-    [[0, 0], [0, 1], [1, 0], [0, 2]], // little L
-    [[0, 0], [1, 0], [1, 1], [2, 1]], // tetris S
-    [[0, 0], [1, 0], [2, 0], [3, 0], [0, 1]], // big L
-    [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1]], // big T
-    [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2]], // corner piece
-    [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1]], // elongated S
-    [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]], // Z shape
-    [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], // big line
-    [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]], // chair
-    [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2]], // staircase
-    [[0, 0], [1, 0], [0, 1], [0, 2], [1, 2]], // corner capper
-    [[0, 0], [1, 0], [1, 1], [1, 2], [2, 1]], // weird dual-elbow
-    [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]], // plus sign
-    [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
-];
-
-var NUM_BLOCKS = BLOCKS.length;
-
 var Game = function(players) {
     this.turn = 0;
     this.players = players;
     this.board = new Board();
     this.over = false;
     this.gameId = crypto.randomBytes(20).toString('hex');//unique ID
-    this.timesAdvanced = 0;
 
     //Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
@@ -223,6 +230,21 @@ var Game = function(players) {
 };
 
 Game.prototype = {
+    // rotation is in range [0, 3]
+    rotateBlock: function(oldBlock, rotation) {
+        var newBlock = [];
+        for (var i = 0; i < oldBlock.length; i++) {
+            var cx = oldBlock[i].x, cy = oldBlock[i].y;
+            switch (rotation) {
+            case 1: newBlock[i] = {x: -cy, y: cx}; break
+            case 2: newBlock[i] = {x: -cx, y: -cy}; break
+            case 3: newBlock[i] = {x: cy, y: -cx}; break
+            default: newBlock[i] = {x: cx, y: cy}; break
+            }
+        }
+        return newBlock;
+    },
+
     doMove: function(pl, move) {
 
         // TODO: informative errors
@@ -236,21 +258,23 @@ Game.prototype = {
         }
 
         //Properly rotate old block. (Maybe this should be a function)
-        var oldBlock = pl.blocks[move.block], newBlock = [];
-        for (var i = 0; i < oldBlock.length; i++) {
-            var cx = oldBlock[i].x, cy = oldBlock[i].y;
-            switch (move.rotation) {
-            case 1: newBlock[i] = {x: -cy, y: cx}; break
-            case 2: newBlock[i] = {x: -cx, y: -cy}; break
-            case 3: newBlock[i] = {x: cy, y: -cx}; break
-            default: newBlock[i] = {x: cx, y: cy}; break
-            }
+        var newBlock = this.rotateBlock(pl.blocks[move.block], move.rotation);
+
+        if (!this.board.placeBlock(pl.number, newBlock, move.pos)) return false;        
+        pl.blocks.splice(move.block, 1);
+
+        this.updateCanMove();
+        console.log(this.players.map(function(pl) { return pl.canMove; }));
+        if (this.checkIsOver()) {
+            io.sockets.in(this.gameId).emit('update', this.clientState());
+            this.quit();
+            return;
         }
 
-        if (!this.board.placeBlock(pl.number, newBlock, move.pos)) return false;
-        
-        pl.blocks.splice(move.block, 1);
-        this.turn = (this.turn + 1) % this.players.length;
+        do {
+            this.turn = (this.turn + 1) % this.players.length;   
+        } while (!this.players[this.turn].canMove);
+
         io.sockets.in(this.gameId).emit('update', this.clientState());
         this.sendMoveRequest();//Ask the next player for their move
         
@@ -262,26 +286,26 @@ Game.prototype = {
     },
 
     quit: function() {
+        if (this.over) return;
         this.over = true;
 
-        for (var i = 0; i < this.players.length; i++) {
-            this.players[i].quit("A player quit the game.");
-        }
+        var scores = this.players.map(this.getScore.bind(this));
+        this.players.forEach(function(player) {
+            player.quit(scores);
+        });
     },
 
     // starts a timer 3 second that will advance to the
     // next player if no move has been made before it is done
     setTimer: function() {
-        var _this = this;
-        this.moveTimer = setTimeout(function() {
-            _this.advance();
-        }, 2300);
+        this.moveTimer = setTimeout((function() {
+            this.advance();
+        }).bind(this), TURN_LENGTH);
     },
 
     //gets rid of the turn timeout timer
     clearTimer: function() {
-        this.timesAdvanced = 0;
-        if(typeof this.moveTimer != undefined){
+        if(this.moveTimer !== undefined){
             clearTimeout(this.moveTimer);
         }
     },
@@ -289,21 +313,22 @@ Game.prototype = {
     //Sends a request for a move to the current player
     sendMoveRequest: function(){
         currplayer = this.players[this.turn];
-        setTimeout(function(){currplayer.socket.emit('moveRequest', {move: 1});}, 300);
+        setTimeout(function(){currplayer.socket.emit('moveRequest', {move: 1});}, DELAY_BETWEEN_TURNS);
     },
 
     //Skips the current player, and will stop advancing if all players skip.
     advance: function() {
-        if(this.timesAdvanced < 7){
-            this.turn = (this.turn + 1) % this.players.length;
+        if (this.checkIsOver()) {
+            this.quit();
+        } else {
+            do {
+                this.turn = (this.turn + 1) % this.players.length;   
+            } while (!this.players[this.turn].canMove)
+
             io.sockets.in(this.gameId).emit('update', this.clientState());
             this.sendMoveRequest();
+            this.clearTimer();
             this.setTimer();
-            this.timesAdvanced += 1;
-        }
-        else{
-            console.log("Ending Game");
-            this.quit();
         }
     },
 
@@ -311,7 +336,7 @@ Game.prototype = {
         return {
             id: this.gameId,
             players: this.players.map(function(player) {
-                return TEAMS[player.teamId]
+                return TEAMS[player.teamId];
             })
         }
     },
@@ -356,18 +381,32 @@ Game.prototype = {
     },
 
     updateCanMove: function() {
-        for (var i = 0; i < this.players.length; i++) {
-            if(this.players[i].canMove){
-                currBlocks = this.players[i].blocks.sort(function(a,b) {
-                    return a.length - b.length;
-                });
-                ////////////////////
-                //TODO: Check if any block can fit in any space,
-                //      and break if a move is found, if no move is found
-                //      set this.players[i].canMove to false
-                /////////////////////
+        this.players.forEach((function(player) {
+            if (!player.canMove) return;
+            var blocks = player.blocks;
+
+            if (blocks.length == 0) {
+                player.canMove = false;
+                return;
             }
-        }
+            
+            // TODO: break the loop when you find canMove
+            for (var b = 0; b < blocks.length; b++) {
+                for (var rot = 0; rot < 4; rot++) {
+                    var block = this.rotateBlock(blocks[b], rot);
+                    for (var i = 0; i < this.board.dimension; i++) {
+                        for (var j = 0; j < this.board.dimension; j++) {
+                            if (this.board.canPlaceBlock(player.number, blocks[b], {x: i, y: j})) {
+                                player.canMove = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            player.canMove = false;
+        }).bind(this));
     }
 };
 
@@ -459,7 +498,6 @@ if(testing){
 
 
 //Basic server functionality
-var NUM_PLAYERS = 1; //Useless?
 var games = []; //List of all games, not just running games
 var connectedPlayers = []; //All players who are connected
 var plannedGames = [];
@@ -471,7 +509,6 @@ matches.split("\n").forEach(function(line) {
     var players = line.split(" ");
     plannedGames.push(players);
 });
-
 
 io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
 
@@ -489,7 +526,7 @@ io.sockets.on('connection', function (socket) {
         //Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test') {
             var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
-            players.push(socket.player);
+            players.unshift(socket.player);
             addGame(new Game(players));
         } else {
             startOpenGames();
