@@ -11,7 +11,8 @@ import json
 class Point:
     x = 0
     y = 0
-
+    
+    # Can be instantiated as either Point(x, y) or Point({'x': x, 'y': y})
     def __init__(self, x=0, y=0):
         if isinstance(x, dict):
             self.x = x['x']
@@ -37,8 +38,11 @@ class Game:
     blocks = []
     grid = []
     my_number = -1
-    dimension = -1 #Board is assumed to be square
+    dimension = -1 # Board is assumed to be square
     turn = -1
+
+    def __init__(self, args):
+        self.interpret_data(args, False)
 
     # find_move is your place to start. When it's your turn,
     # find_move will be called and you must return where to go.
@@ -49,7 +53,8 @@ class Game:
         # INSERT AI LOGIC HERE #
         ########################
 
-        # Here's a sample naive implementation
+        # Here's a sample naive implementation which finds the
+        # first open spot for a block.
         N = self.dimension
         for index, block in enumerate(self.blocks):
             for i in range(0, N * N):
@@ -101,9 +106,6 @@ class Game:
     def rotate_block(self, block, num_rotations):
         return [offset.rotate(num_rotations) for offset in block]
 
-    def __init__(self, args):
-        self.interpret_data(args, False)
-
     # updates local variables with state from the server
     def interpret_data(self, args, game):
         if 'error' in args: return # TODO: notify about error state
@@ -136,11 +138,7 @@ def main():
     game = Game(get_state())
 
     while True:
-        #I don't think the client should close, so multiple games can occour.
-        #if len(game.blocks) == 0:
-        #    exit('Game is over')
-
-        game.interpret_data(get_state(),game)
+        game.interpret_data(get_state(), game)
 
 if __name__ == "__main__":
     main()

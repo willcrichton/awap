@@ -1,10 +1,11 @@
+#!/usr/bin/python
+
 #################################################################################
 # Client.py - Communicates with server via socketIO and AI via stdin/stdout
 # Gets moves via stdin in the form of "# # # #" (block index, # rotations, x, y)
 # Consists mainly of setup, helper funtions, and a loop that gets moves.
 #################################################################################
 
-#!/usr/bin/python
 from socketIO_client import SocketIO, BaseNamespace
 from subprocess import Popen, PIPE, STDOUT
 from argparse import ArgumentParser
@@ -15,10 +16,13 @@ import fileinput
 import threading
 import json
 
+SOCKET_HOST = '127.0.0.1'
+SOCKET_PORT = 8080
+
 team_id = ''
 stdin_handle = None
 
-#write message to stdout
+# write message to stdout
 def write(message):
     if type(message) is not str:
         message = json.dumps(message)
@@ -48,6 +52,10 @@ class GameNamespace(BaseNamespace):
         resp = args[0]
         if not resp: write(json.dumps({'error': 'fail'}))
 
+    def on_end(self, *args):
+        scores = args[0]
+        print(scores)
+
 def main():
 
     # Set up command to run using arguments
@@ -65,7 +73,7 @@ def main():
     stdin_handle = pipe.stdin
     sys.stdin = pipe.stdout
 
-    socket = SocketIO('127.0.0.1', 8080, GameNamespace)
+    socket = SocketIO(SOCKET_HOST, SOCKET_PORT, GameNamespace)
 
     def on_setup(state):
         write(state)

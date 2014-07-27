@@ -1,23 +1,14 @@
-//////////////////////////////////////////////////////////////////////////////
-// app.js - BLOKUS SERVER 
-// Responsible for creating, managing, and verifying games and gamestate
-//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+// SBR SERVER: Responsible for creating, managing, and verifying games //
+/////////////////////////////////////////////////////////////////////////
 
-/*GENERAL TODO: - Finish updateCanMove method
-                - Somewhere in the move cycle check if a player can move and
-                  if they can't, skip them.
-                - Somewhere periodically run updateCanMove and checkIsOver,
-                  to keep game state accurate
-*/
-/*NOTES: Will, I tried to improve matching, but ended up with no time to 
-         finish. What I currently have gets a list of planned games from the 
-         matches file, and puts people into them if they are open. I then tried
-         to get sequential matches working, but that required game ending to 
-         work, which required our move checking to be working. I got a lot of 
-         starter code to the issue done such as updateCanMove, checkIsOver, 
-         and the canMove property of player, but updateCanMove isn't finished
-         and nothing currently does anything with those methods at the moment.
-*/
+/* GENERAL TODO: 
+ *   - determine why players get skipped when NUM_BLOCKS = 1
+ *   - give more informative errors when we get invalid moves
+ *   - verify matchmaking + lobbying works on scale
+ *   - allow multiple tests (bot_1, ...) at once
+ *   - headless tests (don't see game, just get scores)
+ */
 
 var nodestatic = require('node-static');
 var express = require('express');
@@ -63,7 +54,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = BLOCKS.length;
+var NUM_BLOCKS = 1; //BLOCKS.length;
 
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
@@ -71,7 +62,7 @@ var DELAY_BETWEEN_TURNS = 300;
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
 var server = express();
-auth = express.basicAuth('user', 'password12345');
+var auth = express.basicAuth('user', 'password12345'); // pro security
 server.get('/admin*', auth, function(req, res) {
     req.addListener('end', function() {
         fileserver.serve(req, res);
@@ -85,9 +76,7 @@ server.get('/*', function(request, response) {
     }).resume();
 });
 
-ioServer = server.listen(8080);
-
-// spin up the websocket server
+var ioServer = server.listen(8080);
 var io = require('socket.io').listen(ioServer, {log: false});
 
 var Player = function(socket) {
@@ -128,7 +117,7 @@ Board.prototype = {
         var onAbsCorner = false, onRelCorner = false;
         var N = this.dimension - 1, corner;
 
-        //Determine which corner is players starting corner
+        // Determine which corner is player's starting corner
         switch (plNum) {
         case 0: corner = {x: 0, y: 0}; break
         case 1: corner = {x: N, y: 0}; break
@@ -152,7 +141,7 @@ Board.prototype = {
                 return false;
             }
 
-            //Check to make sure piece is placed on starting or continuing corner
+            // Check to make sure piece is placed on starting or continuing corner
             onAbsCorner = onAbsCorner || (x === corner.x && y === corner.y);
             onRelCorner = onRelCorner ||
                 (x > 0 && y > 0 && this.grid[x - 1][y - 1] == plNum) ||
@@ -191,7 +180,7 @@ var Game = function(players) {
     this.over = false;
     this.gameId = crypto.randomBytes(20).toString('hex');//unique ID
 
-    //Generate a random list of Ids
+    // Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
     var blockIds = [], blocks = [];
     for (var i = 0; i < NUM_BLOCKS; i++) {
@@ -204,7 +193,7 @@ var Game = function(players) {
         }
     }
 
-    //Convert array blocks to x,y blocks, then sort by the above permutation
+    // Convert array blocks to x,y blocks, then sort by the above permutation
     for (var i = 0; i < NUM_BLOCKS; i++) {
         var oldBlock = BLOCKS[blockIds[i]], newBlock = [];
         for (var j = 0; j < oldBlock.length; j++) {
@@ -213,7 +202,7 @@ var Game = function(players) {
         blocks.push(newBlock);
     }
 
-    //Give each player a copy of the blocks
+    // Give each player a copy of the blocks
     for (var i = 0; i < this.players.length; i++) {
         this.players[i].blocks = blocks.slice(0);
     }
@@ -245,7 +234,7 @@ Game.prototype = {
     doMove: function(pl, move) {
 
         // TODO: informative errors
-        //Check for invalid or out of turn moves.
+        // Check for invalid or out of turn moves.
         if (this.turn != pl.number ||
             move.block === undefined || move.pos === undefined || move.rotation === undefined ||
             move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
@@ -254,7 +243,7 @@ Game.prototype = {
             return false; 
         }
 
-        //Properly rotate old block. (Maybe this should be a function)
+        // Properly rotate old block. (Maybe this should be a function)
         var newBlock = this.rotateBlock(pl.blocks[move.block], move.rotation);
 
         if (!this.board.placeBlock(pl.number, newBlock, move.pos)) return false;        
@@ -274,7 +263,7 @@ Game.prototype = {
         this.getRoom().emit('update', this.clientState());
         this.sendMoveRequest();//Ask the next player for their move
         
-        //Clear the last players timer and set the current players timer
+        // Clear the last players timer and set the current players timer
         this.clearTimer();
         this.setTimer();
 
@@ -304,20 +293,20 @@ Game.prototype = {
         }).bind(this), TURN_LENGTH);
     },
 
-    //gets rid of the turn timeout timer
+    // gets rid of the turn timeout timer
     clearTimer: function() {
         if(this.moveTimer !== undefined){
             clearTimeout(this.moveTimer);
         }
     },
 
-    //Sends a request for a move to the current player
+    // Sends a request for a move to the current player
     sendMoveRequest: function(){
         currplayer = this.players[this.turn];
         setTimeout(function(){currplayer.socket.emit('moveRequest', {move: 1});}, DELAY_BETWEEN_TURNS);
     },
 
-    //Skips the current player, and will stop advancing if all players skip.
+    // Skips the current player, and will stop advancing if all players skip.
     advance: function() {
         if (this.checkIsOver()) {
             this.quit();
@@ -362,7 +351,7 @@ Game.prototype = {
     },
 
     getScore: function(player) {
-        //gets the number of squares on the board that belong to the player
+        // gets the number of squares on the board that belong to the player
         numSquares = this.board.grid.reduce(function(s1, xs) {
             return s1 + xs.reduce(function(s2, x) {
                 if (x == player.number) {
@@ -391,7 +380,6 @@ Game.prototype = {
                 return;
             }
             
-            // TODO: break the loop when you find canMove
             for (var b = 0; b < blocks.length; b++) {
                 for (var rot = 0; rot < 4; rot++) {
                     var block = this.rotateBlock(blocks[b], rot);
@@ -411,7 +399,7 @@ Game.prototype = {
     }
 };
 
-//Returns first connected player that has a matching teamId
+// Returns first connected player that has a matching teamId
 function getPlayerByTeam(teamId) {
     var sockets = io.sockets.clients();
 
@@ -436,7 +424,7 @@ function getUniqueTeamId (teamId) {
     return newTeamId;
 }
 
-//Returns first (and hopefully only) game with matching gameId
+// Returns first (and hopefully only) game with matching gameId
 function getGameById(gameId) {
     for (var i = 0; i < games.length; i++) {
         var game = games[i];
@@ -447,7 +435,7 @@ function getGameById(gameId) {
     return null;
 }
 
-//Gets open players, looks at planned game and starts first open game
+// Gets open players, looks at planned game and starts first open game
 function startOpenGames () {
     var openTeams = connectedPlayers.filter(function(player) {
         return !player.isInGame();
@@ -483,7 +471,7 @@ function addGame(game) {
 }
 
 
-//Have the server spin up the bots
+// Have the server spin up the bots
 if(testing){
     var children = []
     children.push(childProcess.exec('../client/run.sh bot_1'));
@@ -498,12 +486,12 @@ if(testing){
 }
 
 
-//Basic server functionality
-var games = []; //List of all games, not just running games
-var connectedPlayers = []; //All players who are connected
+// Basic server functionality
+var games = []; // List of all games, not just running games
+var connectedPlayers = []; // All players who are connected
 var plannedGames = [];
 
-//Generate planned games
+// Generate planned games
 var filePath = path.join(__dirname + '/matches');
 var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
 matches.split("\n").forEach(function(line) {
@@ -524,7 +512,7 @@ io.sockets.on('connection', function (socket) {
         console.log('Player ' + teamId + ' has joined.');
         connectedPlayers.push(socket.player);
 
-        //Matching code - Needs fixing
+        // Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test') {
             var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
             players.unshift(socket.player);
@@ -566,7 +554,7 @@ io.sockets.on('connection', function (socket) {
         var game = getGameById(room);
 
         if (game !== null) {
-            game.sendMoveRequest(); //start the game once there is a spectator.
+            game.sendMoveRequest(); // start the game once there is a spectator
             game.sendSetup(socket.player);
         }
     });

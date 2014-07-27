@@ -145,3 +145,35 @@ $light: 40%;
 #games {
     margin-left: 20px;
 }
+
+#scores {
+    width: 300px;
+    height: 300px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    margin: auto;
+    
+    h1 { 
+        margin-bottom: 15px;
+        border-bottom: 1px solid black;
+        padding-bottom: 3px;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    tr {
+        margin-bottom: 5px;
+        font-size: 24px;
+
+        .name { 
+            font-weight: bold; 
+            width: 80%;
+        }
+    }
+}

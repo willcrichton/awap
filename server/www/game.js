@@ -185,10 +185,14 @@ var init = (function() {
         updateBlockList();
     });
 
-    ws.on('end', function(msg) {
-        alert(msg);
-        $('#blocks, #board').hide();
-        $('#waiting').show();
+    ws.on('end', function(scores) {
+        $('#board, #blocks').hide();
+        var names = ['Red', 'Yellow', 'Green', 'Blue']
+        scores.forEach(function(score, playerIdx) {
+            $('#scores table').append('<tr><td class="name">' + names[playerIdx] + ' Player:</td> <td class="score">' + score + '</td></tr>');
+        });
+
+        $('#scores').show();
     });
 
     ws.on('connect', function() {
