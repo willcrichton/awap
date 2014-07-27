@@ -142,3 +142,5 @@ td {
     #scores tr .name {
       font-weight: bold;
       width: 80%; }
+    #scores tr .score {
+      text-align: right; }

@@ -3,12 +3,16 @@
 /////////////////////////////////////////////////////////////////////////
 
 /* GENERAL TODO: 
- *   - determine why players get skipped when NUM_BLOCKS = 1
+ *   SERVER
  *   - give more informative errors when we get invalid moves
  *   - verify matchmaking + lobbying works on scale
  *   - allow multiple tests (bot_1, ...) at once
  *   - headless tests (don't see game, just get scores)
  *   - show spectator scores if they load page after game ends
+ *   
+ *  CLIENT
+ *  - determine why python game client sends invalid first moves on some blocks
+ *  - send debug messages from game to client
  */
 
 var nodestatic = require('node-static');
@@ -217,6 +221,7 @@ var Game = function(players) {
 };
 
 Game.prototype = {
+
     // rotation is in range [0, 3]
     rotateBlock: function(oldBlock, rotation) {
         var newBlock = [];
@@ -233,6 +238,8 @@ Game.prototype = {
     },
 
     doMove: function(pl, move) {
+
+        console.log(pl.teamId, move);
 
         // TODO: informative errors
         // Check for invalid or out of turn moves.
@@ -390,7 +397,7 @@ Game.prototype = {
                     var block = this.rotateBlock(blocks[b], rot);
                     for (var i = 0; i < this.board.dimension; i++) {
                         for (var j = 0; j < this.board.dimension; j++) {
-                            if (this.board.canPlaceBlock(player.number, blocks[b], {x: i, y: j})) {
+                            if (this.board.canPlaceBlock(player.number, block, {x: i, y: j})) {
                                 player.canMove = true;
                                 return;
                             }
