@@ -8,6 +8,7 @@
  *   - verify matchmaking + lobbying works on scale
  *   - allow multiple tests (bot_1, ...) at once
  *   - headless tests (don't see game, just get scores)
+ *   - show spectator scores if they load page after game ends
  */
 
 var nodestatic = require('node-static');
@@ -279,10 +280,14 @@ Game.prototype = {
         this.over = true;
 
         var scores = this.players.map(this.getScore.bind(this));
+        var to_print = []
         this.getRoom().emit('end', scores);
-        this.players.forEach(function(player) {
+        this.players.forEach(function(player, idx) {
+            to_print.push(player.teamId + ': ' + scores[idx])
             player.quit();
         });
+        
+        fs.appendFileSync('scores', to_print.join(', ') + "\n");
     },
 
     // starts a timer 3 second that will advance to the
