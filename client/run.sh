@@ -1,16 +1,23 @@
 #!/bin/bash
 
+# TODO: remove the AI2 logic when we get server set up
+
 RUN_AI="python game.py"
 RUN_AI2="python ../client/game.py"
 TEAM_ID="test"
+FAST=0
 
-if [ "$1" != "" ]; then
-    TEAM_ID=$1
-fi
+while getopts "ft:" option;
+do
+    case $option in
+        f) FAST=1 ;;
+        t) TEAM_ID=$OPTARG ;;
+    esac
+done
 
 if [ -f client.py ]
 then
-	python client.py "$RUN_AI" $TEAM_ID
+	python client.py "$RUN_AI" $TEAM_ID $FAST
 else
-	python ../client/client.py "$RUN_AI2" $TEAM_ID
+	python ../client/client.py "$RUN_AI2" $TEAM_ID $FAST
 fi

@@ -21,6 +21,7 @@ SOCKET_PORT = 8080
 
 team_id = ''
 stdin_handle = None
+is_fast = False
 
 # write message to stdout
 def write(message):
@@ -34,7 +35,10 @@ def write(message):
 class GameNamespace(BaseNamespace):
     def on_connect(self, *args):
         print 'Connected to server'
-        self.emit('teamId', team_id)
+        if is_fast:
+            self.emit('fastGame')
+        else:
+            self.emit('teamId', team_id)
     
     def on_setup(self, *args):
         initState = args[0]
@@ -62,6 +66,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument("command", help="A game.py file for AI input")
     parser.add_argument("teamid", default='test', help="A teamid for serverside identification, default is test")
+    parser.add_argument("fast", default=0, help="Run test quickly without visualization")
     args = parser.parse_args()
 
     # Set up pipes
@@ -72,6 +77,9 @@ def main():
     global stdin_handle
     stdin_handle = pipe.stdin
     sys.stdin = pipe.stdout
+    
+    global is_fast
+    is_fast = int(args.fast) == 1
 
     socket = SocketIO(SOCKET_HOST, SOCKET_PORT, GameNamespace)
 
@@ -81,7 +89,7 @@ def main():
     def get_input():
         while True:
             try:
-                args = raw_input('').split(' ')
+                args = raw_input().split(' ')
             except:
                 # Script died or game is over
                 exit()

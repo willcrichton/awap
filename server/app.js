@@ -7,8 +7,6 @@
  *   - give more informative errors when we get invalid moves
  *   - verify matchmaking + lobbying works on scale
  *   - allow multiple tests (bot_1, ...) at once
- *   - headless tests (don't see game, just get scores)
- *   - show spectator scores if they load page after game ends
  *   
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
@@ -178,12 +176,13 @@ Board.prototype = {
     }
 }
 
-var Game = function(players) {
+var Game = function(players, fast) {
     this.turn = 0;
     this.players = players;
     this.board = new Board();
     this.over = false;
-    this.gameId = crypto.randomBytes(20).toString('hex');//unique ID
+    this.fast = fast;
+    this.gameId = crypto.randomBytes(20).toString('hex'); //unique ID
 
     // Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
@@ -217,6 +216,10 @@ var Game = function(players) {
         this.players[i].canMove = true;
     }
 
+    if (this.fast) {
+        this.sendMoveRequest();
+    }
+
     console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
 };
 
@@ -238,8 +241,6 @@ Game.prototype = {
     },
 
     doMove: function(pl, move) {
-
-        console.log(pl.teamId, move);
 
         // TODO: informative errors
         // Check for invalid or out of turn moves.
@@ -286,7 +287,7 @@ Game.prototype = {
         if (this.over) return;
         this.over = true;
 
-        var scores = this.players.map(this.getScore.bind(this));
+        var scores = this.getScores();
         var to_print = []
         this.getRoom().emit('end', scores);
         this.players.forEach(function(player, idx) {
@@ -294,7 +295,9 @@ Game.prototype = {
             player.quit();
         });
         
-        fs.appendFileSync('scores', to_print.join(', ') + "\n");
+        if (!this.fast) {
+            fs.appendFileSync('scores', to_print.join(', ') + "\n");
+        }
     },
 
     // starts a timer 3 second that will advance to the
@@ -315,7 +318,7 @@ Game.prototype = {
     // Sends a request for a move to the current player
     sendMoveRequest: function(){
         currplayer = this.players[this.turn];
-        setTimeout(function(){currplayer.socket.emit('moveRequest', {move: 1});}, DELAY_BETWEEN_TURNS);
+        setTimeout(function(){ currplayer.socket.emit('moveRequest', {move: 1}); }, this.fast ? 0 : DELAY_BETWEEN_TURNS);
     },
 
     // Skips the current player, and will stop advancing if all players skip.
@@ -374,6 +377,12 @@ Game.prototype = {
             }, 0);
         }, 0);
         return numSquares;
+    },
+
+    getScores: function() {
+        return this.players.map((function(player) {
+            return [player.teamId in TEAMS ? TEAMS[player.teamId] : 'You', this.getScore(player)];
+        }).bind(this));
     },
 
     checkIsOver: function() {
@@ -486,9 +495,9 @@ function addGame(game) {
 // Have the server spin up the bots
 if(testing){
     var children = []
-    children.push(childProcess.exec('../client/run.sh bot_1'));
-    children.push(childProcess.exec('../client/run.sh bot_2'));
-    children.push(childProcess.exec('../client/run.sh bot_3'));
+    children.push(childProcess.exec('../client/run.sh -t bot_1'));
+    children.push(childProcess.exec('../client/run.sh -t bot_2'));
+    children.push(childProcess.exec('../client/run.sh -t bot_3'));
 
     process.on('exit', function() {
         children.forEach(function(child) {
@@ -511,12 +520,12 @@ matches.split("\n").forEach(function(line) {
     plannedGames.push(players);
 });
 
-io.set("heartbeat timeout", 600);//set heartbeat timeout to 10min
+io.set("heartbeat timeout", 600); // set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
-
+    
     socket.player = new Player(socket);
-    socket.emit('games', getCurrentGames()); //only relevant to lobby.js
+    socket.emit('games', getCurrentGames()); // only relevant to lobby.js
 
     socket.on('teamId', function(tID) {
         teamId = getUniqueTeamId(tID);
@@ -525,13 +534,19 @@ io.sockets.on('connection', function (socket) {
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
-        if (teamId.toLowerCase() == 'test') {
+        if (teamId.toLowerCase() == 'test' && getPlayerByTeam('bot_1') !== null) {
             var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
             players.unshift(socket.player);
             addGame(new Game(players));
         } else {
             startOpenGames();
         }
+    });
+
+    socket.on('fastGame', function() {
+        var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
+        players.unshift(socket.player);
+        addGame(new Game(players, true));
     });
 
     socket.on('infoRequest', function() {
@@ -562,10 +577,13 @@ io.sockets.on('connection', function (socket) {
         console.log(socket.player.teamId + 'says, "' + info + '".');
     });
 
-    socket.on('spectate', function(room) {
-        var game = getGameById(room);
+    socket.on('spectate', function(id) {
+        var game = getGameById(id);
+        if (game === null) return;
 
-        if (game !== null) {
+        if (game.over) {
+            socket.emit('end', game.getScores());
+        } else {
             game.sendMoveRequest(); // start the game once there is a spectator
             game.sendSetup(socket.player);
         }

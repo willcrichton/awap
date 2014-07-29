@@ -186,10 +186,10 @@ var init = (function() {
     });
 
     ws.on('end', function(scores) {
-        $('#board, #blocks').hide();
+        $('#board, #blocks, #waiting').hide();
         var names = ['Red', 'Yellow', 'Green', 'Blue']
-        scores.forEach(function(score, playerIdx) {
-            $('#scores table').append('<tr><td class="name">' + names[playerIdx] + ' Player:</td> <td class="score">' + score + '</td></tr>');
+        scores.forEach(function(scoreInfo) {
+            $('#scores table').append('<tr><td class="name">' + scoreInfo[0] + ':</td> <td class="score">' + scoreInfo[1] + '</td></tr>');
         });
 
         $('#scores').show();

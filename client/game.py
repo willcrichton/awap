@@ -1,8 +1,8 @@
-#############################################################################
-# Game.py - Responsible for generating moves to give to client.py            
-# Moves via stdout in the form of "# # # #" (block index, # rotations, x, y) 
-# Important function is find_move, which should contain the main AI          
-#############################################################################
+##############################################################################
+# Game.py - Responsible for generating moves to give to client.py            #
+# Moves via stdout in the form of "# # # #" (block index, # rotations, x, y) #
+# Important function is find_move, which should contain the main AI          #
+##############################################################################
 
 import sys
 import json
