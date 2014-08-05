@@ -1,8 +1,8 @@
-#################################################################################
-# Client.py - Communicates with server via socketIO and AI via stdin/stdout
-# Gets moves via stdin in the form of "# # # #" (block index, # rotations, x, y)
-# Consists mainly of setup, helper funtions, and a loop that gets moves.
-#################################################################################
+##################################################################################
+# client.py - Communicates with server via socketIO and AI via stdin/stdout      #
+# Gets moves via stdin in the form of "# # # #" (block index, # rotations, x, y) #
+# Consists mainly of setup, helper funtions, and a loop that gets moves.         #
+##################################################################################
 
 from socketIO_client import SocketIO, BaseNamespace
 from subprocess import Popen, PIPE, STDOUT
@@ -41,6 +41,8 @@ class GameNamespace(BaseNamespace):
     
     def on_setup(self, *args):
         initState = args[0]
+        if not is_fast:
+            print 'Game URL: ' + initState['url']
         write(initState)
 
     def on_update(self, *args):
@@ -53,7 +55,7 @@ class GameNamespace(BaseNamespace):
 
     def on_moveResponse(self, *args):
         resp = args[0]
-        if not resp: write(json.dumps({'error': 'fail'}))
+        if resp: write(json.dumps({'error': resp}))
 
     def on_end(self, *args):
         scores = args[0]
@@ -90,17 +92,19 @@ def main():
             try:
                 args = raw_input().split(' ')
             except:
-                # Script died or game is over
                 exit()
 
-            socket.emit('move', {
-                'block': int(args[0]),
-                'rotation': int(args[1]),
-                'pos': {
-                    'x': int(args[2]),
-                    'y': int(args[3])
-                }
-            })
+            if args[0] == 'DEBUG':
+                print ' '.join(args[1:])
+            else:
+                socket.emit('move', {
+                    'block': int(args[0]),
+                    'rotation': int(args[1]),
+                    'pos': {
+                        'x': int(args[2]),
+                        'y': int(args[3])
+                    }
+                })
 
     threading.Thread(target=get_input).start()
     socket.wait()

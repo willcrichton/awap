@@ -164,8 +164,8 @@ var init = (function() {
     });
 
     ws.on('moveResponse', function(resp) {
-        if (!resp) {
-            alert('Invalid move or not your turn.');
+        if (resp) {
+            alert(resp);
         }
     });
 

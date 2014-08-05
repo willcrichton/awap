@@ -1,17 +1,14 @@
-/////////////////////////////////////////////////////////////////////////
-// SBR SERVER: Responsible for creating, managing, and verifying games //
-/////////////////////////////////////////////////////////////////////////
+/***********************************************************************
+ * SBR SERVER: Responsible for creating, managing, and verifying games *
+ ***********************************************************************/
 
 /* GENERAL TODO: 
  *   SERVER
- *   - give more informative errors when we get invalid moves
  *   - verify matchmaking + lobbying works on scale
  *   - determine why bots[this.teamId].kill() doesn't actually kill process
- *   - fix fast games with new bot system
  *   
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
- *  - send debug messages from game to client
  */
 
 var nodestatic = require('node-static');
@@ -201,7 +198,7 @@ var Game = function(players, fast) {
     this.board = new Board();
     this.over = false;
     this.fast = fast;
-    this.gameId = crypto.randomBytes(20).toString('hex'); //unique ID
+    this.gameId = crypto.randomBytes(8).toString('hex'); //unique ID
 
     // Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
@@ -251,29 +248,32 @@ Game.prototype = {
         return newBlock;
     },
 
+    // returns false if no error, string if error
     doMove: function(pl, move) {
 
-        // TODO: informative errors
         // Check for invalid or out of turn moves.
-        if (this.turn != pl.number ||
-            move.block === undefined || move.pos === undefined || move.rotation === undefined ||
+        if (this.turn != pl.number) { return 'not your turn'; }
+        if (move.block === undefined || move.pos === undefined || move.rotation === undefined ||
             move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
             move.block >= pl.blocks.length || move.rotation < 0 || move.rotation > 3) 
         { 
-            return false; 
+            return 'malformatted move ' + JSON.stringify(move);
         }
 
         // Properly rotate old block. (Maybe this should be a function)
         var newBlock = this.rotateBlock(pl.blocks[move.block], move.rotation);
 
-        if (!this.board.placeBlock(pl.number, newBlock, move.pos)) return false;        
+        if (!this.board.placeBlock(pl.number, newBlock, move.pos)) {
+            return 'illegal move ' + JSON.stringify(move);
+        }
+
         pl.blocks.splice(move.block, 1);
 
         this.updateCanMove();
         if (this.checkIsOver()) {
             this.getRoom().emit('update', this.clientState());
             this.quit();
-            return;
+            return false;
         }
 
         do {
@@ -287,7 +287,7 @@ Game.prototype = {
         this.clearTimer();
         this.setTimer();
 
-        return true;
+        return false;
     },
 
     getRoom: function() {
@@ -361,7 +361,8 @@ Game.prototype = {
         return {
             blocks: this.players.map(function(p){ return p.blocks; }),
             board: this.board,
-            turn: this.turn
+            turn: this.turn,
+            url: 'http://localhost:8080/game.html#' + this.gameId // TODO: change this on prod
         }
     },
 

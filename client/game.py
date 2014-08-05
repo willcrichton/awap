@@ -1,5 +1,5 @@
 ##############################################################################
-# Game.py - Responsible for generating moves to give to client.py            #
+# game.py - Responsible for generating moves to give to client.py            #
 # Moves via stdout in the form of "# # # #" (block index, # rotations, x, y) #
 # Important function is find_move, which should contain the main AI          #
 ##############################################################################
@@ -108,9 +108,12 @@ class Game:
 
     # updates local variables with state from the server
     def interpret_data(self, args, game):
-        if 'error' in args: return # TODO: notify about error state
+        if 'error' in args: 
+            debug('Error: ' + args['error'])
+            return
 
-        if 'number' in args: self.my_number = args['number']
+        if 'number' in args: 
+            self.my_number = args['number']
 
         if 'board' in args: 
             self.dimension = args['board']['dimension']
@@ -133,6 +136,9 @@ def get_state():
 def send_command(message):
     print message
     sys.stdout.flush()
+
+def debug(message):
+    send_command('DEBUG ' + str(message))
 
 def main():
     game = Game(get_state())
