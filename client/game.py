@@ -42,7 +42,7 @@ class Game:
     turn = -1
 
     def __init__(self, args):
-        self.interpret_data(args, False)
+        self.interpret_data(args)
 
     # find_move is your place to start. When it's your turn,
     # find_move will be called and you must return where to go.
@@ -107,7 +107,7 @@ class Game:
         return [offset.rotate(num_rotations) for offset in block]
 
     # updates local variables with state from the server
-    def interpret_data(self, args, game):
+    def interpret_data(self, args):
         if 'error' in args: 
             debug('Error: ' + args['error'])
             return
@@ -125,7 +125,7 @@ class Game:
                 self.blocks[index] = [Point(offset) for offset in block]
 
         if (('move' in args) and (args['move'] == 1)):
-            send_command(" ".join(str(x) for x in game.find_move()))
+            send_command(" ".join(str(x) for x in self.find_move()))
 
     def is_my_turn(self):
         return self.turn == self.my_number
@@ -144,7 +144,7 @@ def main():
     game = Game(get_state())
 
     while True:
-        game.interpret_data(get_state(), game)
+        game.interpret_data(get_state())
 
 if __name__ == "__main__":
     main()
