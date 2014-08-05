@@ -6,7 +6,8 @@
  *   SERVER
  *   - give more informative errors when we get invalid moves
  *   - verify matchmaking + lobbying works on scale
- *   - allow multiple tests (bot_1, ...) at once
+ *   - determine why bots[this.teamId].kill() doesn't actually kill process
+ *   - fix fast games with new bot system
  *   
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
@@ -19,19 +20,18 @@ var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
-var testing = true;
 
 var TEAMS = {
     'will'  : 'Will Crichton',
     'test'  : 'Anonymous',
-    'bot_1' : 'Bot 1',
-    'bot_2' : 'Bot 2',
-    'bot_3' : 'Bot 3',
-    'p1'    : 'Bill',
-    'p2'    : 'Bob',
-    'p3'    : 'Joe',
-    'p4'    : 'Ted'
 };
+
+var BOT_NAMES = [
+    'Wilbur Bot',
+    'Johnny Bot',
+    'Stanley Bot',
+    'Cassandra Bot'
+]
 
 var BLOCKS = [
     [[0, 0]], // single
@@ -98,6 +98,10 @@ Player.prototype = {
 
     quit: function(msg) {
         this.game = null;
+
+        if (this.teamId in bots) {
+            bots[this.teamId].kill();
+        }
     }
 };
 
@@ -176,6 +180,21 @@ Board.prototype = {
     }
 }
 
+function getRandomSubset(set, length) {
+    var ids = [];
+    for (var i = 0; i < length; i++) {
+        while (true) {
+            var idx = Math.floor(Math.random() * set.length);
+            if (ids.indexOf(idx) < 0) {
+                ids.push(idx);
+                break;
+            }
+        }
+    }
+
+    return ids;
+}
+
 var Game = function(players, fast) {
     this.turn = 0;
     this.players = players;
@@ -186,16 +205,8 @@ var Game = function(players, fast) {
 
     // Generate a random list of Ids
     // TODO: This should be re-written to be O(n) (Fisher-Yates)
-    var blockIds = [], blocks = [];
-    for (var i = 0; i < NUM_BLOCKS; i++) {
-        while (true) {
-            var idx = Math.floor(Math.random() * BLOCKS.length);
-            if (blockIds.indexOf(idx) < 0) {
-                blockIds.push(idx);
-                break;
-            }
-        }
-    }
+    var blockIds = getRandomSubset(BLOCKS, NUM_BLOCKS);
+    var blocks = [];
 
     // Convert array blocks to x,y blocks, then sort by the above permutation
     for (var i = 0; i < NUM_BLOCKS; i++) {
@@ -457,7 +468,7 @@ function getGameById(gameId) {
 }
 
 // Gets open players, looks at planned game and starts first open game
-function startOpenGames () {
+function startOpenGames() {
     var openTeams = connectedPlayers.filter(function(player) {
         return !player.isInGame();
     }).map(function(player) {
@@ -465,9 +476,9 @@ function startOpenGames () {
     });
 
     for (var i = 0; i < plannedGames.length; i++) {
-        if(plannedGames[i].every(function(t) {return openTeams.indexOf(t) >= 0; })) {
-            console.log(plannedGames[i]);
-            addGame(new Game(plannedGames[i].map(getPlayerByTeam)));
+        var game = plannedGames[i];
+        if(game.players.every(function(t) {return openTeams.indexOf(t) >= 0; })) {
+            addGame(new Game(game.players.map(getPlayerByTeam), game.fast));
             plannedGames.splice(i, 1);
             break;
         }
@@ -491,62 +502,59 @@ function addGame(game) {
     io.sockets.emit('games', getCurrentGames());
 }
 
-
-// Have the server spin up the bots
-if(testing){
-    var children = []
-    children.push(childProcess.exec('../client/run.sh -t bot_1'));
-    children.push(childProcess.exec('../client/run.sh -t bot_2'));
-    children.push(childProcess.exec('../client/run.sh -t bot_3'));
-
-    process.on('exit', function() {
-        children.forEach(function(child) {
+function createBots(numBots) {
+    var names = getRandomSubset(BOT_NAMES, numBots);
+    var botIds = [];
+    for (var i = 0; i < numBots; i++) {
+        var botId = 'bot_' + crypto.randomBytes(4).toString('hex');
+        var child = childProcess.exec('../client/run.sh -t ' + botId);
+        process.on('exit', function() {
             child.kill();
         });
-    });
-}
+        
+        bots[botId] = child;
+        TEAMS[botId] = BOT_NAMES[names[i]];
+        botIds.push(botId);
+    }
 
+    return botIds;
+}
 
 // Basic server functionality
 var games = []; // List of all games, not just running games
 var connectedPlayers = []; // All players who are connected
 var plannedGames = [];
+var bots = {};
 
 // Generate planned games
 var filePath = path.join(__dirname + '/matches');
 var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
 matches.split("\n").forEach(function(line) {
     var players = line.split(" ");
-    plannedGames.push(players);
+    plannedGames.push({players: players, fast: false});
 });
 
-io.set("heartbeat timeout", 600); // set heartbeat timeout to 10min
+io.set('heartbeat timeout', 600); // set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
     
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); // only relevant to lobby.js
 
-    socket.on('teamId', function(tID) {
-        teamId = getUniqueTeamId(tID);
+    socket.on('clientInfo', function(args) {
+        var teamId = getUniqueTeamId(args.teamId);
         socket.player.teamId = teamId;
         console.log('Player ' + teamId + ' has joined.');
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
-        if (teamId.toLowerCase() == 'test' && getPlayerByTeam('bot_1') !== null) {
-            var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
-            players.unshift(socket.player);
-            addGame(new Game(players));
+        if (teamId.toLowerCase() == 'test' || args.fast) {
+            var bots = createBots(3);
+            bots.unshift(teamId);
+            plannedGames.push({players: bots, fast: args.fast});
         } else {
             startOpenGames();
         }
-    });
-
-    socket.on('fastGame', function() {
-        var players = ['bot_1', 'bot_2', 'bot_3'].map(getPlayerByTeam);
-        players.unshift(socket.player);
-        addGame(new Game(players, true));
     });
 
     socket.on('infoRequest', function() {

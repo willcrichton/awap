@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 #################################################################################
 # Client.py - Communicates with server via socketIO and AI via stdin/stdout
 # Gets moves via stdin in the form of "# # # #" (block index, # rotations, x, y)
@@ -16,6 +14,7 @@ import fileinput
 import threading
 import json
 
+# TODO: update this for competition
 SOCKET_HOST = '127.0.0.1'
 SOCKET_PORT = 8080
 
@@ -35,10 +34,10 @@ def write(message):
 class GameNamespace(BaseNamespace):
     def on_connect(self, *args):
         print 'Connected to server'
-        if is_fast:
-            self.emit('fastGame')
-        else:
-            self.emit('teamId', team_id)
+        self.emit('clientInfo', {
+            'teamId' : team_id,
+            'fast'   : is_fast
+        })
     
     def on_setup(self, *args):
         initState = args[0]

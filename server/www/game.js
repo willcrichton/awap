@@ -200,7 +200,10 @@ var init = (function() {
         if (hash != '') {
             ws.emit('spectate', hash);
         } else {
-            ws.emit('teamId', 'test');
+            ws.emit('clientInfo', {
+                teamId: 'test',
+                fast: false
+            });
         }
     });
 });
