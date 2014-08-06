@@ -54,7 +54,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = 1; //BLOCKS.length;
+var NUM_BLOCKS = BLOCKS.length;
 
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
@@ -340,7 +340,7 @@ Game.prototype = {
             do {
                 this.turn = (this.turn + 1) % this.players.length;   
             } while (!this.players[this.turn].canMove)
-
+            
             this.getRoom().emit('update', this.clientState());
             this.sendMoveRequest();
             this.clearTimer();
@@ -509,9 +509,6 @@ function createBots(numBots) {
     for (var i = 0; i < numBots; i++) {
         var botId = 'bot_' + crypto.randomBytes(4).toString('hex');
         var child = childProcess.exec('../client/run.sh -t ' + botId);
-        process.on('exit', function() {
-            child.kill();
-        });
         
         bots[botId] = child;
         TEAMS[botId] = BOT_NAMES[names[i]];
@@ -526,6 +523,12 @@ var games = []; // List of all games, not just running games
 var connectedPlayers = []; // All players who are connected
 var plannedGames = [];
 var bots = {};
+
+process.on('exit', function() {
+    for (botId in bots) {
+        bots[botId].kill();
+    }
+});
 
 // Generate planned games
 var filePath = path.join(__dirname + '/matches');
