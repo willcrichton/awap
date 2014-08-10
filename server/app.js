@@ -2,11 +2,11 @@
  * SBR SERVER: Responsible for creating, managing, and verifying games *
  ***********************************************************************/
 
-/* GENERAL TODO: 
+/* GENERAL TODO:
  *   SERVER
  *   - verify matchmaking + lobbying works on scale
  *   - determine why bots[this.teamId].kill() doesn't actually kill process
- *   
+ *
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
  */
@@ -104,8 +104,8 @@ Player.prototype = {
 
 //Board is 2d array with -1 for no block and a players number for their block
 var Board = function() {
-    this.dimension = 20; //Square board is assumed 
-    this.grid = []; 
+    this.dimension = 20; //Square board is assumed
+    this.grid = [];
 
     // populate the board with empty values
     for (var i = 0; i < this.dimension; i++) {
@@ -137,7 +137,7 @@ Board.prototype = {
             if (x >= this.dimension || x < 0 ||
                 y >= this.dimension || y < 0 ||
                 this.grid[x][y] >= 0 ||
-                (x > 0 && this.grid[x - 1][y] == plNum) || 
+                (x > 0 && this.grid[x - 1][y] == plNum) ||
                 (y > 0 && this.grid[x][y - 1] == plNum) ||
                 (x < N && this.grid[x + 1][y] == plNum) ||
                 (y < N && this.grid[x][y + 1] == plNum))
@@ -159,10 +159,10 @@ Board.prototype = {
 
         // ensure that placed block is on the corner of another block players owns
         if (!onAbsCorner && !onRelCorner) return false;
-        
+
         return true;
     },
-    
+
     placeBlock: function(plNum, block, point) {
         if (!this.canPlaceBlock(plNum, block, point)) {
             return false;
@@ -254,9 +254,9 @@ Game.prototype = {
         // Check for invalid or out of turn moves.
         if (this.turn != pl.number) { return 'not your turn'; }
         if (move.block === undefined || move.pos === undefined || move.rotation === undefined ||
-            move.pos.x === undefined || move.pos.y === undefined || move.block < 0 || 
-            move.block >= pl.blocks.length || move.rotation < 0 || move.rotation > 3) 
-        { 
+            move.pos.x === undefined || move.pos.y === undefined || move.block < 0 ||
+            move.block >= pl.blocks.length || move.rotation < 0 || move.rotation > 3)
+        {
             return 'malformatted move ' + JSON.stringify(move);
         }
 
@@ -277,12 +277,12 @@ Game.prototype = {
         }
 
         do {
-            this.turn = (this.turn + 1) % this.players.length;   
+            this.turn = (this.turn + 1) % this.players.length;
         } while (!this.players[this.turn].canMove);
 
         this.getRoom().emit('update', this.clientState());
         this.sendMoveRequest();//Ask the next player for their move
-        
+
         // Clear the last players timer and set the current players timer
         this.clearTimer();
         this.setTimer();
@@ -305,7 +305,7 @@ Game.prototype = {
             to_print.push(player.teamId + ': ' + scores[idx])
             player.quit();
         });
-        
+
         if (!this.fast) {
             fs.appendFileSync('scores', to_print.join(', ') + "\n");
         }
@@ -337,10 +337,13 @@ Game.prototype = {
         if (this.checkIsOver()) {
             this.quit();
         } else {
+            var oldTurn = this.turn;
             do {
-                this.turn = (this.turn + 1) % this.players.length;   
+                this.turn = (this.turn + 1) % this.players.length;
             } while (!this.players[this.turn].canMove)
-            
+
+            if (this.turn == oldTurn) return;
+
             this.getRoom().emit('update', this.clientState());
             this.sendMoveRequest();
             this.clearTimer();
@@ -412,7 +415,7 @@ Game.prototype = {
                 player.canMove = false;
                 return;
             }
-            
+
             for (var b = 0; b < blocks.length; b++) {
                 for (var rot = 0; rot < 4; rot++) {
                     var block = this.rotateBlock(blocks[b], rot);
@@ -509,7 +512,7 @@ function createBots(numBots) {
     for (var i = 0; i < numBots; i++) {
         var botId = 'bot_' + crypto.randomBytes(4).toString('hex');
         var child = childProcess.exec('../client/run.sh -t ' + botId);
-        
+
         bots[botId] = child;
         TEAMS[botId] = BOT_NAMES[names[i]];
         botIds.push(botId);
@@ -541,7 +544,7 @@ matches.split("\n").forEach(function(line) {
 io.set('heartbeat timeout', 600); // set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
-    
+
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); // only relevant to lobby.js
 
@@ -601,7 +604,3 @@ io.sockets.on('connection', function (socket) {
         }
     });
 });
-
-
-
-
