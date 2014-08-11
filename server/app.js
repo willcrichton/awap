@@ -268,6 +268,8 @@ Game.prototype = {
         }
 
         pl.blocks.splice(move.block, 1);
+        
+        this.getRoom().emit('update', this.clientState());
 
         this.updateCanMove();
         if (this.checkIsOver()) {
@@ -280,12 +282,11 @@ Game.prototype = {
             this.turn = (this.turn + 1) % this.players.length;
         } while (!this.players[this.turn].canMove);
 
-        this.getRoom().emit('update', this.clientState());
-        this.sendMoveRequest();//Ask the next player for their move
-
         // Clear the last players timer and set the current players timer
         this.clearTimer();
         this.setTimer();
+
+        this.sendMoveRequest();//Ask the next player for their move
 
         return false;
     },
@@ -297,6 +298,7 @@ Game.prototype = {
     quit: function() {
         if (this.over) return;
         this.over = true;
+        this.clearTimer();
 
         var scores = this.getScores();
         var to_print = []
