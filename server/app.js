@@ -197,6 +197,7 @@ var Game = function(players, fast) {
     this.players = players;
     this.board = new Board();
     this.over = false;
+    this.started = false;
     this.fast = fast;
     this.gameId = crypto.randomBytes(8).toString('hex'); //unique ID
 
@@ -268,7 +269,7 @@ Game.prototype = {
         }
 
         pl.blocks.splice(move.block, 1);
-        
+
         this.getRoom().emit('update', this.clientState());
 
         this.updateCanMove();
@@ -330,6 +331,7 @@ Game.prototype = {
 
     // Sends a request for a move to the current player
     sendMoveRequest: function(){
+        this.started = true;
         currplayer = this.players[this.turn];
         setTimeout(function(){ currplayer.socket.emit('moveRequest', {move: 1}); }, this.fast ? 0 : DELAY_BETWEEN_TURNS);
     },
@@ -601,7 +603,9 @@ io.sockets.on('connection', function (socket) {
         if (game.over) {
             socket.emit('end', game.getScores());
         } else {
-            game.sendMoveRequest(); // start the game once there is a spectator
+            if (!game.started) {
+                game.sendMoveRequest(); // start the game once there is a spectator
+            }
             game.sendSetup(socket.player);
         }
     });
