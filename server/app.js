@@ -5,7 +5,6 @@
 /* GENERAL TODO:
  *   SERVER
  *   - verify matchmaking + lobbying works on scale
- *   - determine why bots[this.teamId].kill() doesn't actually kill process
  *
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
@@ -560,9 +559,9 @@ io.sockets.on('connection', function (socket) {
 
         // Matching code - Needs fixing
         if (teamId.toLowerCase() == 'test' || args.fast) {
-            var bots = createBots(3);
-            bots.unshift(teamId);
-            plannedGames.push({players: bots, fast: args.fast});
+            var testers = createBots(3);
+            testers.unshift(teamId);
+            plannedGames.push({players: testers, fast: args.fast});
         } else {
             startOpenGames();
         }

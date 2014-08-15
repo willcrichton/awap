@@ -7,6 +7,8 @@ RUN_AI2="python ../client/game.py"
 TEAM_ID="test"
 FAST=0
 
+trap "pkill -P $$" SIGTERM SIGKILL EXIT
+
 while getopts "ft:" option;
 do
     case $option in
@@ -17,7 +19,8 @@ done
 
 if [ -f client.py ]
 then
-	python client.py "$RUN_AI" $TEAM_ID $FAST
+	python client.py "$RUN_AI" $TEAM_ID $FAST &
 else
-	python ../client/client.py "$RUN_AI2" $TEAM_ID $FAST
+	python ../client/client.py "$RUN_AI2" $TEAM_ID $FAST &
 fi
+wait
