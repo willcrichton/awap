@@ -62,8 +62,18 @@ var DELAY_BETWEEN_TURNS = 300;
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
 var server = express();
-var auth = express.basicAuth('user', 'password12345'); // pro security
+var auth = express.basicAuth('awap', 'algorithms'); // pro security
 server.get('/admin*', auth, function(req, res) {
+    req.addListener('end', function() {
+        fileserver.serve(req, res);
+    }).resume();
+});
+server.get('/index.html', auth, function(req, res) {
+    req.addListener('end', function() {
+        fileserver.serve(req, res);
+    }).resume();
+});
+server.get('/game.html*', auth, function(req, res) {
     req.addListener('end', function() {
         fileserver.serve(req, res);
     }).resume();
