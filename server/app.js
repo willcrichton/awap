@@ -283,7 +283,6 @@ Game.prototype = {
 
         this.updateCanMove();
         if (this.checkIsOver()) {
-            this.getRoom().emit('update', this.clientState());
             this.quit();
             return false;
         }

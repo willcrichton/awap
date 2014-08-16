@@ -1,5 +1,3 @@
-Sorry for the uncommented code
-
 To use, please alter the constants in the file for the number of teams (numPlayers)
 and the number of total matches wanted (numGames). Please do not try to schedule more than
 floor((n^2 - n)/15) matches unless you plan on letting it run for a REALLY
