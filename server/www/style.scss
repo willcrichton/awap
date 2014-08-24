@@ -102,6 +102,14 @@ $light: 40%;
         border-bottom: 1px solid black;
     }
 
+    $bonuswidth: 3px;
+    .bonus{
+      border: $bonuswidth solid orange; 
+      height: $tileSize - 2*$bonuswidth;
+      text-align: center;
+      padding-top: 2px;
+    }
+
     $bwidth: 5px;    
     .corner {
         position: absolute;

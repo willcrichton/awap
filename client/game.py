@@ -37,6 +37,7 @@ class Point:
 class Game:
     blocks = []
     grid = []
+    bonus_squares = []
     my_number = -1
     dimension = -1 # Board is assumed to be square
     turn = -1
@@ -123,6 +124,9 @@ class Game:
 
             for index, block in enumerate(self.blocks):
                 self.blocks[index] = [Point(offset) for offset in block]
+
+        if 'bonus_squares' in args: 
+            self.bonus_squares = args['bonus_squares']
 
         if (('move' in args) and (args['move'] == 1)):
             send_command(" ".join(str(x) for x in self.find_move()))

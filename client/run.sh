@@ -7,7 +7,7 @@ RUN_AI2="python ../client/game.py"
 TEAM_ID="test"
 FAST=0
 
-trap "pkill -P $$" SIGTERM
+trap "pkill -P $$" SIGTERM SIGKILL EXIT
 
 while getopts "ft:" option;
 do

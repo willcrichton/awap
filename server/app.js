@@ -27,7 +27,15 @@ var BOT_NAMES = [
     'Johnny Bot',
     'Stanley Bot',
     'Cassandra Bot'
-]
+];
+
+//In the form of x,y,value.
+var BONUS_SQUARES = [
+    [ 1,  1, 100],
+    [18, 18, 100],
+    [ 1, 18, 100],
+    [18,  1, 100]
+];
 
 var BLOCKS = [
     [[0, 0]], // single
@@ -55,7 +63,7 @@ var BLOCKS = [
 
 var NUM_BLOCKS = BLOCKS.length;
 
-var TURN_LENGTH = 5000;
+var TURN_LENGTH = 50000;
 var DELAY_BETWEEN_TURNS = 300;
 
 //use express to protect admin page
@@ -115,14 +123,21 @@ Player.prototype = {
 var Board = function() {
     this.dimension = 20; //Square board is assumed
     this.grid = [];
+    this.pointsGrid = [];
+    this.bonus_squares = BONUS_SQUARES;
 
     // populate the board with empty values
     for (var i = 0; i < this.dimension; i++) {
         this.grid[i] = [];
+        this.pointsGrid[i] = [];
         for (var j = 0; j < this.dimension; j++) {
             this.grid[i][j] = -1;
+            this.pointsGrid[i][j] = 1;
         }
     }
+    for (var i = 0; i < BONUS_SQUARES.length; i++) {
+        this.pointsGrid[BONUS_SQUARES[i][0]][BONUS_SQUARES[i][1]] = BONUS_SQUARES[i][2];
+    };
 };
 
 Board.prototype = {
@@ -385,6 +400,7 @@ Game.prototype = {
         var number = this.players.indexOf(player);
         var state = this.clientState();
         state.number = number;
+        state.bonus_squares = this.board.bonus_squares;
 
         player.game = this;
         player.number = number;
@@ -394,10 +410,11 @@ Game.prototype = {
 
     getScore: function(player) {
         // gets the number of squares on the board that belong to the player
-        numSquares = this.board.grid.reduce(function(s1, xs) {
-            return s1 + xs.reduce(function(s2, x) {
+        pointBoard = this.board.pointsGrid;
+        numSquares = this.board.grid.reduce(function(s1, xs, col) {
+            return s1 + xs.reduce(function(s2, x, row) {
                 if (x == player.number) {
-                    return s2+1;
+                    return s2+this.pointBoard[row][col];
                 } else{
                     return s2;
                 };
@@ -567,7 +584,7 @@ io.sockets.on('connection', function (socket) {
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
-        if (teamId.toLowerCase() == 'test' || args.fast) {
+        if (teamId.toLowerCase().slice(0,5) == 'test' || args.fast) {
             var testers = createBots(3);
             testers.unshift(teamId);
             plannedGames.push({players: testers, fast: args.fast});

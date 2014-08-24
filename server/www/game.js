@@ -1,6 +1,6 @@
 var init = (function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+(location.port ? (':'+location.port) : ''));
-    var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
+    var blocks, bonus_squares, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
     
     function getTile(x, y) {
         return $('.tile.' + x + 'x' + y);
@@ -109,6 +109,7 @@ var init = (function() {
     ws.on('setup', function(state) {
         blocks = state.blocks;
         board = state.board;
+        bonus_squares = state.bonus_squares;
         myNum = state.number;
         turn = state.turn;
 
@@ -140,6 +141,9 @@ var init = (function() {
                     getTile(x, y).addClass('p' + board.grid[x][y]);
                 }
             }
+        }
+        for (var i = 0; i < bonus_squares.length; i++) {
+            getTile(bonus_squares[i][0], bonus_squares[i][1]).html("<div class='bonus'>B</div>");
         }
 
         var $tiles = $('#board .tile');
@@ -207,6 +211,11 @@ var init = (function() {
         }
     });
 });
+
+function showBoard(){
+    $('#scores, #waiting').hide();
+    $('#board, #blocks').show();
+}
 
 $(window).load(function() {
     var count = 1;

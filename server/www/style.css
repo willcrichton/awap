@@ -9,6 +9,13 @@ body {
 td {
   padding: 2px; }
 
+.bonus{
+  border: 3px solid orange; 
+  height: 24px;
+  text-align: center;
+  padding-top: 2px;
+}
+
 #container {
   padding: 10px;
   width: 1160px;
