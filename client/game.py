@@ -83,7 +83,7 @@ class Game:
             x = p.x
             y = p.y
             
-            if (x > N or x < 0 or y > N or y < 0 or self.grid[x][y] >= 0 or
+            if (x > N or x < 0 or y > N or y < 0 or self.grid[x][y] != -1 or
                 (x > 0 and self.grid[x - 1][y] == self.my_number) or
                 (y > 0 and self.grid[x][y - 1] == self.my_number) or
                 (x < N and self.grid[x + 1][y] == self.my_number) or

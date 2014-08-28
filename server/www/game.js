@@ -140,6 +140,9 @@ var init = (function() {
                 if (board.grid[x][y] >= 0) {
                     getTile(x, y).addClass('p' + board.grid[x][y]);
                 }
+                if (board.grid[x][y] == -2) {
+                    getTile(x, y).addClass('blocked');
+                }
             }
         }
         for (var i = 0; i < bonus_squares.length; i++) {

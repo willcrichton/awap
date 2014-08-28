@@ -1,7 +1,7 @@
 import itertools
 import random
-numPlayers = 50 #number of teams competing
-numGames = 150 #number of total games to be played
+numPlayers = 40 #number of teams competing
+numGames = 99 #number of total games to be played
 
 #create every possible game and then shuffle it for even probability
 comb = list(itertools.combinations(xrange(1,numPlayers+1), 4))
@@ -80,11 +80,14 @@ def output_answer(answer):
 def output_dot_file(answer):
     fo = open("matches.dot", "w")
     fo.write("graph matches {\n")
+    hue = 0
     for game in answer:
         (a,b,c,d) = game #represent the game as the 6 edges it creates
         edges = [(a,b),(a,c),(a,d),(b,c),(b,d),(c,d)]
         for edge in edges:
+            fo.write("edge [color= \"" + str(hue) + " 0.8 0.8\"];\n");
             fo.write("    " + str(edge[0]) + " -- " + str(edge[1]) +";\n")
+        hue+=0.01
     fo.write("}")
     fo.close()    
 

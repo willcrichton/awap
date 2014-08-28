@@ -29,12 +29,24 @@ var BOT_NAMES = [
     'Cassandra Bot'
 ];
 
-//In the form of x,y,value.
+//In the form of [x, y, value].
 var BONUS_SQUARES = [
     [ 1,  1, 100],
     [18, 18, 100],
     [ 1, 18, 100],
     [18,  1, 100]
+];
+
+var BLOCKED_SQUARES = [
+    [17,  1],
+    [ 1, 17],
+    [17, 17],
+    [ 2, 16],
+    [16,  2],
+    [16, 16],
+    [ 3, 15],
+    [15,  3],
+    [15, 15]
 ];
 
 var BLOCKS = [
@@ -63,7 +75,7 @@ var BLOCKS = [
 
 var NUM_BLOCKS = BLOCKS.length;
 
-var TURN_LENGTH = 50000;
+var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
 
 //use express to protect admin page
@@ -137,7 +149,10 @@ var Board = function() {
     }
     for (var i = 0; i < BONUS_SQUARES.length; i++) {
         this.pointsGrid[BONUS_SQUARES[i][0]][BONUS_SQUARES[i][1]] = BONUS_SQUARES[i][2];
-    };
+    }
+    for (var i = 0; i < BLOCKED_SQUARES.length; i++) {
+        this.grid[BLOCKED_SQUARES[i][0]][BLOCKED_SQUARES[i][1]] = -2;
+    }
 };
 
 Board.prototype = {
@@ -160,7 +175,7 @@ Board.prototype = {
             // Check bounds and illegal plays
             if (x >= this.dimension || x < 0 ||
                 y >= this.dimension || y < 0 ||
-                this.grid[x][y] >= 0 ||
+                this.grid[x][y] != -1 ||
                 (x > 0 && this.grid[x - 1][y] == plNum) ||
                 (y > 0 && this.grid[x][y - 1] == plNum) ||
                 (x < N && this.grid[x + 1][y] == plNum) ||

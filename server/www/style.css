@@ -16,6 +16,10 @@ td {
   padding-top: 2px;
 }
 
+.blocked{
+  background-color: black;
+}
+
 #container {
   padding: 10px;
   width: 1160px;
