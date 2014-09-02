@@ -2,8 +2,8 @@
 
 # TODO: remove the AI2 logic when we get server set up
 
-RUN_AI="python game.py"
-RUN_AI2="python ../client/game.py"
+RUN_AI="python python/game.py"
+RUN_AI2="python ../client/python/game.py"
 TEAM_ID="test"
 FAST=0
 
