@@ -607,6 +607,15 @@ io.sockets.on('connection', function (socket) {
             startOpenGames();
         }
     });
+    
+    socket.on('newGame', function(teams) {
+        numBots = 4 - teams.length;
+        var testers = createBots(numBots);
+        teams = teams.concat(testers);
+        plannedGames.push({players: teams, fast: false});
+        console.log("added game with: " + teams.join(', '));
+        startOpenGames();
+    });
 
     socket.on('infoRequest', function() {
         socket.emit('returnInfo',{
