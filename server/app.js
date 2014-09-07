@@ -80,7 +80,7 @@ var DELAY_BETWEEN_TURNS = 300;
 
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
-var server = express();
+var server = express(8080);
 var auth = express.basicAuth('awap', 'algorithms'); // pro security
 server.get('/admin*', auth, function(req, res) {
     req.addListener('end', function() {
@@ -415,7 +415,7 @@ Game.prototype = {
         var number = this.players.indexOf(player);
         var state = this.clientState();
         state.number = number;
-        state.bonus_squares = this.board.bonus_squares;
+        state.bonusSquares = this.board.bonus_squares;
 
         player.game = this;
         player.number = number;

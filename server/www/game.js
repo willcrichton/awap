@@ -1,11 +1,11 @@
 var init = (function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+(location.port ? (':'+location.port) : ''));
     var blocks, bonus_squares, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
-    
+
     function getTile(x, y) {
         return $('.tile.' + x + 'x' + y);
     }
-    
+
     function rotate(block) {
         if (rotation === 0) return block;
 
@@ -15,7 +15,7 @@ var init = (function() {
             if (rotation === 1) {
                 newBlock[i] = {x: -cy, y: cx};
             } else if (rotation === 2) {
-                newBlock[i] = {x: -cx, y: -cy};            
+                newBlock[i] = {x: -cx, y: -cy};
             } else if (rotation === 3) {
                 newBlock[i] = {x: cy, y: -cx};
             }
@@ -48,25 +48,25 @@ var init = (function() {
                 var block = blocks[i][j], $block = $('<div class="block"></div>');
                 $block.data('index', j);
                 $group.append($block);
-                
+
                 var maxX = 0, maxY = 0, minX = 0, minY = 0;
                 for (var k = 0; k < block.length; k++) {
                     var $tile = $('<div class="tile p' + i + '"></div>');
                     $block.append($tile);
-                    
+
                     var dim = $tile.width();
                     $tile.css({
                         left: dim * block[k].x,
                         top: dim * block[k].y
                     });
-                    
+
                     maxX = Math.max(maxX, block[k].x);
                     maxY = Math.max(maxY, block[k].y);
-                    
+
                     minX = Math.min(minX, block[k].x);
                     minY = Math.min(minY, block[k].y);
                 }
-                
+
                 var tileDim = $block.find('.tile').width();
                 $block.css({
                     width: (1 + maxX - minX) * tileDim,
@@ -74,7 +74,7 @@ var init = (function() {
                     left: -minX * tileDim,
                     top: -minY * tileDim
                 });
-                
+
                 maxHeight = Math.max(maxHeight, $block.height() - minY * tileDim);
             }
         }
@@ -97,11 +97,11 @@ var init = (function() {
     $(document).keyup(function(e) {
         var key = e.which;
 
-        if (key == 32) { 
+        if (key == 32) {
             e.preventDefault();
 
             highlightBlock(false);
-            rotation = (rotation + 1) % 4; 
+            rotation = (rotation + 1) % 4;
             highlightBlock(true);
         }
     });
@@ -109,7 +109,7 @@ var init = (function() {
     ws.on('setup', function(state) {
         blocks = state.blocks;
         board = state.board;
-        bonus_squares = state.bonus_squares;
+        bonus_squares = state.bonusSquares;
         myNum = state.number;
         turn = state.turn;
 
@@ -121,7 +121,7 @@ var init = (function() {
         var $board = $('#board');
         $board.html('');
 
-        for (var i = 0; i < state.blocks.length; i++) { 
+        for (var i = 0; i < state.blocks.length; i++) {
             $board.append('<div class="corner"></div>');
         }
 
@@ -164,7 +164,7 @@ var init = (function() {
                 pos: pos
             });
         });
-        
+
         updateBlockList();
 
         $board.append('<div class="clear"></div>');
