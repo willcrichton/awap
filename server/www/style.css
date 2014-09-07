@@ -9,17 +9,6 @@ body {
 td {
   padding: 2px; }
 
-.bonus{
-  border: 3px solid orange; 
-  height: 24px;
-  text-align: center;
-  padding-top: 2px;
-}
-
-.blocked{
-  background-color: black;
-}
-
 #container {
   padding: 10px;
   width: 1160px;
@@ -38,6 +27,9 @@ td {
   height: 50px;
   font-size: 36px; }
 
+.blocked {
+  background-color: black; }
+
 .p0 .tile.hover {
   background: #ffcccc; }
 
@@ -53,7 +45,7 @@ td {
 .spectate .tile.p0, .p0 .tile.p0, .p1 .tile.p0, .p2 .tile.p0, .p3 .tile.p0 {
   background: red; }
 .spectate .tile.p1, .p0 .tile.p1, .p1 .tile.p1, .p2 .tile.p1, .p3 .tile.p1 {
-  background: #eeee1a; }
+  background: #EEEE1A; }
 .spectate .tile.p2, .p0 .tile.p2, .p1 .tile.p2, .p2 .tile.p2, .p3 .tile.p2 {
   background: green; }
 .spectate .tile.p3, .p0 .tile.p3, .p1 .tile.p3, .p2 .tile.p3, .p3 .tile.p3 {
@@ -100,6 +92,11 @@ td {
     height: 32px;
     border-right: 1px solid black;
     border-bottom: 1px solid black; }
+  #board .bonus {
+    border: 3px solid orange;
+    height: 26px;
+    text-align: center;
+    padding-top: 2px; }
   #board .corner {
     position: absolute;
     z-index: -1;
@@ -111,8 +108,8 @@ td {
     top: -6px;
     left: -6px; }
   #board .corner:nth-child(2) {
-    border-top: 5px solid #eeee1a;
-    border-right: 5px solid #eeee1a;
+    border-top: 5px solid #EEEE1A;
+    border-right: 5px solid #EEEE1A;
     top: -6px;
     right: -4px; }
   #board .corner:nth-child(3) {
@@ -155,3 +152,5 @@ td {
       width: 80%; }
     #scores tr .score {
       text-align: right; }
+
+/*# sourceMappingURL=style.css.map */
