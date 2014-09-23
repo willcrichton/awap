@@ -45,21 +45,47 @@ class Game:
     dimension = -1 # Board is assumed to be square
     turn = -1
 
+    # variables for AI
+    area_enclosed = -1000000 #TODO this evil magic number will go away when my_corner exists
+    
+    block_size_weight = (lambda s, bs : bs * 10)
+    hits_bonus_weight = (lambda s, hb : 200 if hb else 0)
+    bonus_points_weight = (lambda s, bp : bp * 2)
+    delta_my_liberties_weight = (lambda s, dml : dml * 2)
+    delta_other_liberties_weight = (lambda s, dol : dol * -5)
+    area_enclosed_weight = (lambda s, ae : ae * 5)
+
     def __init__(self, args):
         self.interpret_data(args)
 
     def score_move(self, block, point):
-        score = len(block) # bigger blocks are better
+        score = 0
+        block_size = len(block) # bigger blocks are better
+        #hits_bonus = False
+        bonus_points = 0
+        area_enclosed = self.area_enclosed
 
         N = self.dimension
-        for x in range(0, N):
-            for y in range(0, N):
-                if self.grid[x][y] == self.my_number:
-                    for offset in block:
-                        score -= (point + offset).distance(Point(x, y)) * 0.05 / len(block)
+        for offset in block:
+            s = point + offset
+            for bs in self.bonus_squares:
+                if s.x == bs[0] and s.y == bs[1]:
+                    bonus_points += bs[2]
+            area_enclosed = max(area_enclosed, -(s.distance(Point(N/2, N/2))))
 
-        score -= point.distance(Point(N / 2, N / 2)) * 2
-
+        self.area_enclosed = area_enclosed
+        #N = self.dimension
+        #for x in range(0, N):
+        #    for y in range(0, N):
+        #        if self.grid[x][y] == self.my_number:
+        #            for offset in block:
+        #                score -= (point + offset).distance(Point(x, y)) * 0.05 / len(block)
+        #
+        #score -= point.distance(Point(N / 2, N / 2)) * 2
+        
+        score += self.block_size_weight(block_size)
+        score += self.bonus_points_weight(bonus_points)
+        score += self.area_enclosed_weight(area_enclosed)
         return int(score)
 
     # find_move is your place to start. When it's your turn,
@@ -67,7 +93,6 @@ class Game:
     # You must return a tuple (block index, # rotations, x, y)
     def find_move(self):
         moves = []
-
         N = self.dimension
         for index, block in enumerate(self.blocks):
             for i in range(0, N * N):
