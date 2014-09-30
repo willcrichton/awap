@@ -26,7 +26,7 @@ is_fast = False
 def write(message):
     if type(message) is not str:
         message = json.dumps(message)
-    
+
     stdin_handle.write(message + "\n")
     stdin_handle.flush()
 
@@ -38,7 +38,7 @@ class GameNamespace(BaseNamespace):
             'teamId' : team_id,
             'fast'   : is_fast
         })
-    
+
     def on_setup(self, *args):
         initState = args[0]
         if not is_fast:
@@ -78,7 +78,7 @@ def main():
     global stdin_handle
     stdin_handle = pipe.stdin
     sys.stdin = pipe.stdout
-    
+
     global is_fast
     is_fast = int(args.fast) == 1
 

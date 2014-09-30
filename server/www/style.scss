@@ -4,6 +4,9 @@
 
 body {
     font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+    background: url('images/bg.jpg') no-repeat top;
+    background-size: cover;
+    color: white;
 }
 
 td {
@@ -12,8 +15,8 @@ td {
 
 #container {
     padding: 10px;
-    width: 1160px;
-    margin: 0 auto;
+    width: 1280px;
+    margin: 40px auto 0;
     overflow: auto;
 }
 
@@ -25,9 +28,10 @@ td {
     text-align: left;
     height: 50px;
     font-size: 36px;
+    color: white;
 }
 
-.blocked{
+.blocked {
   background-color: black;
 }
 
@@ -35,27 +39,37 @@ $red: red;
 $yellow: #EEEE1A;
 $green: green;
 $blue: blue;
-$light: 40%;
+$light: 20%;
 
-.p0 .tile.hover { background: lighten($red, $light); }
-.p1 .tile.hover { background: lighten($yellow, $light); }
-.p2 .tile.hover { background: lighten($green, $light); }
-.p3 .tile.hover { background: lighten($blue, $light); }
+$border: rgba(96, 183, 209, 0.5);
+
+@mixin shadow($color) {
+    box-shadow: inset 0 0 24px $color!important;
+}
+
+.p0 .tile.hover { @include shadow(lighten($red, $light)); }
+.p1 .tile.hover { @include shadow(lighten($yellow, $light)); }
+.p2 .tile.hover { @include shadow(lighten($green, $light)); }
+.p3 .tile.hover { @include shadow(lighten($blue, $light)); }
 
 .spectate, .p0, .p1, .p2, .p3 {
-    .tile.p0 { background: $red; }
-    .tile.p1 { background: $yellow; }
-    .tile.p2 { background: $green; }
-    .tile.p3 { background: $blue; }
+    .tile.p0 { background-image: url('images/red.png'); }
+    .tile.p1 { background-image: url('images/yellow.png'); }
+    .tile.p2 { background-image: url('images/green.png'); }
+    .tile.p3 { background-image: url('images/blue.png'); }
 }
 
 #blocks {
+    display: none;
     width: 480px;
     min-height: 1px;
     overflow: auto;
     float: left;
     position: relative;
     z-index: 2;
+    margin-right: 100px;
+    margin-top: 50px;
+    background: rgba(255, 255, 255, 0.4);
 
     .blockgroup {
         overflow: hidden;
@@ -63,6 +77,7 @@ $light: 40%;
         padding-top: 15px;
         padding-left: 10px;
         height: 100px;
+        padding-bottom: 15px;
     }
 
     .blockgroup:first-child {
@@ -71,7 +86,7 @@ $light: 40%;
     }
 
     .blockgroup.active {
-        background: #ffeeaa;
+        background: rgba(255, 255, 255, 0.6);
     }
 
     $tileSize: 12px;
@@ -86,35 +101,45 @@ $light: 40%;
         width: $tileSize;
         height: $tileSize;
         position: absolute;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: none;
     }
 }
 
-#board { 
+#board-wrapper {
+    float: left;
+    background: url('images/moon.png') no-repeat center center;
+    padding: 20px;
+    display: none;
+}
+
+#board {
     position: relative;
     z-index: 3;
-    border-left: 1px solid black;
-    border-top: 1px solid black;
-    float: left;
- 
-    $tileSize: 32px;
+    box-shadow: 0 0 10px $border;
+
+    $tileSize: 30px;
     .tile {
         float: left;
         cursor: pointer;
         width: $tileSize;
         height: $tileSize;
-        border-right: 1px solid black;
-        border-bottom: 1px solid black;
+        box-shadow: inset 0 0 8px $border;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: none;
     }
 
     $bonuswidth: 3px;
     .bonus{
-      border: $bonuswidth solid orange; 
       height: $tileSize - 2*$bonuswidth;
       text-align: center;
       padding-top: 2px;
+      background: url('images/bonus.png') no-repeat center center;
     }
 
-    $bwidth: 5px;    
+    $bwidth: 5px;
     .corner {
         position: absolute;
         z-index: -1;
@@ -134,7 +159,7 @@ $light: 40%;
         border-top: $border $yellow;
         border-right: $border $yellow;
         top: -$bwidth - 1;
-        right: -$bwidth + 1; 
+        right: -$bwidth + 1;
     }
 
     .corner:nth-child(3) {
@@ -158,13 +183,18 @@ $light: 40%;
     margin-left: 20px;
 }
 
+a {
+    color: white;
+}
+
 .column{
-    float: left; 
-    border: 1px solid black; 
+    float: left;
+    border: 1px solid black;
     margin-right: 10px;
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     height: 300px;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 #existingGames{
@@ -180,17 +210,23 @@ $light: 40%;
         clear: left;
         width: 100px;
         text-align: right;
+        padding-right: 10px;
+        padding-bottom: 5px;
     }
 
     input {
       display: inline-block;
       float: left;
+      padding-top: 2px;
+      padding-bottom: 2px;
     }
 }
 
 #scores {
+    color: black;
     width: 300px;
-    height: 300px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.9);
     position: absolute;
     left: 0;
     top: 0;
@@ -198,8 +234,10 @@ $light: 40%;
     bottom: 0;
     display: none;
     margin: auto;
-    
-    h1 { 
+    padding: 10px;
+    border-radius: 4px;
+
+    h1 {
         margin-bottom: 15px;
         border-bottom: 1px solid black;
         padding-bottom: 3px;
@@ -213,8 +251,8 @@ $light: 40%;
         margin-bottom: 5px;
         font-size: 24px;
 
-        .name { 
-            font-weight: bold; 
+        .name {
+            font-weight: bold;
             width: 80%;
         }
 
