@@ -5,9 +5,15 @@
 /* GENERAL TODO:
  *   SERVER
  *   - verify matchmaking + lobbying works on scale
+ *   - change bot maker to use distributor
  *
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
+ *
+ *  WEBPAGE
+ *  - when you refresh a previous game, show the board
+ *  - add a 'back to scores' from board
+ *  - add a 'back to lobby' from game
  */
 
 var nodestatic = require('node-static');
@@ -555,6 +561,8 @@ function createBots(numBots) {
     var botIds = [];
     for (var i = 0; i < numBots; i++) {
         var botId = 'bot_' + crypto.randomBytes(4).toString('hex');
+
+        // TODO: delegate this out to Brandon's distributor
         var child = childProcess.exec('../client/run.sh -t ' + botId);
 
         bots[botId] = child;
@@ -607,7 +615,7 @@ io.sockets.on('connection', function (socket) {
             startOpenGames();
         }
     });
-    
+
     socket.on('newGame', function(teams) {
         numBots = 4 - teams.length;
         var testers = createBots(numBots);

@@ -113,9 +113,8 @@ var init = (function() {
         myNum = state.number;
         turn = state.turn;
 
-        console.log(state);
-
         $('#waiting').hide();
+        showBoard();
         $(document.body).attr('class', '').addClass(myNum == -1 ? 'spectate' : ('p' + myNum));
 
         var $board = $('#board');
@@ -146,7 +145,7 @@ var init = (function() {
             }
         }
         for (var i = 0; i < bonus_squares.length; i++) {
-            getTile(bonus_squares[i][0], bonus_squares[i][1]).html("<div class='bonus'>B</div>");
+            getTile(bonus_squares[i][0], bonus_squares[i][1]).html("<div class='bonus'></div>");
         }
 
         var $tiles = $('#board .tile');
@@ -181,6 +180,8 @@ var init = (function() {
         blocks = state.blocks;
         turn = state.turn;
 
+        console.log(turn);
+
         for (var x = 0; x < board.dimension; x++) {
             for (var y = 0; y < board.dimension; y++) {
                 if (board.grid[x][y] >= 0) {
@@ -193,7 +194,7 @@ var init = (function() {
     });
 
     ws.on('end', function(scores) {
-        $('#board, #blocks, #waiting').hide();
+        $('#board-wrapper, #blocks, #waiting').hide();
         var names = ['Red', 'Yellow', 'Green', 'Blue']
         scores.forEach(function(scoreInfo) {
             $('#scores table').append('<tr><td class="name">' + scoreInfo[0] + ':</td> <td class="score">' + scoreInfo[1] + '</td></tr>');
@@ -217,7 +218,7 @@ var init = (function() {
 
 function showBoard(){
     $('#scores, #waiting').hide();
-    $('#board, #blocks').show();
+    $('#board-wrapper, #blocks').show();
 }
 
 $(window).load(function() {

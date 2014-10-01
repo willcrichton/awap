@@ -10,13 +10,16 @@ $(document).ready(function() {
         });
     });
     $("#matchButton").click(function() {
-        teams = [];
+        var teams = [];
         for (var i = 0; i < 4; i++) {
-            temp = $("input[name='teamid" + (i+1) + "']").val()
+            var $input = $("input[name='teamid" + (i+1) + "']");
+            var temp = $input.val();
             if(temp != ""){
                 teams.push(temp);
             }
+            $input.val('');
         }
+        alert('Submitted your game. TODO: make this not an alert box');
         ws.emit('newGame', teams);
     });
 });
