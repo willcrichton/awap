@@ -135,7 +135,7 @@ $border: rgba(96, 183, 209, 0.85);
     .bonus{
       height: $tileSize - 2*$bonuswidth;
       text-align: center;
-      padding-top: 2px;
+      padding-top: 6px;
       background: url('images/bonus.png') no-repeat center center;
     }
 
@@ -151,15 +151,15 @@ $border: rgba(96, 183, 209, 0.85);
     .corner:nth-child(1) {
         border-top: $border $red;
         border-left: $border $red;
-        top: -$bwidth - 1;
-        left: -$bwidth - 1;
+        top: -$bwidth;
+        left: -$bwidth;
     }
 
     .corner:nth-child(2) {
         border-top: $border $yellow;
         border-right: $border $yellow;
-        top: -$bwidth - 1;
-        right: -$bwidth + 1;
+        top: -$bwidth;
+        right: -$bwidth;
     }
 
     .corner:nth-child(3) {
@@ -173,7 +173,7 @@ $border: rgba(96, 183, 209, 0.85);
         border-bottom: $border $blue;
         border-left: $border $blue;
         bottom: -$bwidth;
-        left: -$bwidth - 1;
+        left: -$bwidth;
     }
 
     .clear { clear: both; }

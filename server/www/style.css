@@ -113,7 +113,7 @@ td {
   #board .bonus {
     height: 24px;
     text-align: center;
-    padding-top: 2px;
+    padding-top: 6px;
     background: url("images/bonus.png") no-repeat center center; }
   #board .corner {
     position: absolute;
@@ -123,13 +123,13 @@ td {
   #board .corner:nth-child(1) {
     border-top: 5px solid red;
     border-left: 5px solid red;
-    top: -6px;
-    left: -6px; }
+    top: -5px;
+    left: -5px; }
   #board .corner:nth-child(2) {
     border-top: 5px solid #EEEE1A;
     border-right: 5px solid #EEEE1A;
-    top: -6px;
-    right: -4px; }
+    top: -5px;
+    right: -5px; }
   #board .corner:nth-child(3) {
     border-bottom: 5px solid green;
     border-right: 5px solid green;
@@ -139,7 +139,7 @@ td {
     border-bottom: 5px solid blue;
     border-left: 5px solid blue;
     bottom: -5px;
-    left: -6px; }
+    left: -5px; }
   #board .clear {
     clear: both; }
 
