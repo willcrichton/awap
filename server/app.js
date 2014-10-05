@@ -86,33 +86,14 @@ var DELAY_BETWEEN_TURNS = 300;
 
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
-var server = express(8080);
-var auth = express.basicAuth('awap', 'algorithms'); // pro security
-server.get('/admin*', auth, function(req, res) {
-    req.addListener('end', function() {
-        fileserver.serve(req, res);
-    }).resume();
-});
-server.get('/index.html', auth, function(req, res) {
-    req.addListener('end', function() {
-        fileserver.serve(req, res);
-    }).resume();
-});
-server.get('/game.html*', auth, function(req, res) {
-    req.addListener('end', function() {
-        fileserver.serve(req, res);
-    }).resume();
-});
+var server = require('http').createServer(function(request, response) {
+        request.addListener('end', function() {
+                fileserver.serve(request, response);
+            }).resume();
+    });
+server.listen(8080);
 
-//catch all other requests with the static file server
-server.get('/*', function(request, response) {
-    request.addListener('end', function() {
-        fileserver.serve(request, response);
-    }).resume();
-});
-
-var ioServer = server.listen(8080);
-var io = require('socket.io').listen(ioServer, {log: false});
+var io = require('socket.io').listen(server, {log: false});
 
 var Player = function(socket) {
     this.socket = socket;
@@ -560,10 +541,11 @@ function createBots(numBots) {
     var names = getRandomSubset(BOT_NAMES, numBots);
     var botIds = [];
     for (var i = 0; i < numBots; i++) {
-        var botId = 'bot_' + crypto.randomBytes(4).toString('hex');
+        var botId = 'bot' + crypto.randomBytes(4).toString('hex');
 
         // TODO: delegate this out to Brandon's distributor
         var child = childProcess.exec('../client/run.sh -t ' + botId);
+        //var child = childProcess.exec('./client_nfg unix5.andrew.cmu.edu:9010 ' + botId);
 
         bots[botId] = child;
         TEAMS[botId] = BOT_NAMES[names[i]];

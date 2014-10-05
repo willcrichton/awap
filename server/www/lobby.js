@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var ws = io.connect(location.protocol+'//'+location.hostname+(location.port ? (':'+location.port) : ''));
+    var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
     ws.on('games', function(games) {
         var $list = $('#games');
         $list.html('');

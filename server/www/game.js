@@ -1,5 +1,5 @@
 var init = (function() {
-    var ws = io.connect(location.protocol+'//'+location.hostname+(location.port ? (':'+location.port) : ''));
+    var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
     var blocks, bonus_squares, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
 
     function getTile(x, y) {
