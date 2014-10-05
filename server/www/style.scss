@@ -32,16 +32,17 @@ td {
 }
 
 .blocked {
-  background-color: black;
+  // background-color: black;
+  background: url('images/crater.png');
 }
 
-$red: red;
-$yellow: #EEEE1A;
-$green: green;
-$blue: blue;
-$light: 20%;
+$red: rgba(240, 0, 0, 0.85);
+$yellow: rgba(230, 230, 20, 0.85);
+$green: rgba(0, 240, 0, 0.85);
+$blue: rgba(0, 0, 240, 0.85);
+$light: 10%;
 
-$border: rgba(96, 183, 209, 0.85);
+$border: rgba(75, 180, 240, 0.85);
 
 @mixin shadow($color) {
     box-shadow: inset 0 0 24px $color!important;
