@@ -41,7 +41,7 @@ $green: green;
 $blue: blue;
 $light: 20%;
 
-$border: rgba(96, 183, 209, 0.5);
+$border: rgba(96, 183, 209, 0.85);
 
 @mixin shadow($color) {
     box-shadow: inset 0 0 24px $color!important;
