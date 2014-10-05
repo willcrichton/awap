@@ -14,8 +14,7 @@ import fileinput
 import threading
 import json
 
-# TODO: update this for competition
-SOCKET_HOST = '127.0.0.1'
+SOCKET_HOST = 'game.acmalgo.com'
 SOCKET_PORT = 8080
 
 team_id = ''
