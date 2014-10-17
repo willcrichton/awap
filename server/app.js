@@ -416,7 +416,7 @@ Game.prototype = {
         var numSquares = this.board.grid.reduce(function(s1, xs, col) {
             return s1 + xs.reduce(function(s2, x, row) {
                 if (x == player.number) {
-                    return s2+this.pointBoard[row][col];
+                    return s2 + pointBoard[row][col];
                 } else {
                     return s2;
                 }
