@@ -134,10 +134,10 @@ var Board = function() {
             this.pointsGrid[i][j] = 1;
         }
     }
-    for (var i = 0; i < BONUS_SQUARES.length; i++) {
+    for (i = 0; i < BONUS_SQUARES.length; i++) {
         this.pointsGrid[BONUS_SQUARES[i][0]][BONUS_SQUARES[i][1]] = BONUS_SQUARES[i][2];
     }
-    for (var i = 0; i < BLOCKED_SQUARES.length; i++) {
+    for (i = 0; i < BLOCKED_SQUARES.length; i++) {
         this.grid[BLOCKED_SQUARES[i][0]][BLOCKED_SQUARES[i][1]] = -2;
     }
 };
@@ -149,10 +149,10 @@ Board.prototype = {
 
         // Determine which corner is player's starting corner
         switch (plNum) {
-        case 0: corner = {x: 0, y: 0}; break
-        case 1: corner = {x: N, y: 0}; break
-        case 2: corner = {x: N, y: N}; break
-        case 3: corner = {x: 0, y: N}; break
+        case 0: corner = {x: 0, y: 0}; break;
+        case 1: corner = {x: N, y: 0}; break;
+        case 2: corner = {x: N, y: N}; break;
+        case 3: corner = {x: 0, y: N}; break;
         }
 
         for (var i = 0; i < block.length; i++) {
@@ -201,7 +201,7 @@ Board.prototype = {
 
         return true;
     }
-}
+};
 
 function getRandomSubset(set, length) {
     var ids = [];
@@ -236,17 +236,17 @@ var Game = function(players, fast) {
     for (var i = 0; i < NUM_BLOCKS; i++) {
         var oldBlock = BLOCKS[blockIds[i]], newBlock = [];
         for (var j = 0; j < oldBlock.length; j++) {
-            newBlock[j] = {x: oldBlock[j][0], y: oldBlock[j][1]}
+            newBlock[j] = {x: oldBlock[j][0], y: oldBlock[j][1]};
         }
         blocks.push(newBlock);
     }
 
     // Give each player a copy of the blocks
-    for (var i = 0; i < this.players.length; i++) {
+    for (i = 0; i < this.players.length; i++) {
         this.players[i].blocks = blocks.slice(0);
     }
 
-    for (var i = 0; i < this.players.length; i++) {
+    for (i = 0; i < this.players.length; i++) {
         this.sendSetup(this.players[i]);
         this.players[i].canMove = true;
     }
@@ -255,7 +255,7 @@ var Game = function(players, fast) {
         this.sendMoveRequest();
     }
 
-    console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId]}).join(", ") + ".");
+    console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId];}).join(", ") + ".");
 };
 
 Game.prototype = {
@@ -266,10 +266,10 @@ Game.prototype = {
         for (var i = 0; i < oldBlock.length; i++) {
             var cx = oldBlock[i].x, cy = oldBlock[i].y;
             switch (rotation) {
-            case 1: newBlock[i] = {x: -cy, y: cx}; break
-            case 2: newBlock[i] = {x: -cx, y: -cy}; break
-            case 3: newBlock[i] = {x: cy, y: -cx}; break
-            default: newBlock[i] = {x: cx, y: cy}; break
+            case 1: newBlock[i] = {x: -cy, y: cx}; break;
+            case 2: newBlock[i] = {x: -cx, y: -cy}; break;
+            case 3: newBlock[i] = {x: cy, y: -cx}; break;
+            default: newBlock[i] = {x: cx, y: cy}; break;
             }
         }
         return newBlock;
@@ -327,10 +327,10 @@ Game.prototype = {
         this.clearTimer();
 
         var scores = this.getScores();
-        var to_print = []
+        var to_print = [];
         this.getRoom().emit('end', scores);
         this.players.forEach(function(player, idx) {
-            to_print.push(player.teamId + ': ' + scores[idx])
+            to_print.push(player.teamId + ': ' + scores[idx]);
             player.quit();
         });
 
@@ -357,7 +357,7 @@ Game.prototype = {
     // Sends a request for a move to the current player
     sendMoveRequest: function(){
         this.started = true;
-        currplayer = this.players[this.turn];
+        var currplayer = this.players[this.turn];
         setTimeout(function(){ currplayer.socket.emit('moveRequest', {move: 1}); }, this.fast ? 0 : DELAY_BETWEEN_TURNS);
     },
 
@@ -369,7 +369,7 @@ Game.prototype = {
             var oldTurn = this.turn;
             do {
                 this.turn = (this.turn + 1) % this.players.length;
-            } while (!this.players[this.turn].canMove)
+            } while (!this.players[this.turn].canMove);
 
             if (this.turn == oldTurn) return;
 
@@ -386,7 +386,7 @@ Game.prototype = {
             players: this.players.map(function(player) {
                 return TEAMS[player.teamId];
             })
-        }
+        };
     },
 
     clientState: function() {
@@ -395,7 +395,7 @@ Game.prototype = {
             board: this.board,
             turn: this.turn,
             url: 'http://localhost:8080/game.html#' + this.gameId // TODO: change this on prod
-        }
+        };
     },
 
     sendSetup: function(player) {
@@ -412,14 +412,14 @@ Game.prototype = {
 
     getScore: function(player) {
         // gets the number of squares on the board that belong to the player
-        pointBoard = this.board.pointsGrid;
-        numSquares = this.board.grid.reduce(function(s1, xs, col) {
+        var pointBoard = this.board.pointsGrid;
+        var numSquares = this.board.grid.reduce(function(s1, xs, col) {
             return s1 + xs.reduce(function(s2, x, row) {
                 if (x == player.number) {
                     return s2+this.pointBoard[row][col];
-                } else{
+                } else {
                     return s2;
-                };
+                }
             }, 0);
         }, 0);
         return numSquares;
@@ -442,7 +442,7 @@ Game.prototype = {
             if (!player.canMove) return;
             var blocks = player.blocks;
 
-            if (blocks.length == 0) {
+            if (blocks.length === 0) {
                 player.canMove = false;
                 return;
             }
@@ -479,9 +479,9 @@ function getPlayerByTeam(teamId) {
 }
 
 function getUniqueTeamId (teamId) {
-    newTeamId = String(teamId);
-    i = 1;
-    var teams = connectedPlayers.map(function(p) {return p.teamId; })
+    var newTeamId = String(teamId);
+    var i = 1;
+    var teams = connectedPlayers.map(function(p) {return p.teamId; });
 
     while(teams.indexOf(newTeamId) != -1){
         newTeamId = newTeamId.replace(/_\d+/,"");
@@ -510,9 +510,10 @@ function startOpenGames() {
         return player.teamId;
     });
 
+    var filter = function(t) { return openTeams.indexOf(t) >= 0; };
     for (var i = 0; i < plannedGames.length; i++) {
         var game = plannedGames[i];
-        if(game.players.every(function(t) {return openTeams.indexOf(t) >= 0; })) {
+        if(game.players.every(filter)) {
             addGame(new Game(game.players.map(getPlayerByTeam), game.fast));
             plannedGames.splice(i, 1);
             break;
@@ -522,7 +523,7 @@ function startOpenGames() {
 }
 
 function getCurrentGames() {
-    var currentGames = []
+    var currentGames = [];
     games.forEach(function(game) {
         if (!game.over) {
             currentGames.push(game.sanitize());
@@ -562,7 +563,7 @@ var plannedGames = [];
 var bots = {};
 
 process.on('exit', function() {
-    for (botId in bots) {
+    for (var botId in bots) {
         bots[botId].kill();
     }
 });
@@ -578,7 +579,6 @@ matches.split("\n").forEach(function(line) {
 io.set('heartbeat timeout', 600); // set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
-
     socket.player = new Player(socket);
     socket.emit('games', getCurrentGames()); // only relevant to lobby.js
 
@@ -599,7 +599,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('newGame', function(teams) {
-        numBots = 4 - teams.length;
+        var numBots = 4 - teams.length;
         var testers = createBots(numBots);
         teams = teams.concat(testers);
         plannedGames.push({players: teams, fast: false});
@@ -615,7 +615,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('move', function(move) {
-        if(socket.player.game != null){
+        if(socket.player.game !== null){
             socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
         }
     });
@@ -623,7 +623,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function() {
         var teamId = socket.player.teamId;
         console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
-        if(socket.player.teamId != undefined){
+        if(socket.player.teamId !== undefined){
             connectedPlayers.splice(connectedPlayers.indexOf(socket.player), 1);
         }
         if (socket.player && socket.player.game && socket.player.number !== -1) {
