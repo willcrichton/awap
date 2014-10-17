@@ -545,7 +545,7 @@ function createBots(numBots) {
         var botId = 'bot' + crypto.randomBytes(4).toString('hex');
 
         // TODO: delegate this out to Brandon's distributor
-        var child = childProcess.exec('./client_nfg unix5.andrew.cmu.edu:9010 ' + botId);
+        var child = childProcess.exec('./client_nfg acmalgo.com:9010 ' + botId);
 
         bots[botId] = child;
         TEAMS[botId] = BOT_NAMES[names[i]];
