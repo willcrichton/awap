@@ -588,7 +588,7 @@ io.sockets.on('connection', function (socket) {
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
-        if (teamId.toLowerCase().slice(0,5) == 'test' || args.fast) {
+        if (teamId.toLowerCase().slice(0,4) == 'test' || args.fast) {
             var testers = createBots(3);
             testers.unshift(teamId);
             plannedGames.push({players: testers, fast: args.fast});
