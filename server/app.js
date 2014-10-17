@@ -606,12 +606,12 @@ io.sockets.on('connection', function (socket) {
         startOpenGames();
     });
 
-    socket.on('infoRequest', function() {
+    /*socket.on('infoRequest', function() {
         socket.emit('returnInfo',{
             games: getCurrentGames(),
             teams: teams
         });
-    });
+    });*/
 
     socket.on('move', function(move) {
         if(socket.player.game !== null){
