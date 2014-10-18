@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# TODO: remove the AI2 logic when we get server set up
-
 RUN_AI="python python/game.py"
-RUN_AI2="python ../client/python/game.py"
+
+# for Java, uncomment this line:
+# RUN_AI="java -jar java/target/AWAP-0.0.1-SNAPSHOT.jar"
+
+# for CPP, uncomment this line:
+# RUN_AI="./cpp/game"
+
 TEAM_ID="test"
 FAST=0
 
@@ -17,10 +21,6 @@ do
     esac
 done
 
-if [ -f client.py ]
-then
-	python client.py "$RUN_AI" $TEAM_ID $FAST &
-else
-	python ../client/client.py "$RUN_AI2" $TEAM_ID $FAST &
-fi
+python client.py "$RUN_AI" $TEAM_ID $FAST &
+
 wait

@@ -126,20 +126,20 @@ td {
     top: -5px;
     left: -5px; }
   #board .corner:nth-child(2) {
-    border-top: 5px solid rgba(230, 230, 20, 0.85);
-    border-right: 5px solid rgba(230, 230, 20, 0.85);
-    top: -5px;
-    right: -5px; }
+    border-bottom: 5px solid rgba(230, 230, 20, 0.85);
+    border-left: 5px solid rgba(230, 230, 20, 0.85);
+    bottom: -5px;
+    left: -5px; }
   #board .corner:nth-child(3) {
     border-bottom: 5px solid rgba(0, 240, 0, 0.85);
     border-right: 5px solid rgba(0, 240, 0, 0.85);
     bottom: -5px;
     right: -5px; }
   #board .corner:nth-child(4) {
-    border-bottom: 5px solid rgba(0, 0, 240, 0.85);
-    border-left: 5px solid rgba(0, 0, 240, 0.85);
-    bottom: -5px;
-    left: -5px; }
+    top: -5px;
+    right: -5px;
+    border-top: 5px solid rgba(0, 0, 240, 0.85);
+    border-right: 5px solid rgba(0, 0, 240, 0.85); }
   #board .clear {
     clear: both; }
 
@@ -160,6 +160,10 @@ a {
 
 h1 {
   margin-bottom: 10px; }
+
+#docs {
+  background: white;
+  padding: 10px; }
 
 #existingGames {
   width: 600px; }

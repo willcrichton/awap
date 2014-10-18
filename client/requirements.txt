@@ -1,1 +1,1 @@
-socketio-client
+socketio-client==0.5.3

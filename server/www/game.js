@@ -1,6 +1,6 @@
 var init = (function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
-    var blocks, bonus_squares, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
+    var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
 
     function getTile(x, y) {
         return $('.tile.' + x + 'x' + y);
@@ -38,6 +38,8 @@ var init = (function() {
     function updateBlockList() {
         var $blocks = $('#blocks');
         $blocks.html('');
+        
+        console.log(turn);
 
         var maxHeight = 0;
         for (var i = 0; i < blocks.length; i++) {
@@ -109,7 +111,6 @@ var init = (function() {
     ws.on('setup', function(state) {
         blocks = state.blocks;
         board = state.board;
-        bonus_squares = state.bonusSquares;
         myNum = state.number;
         turn = state.turn;
 
@@ -123,9 +124,9 @@ var init = (function() {
         for (var i = 0; i < state.blocks.length; i++) {
             $board.append('<div class="corner"></div>');
         }
-
-        for (var y = 0; y < board.dimension; y++) {
-            for (var x = 0; x < board.dimension; x++) {
+        
+        for (var x = 0; x < board.dimension; x++) {
+            for (var y = 0; y < board.dimension; y++) {
                 var $tile = $('<div class="' + x + 'x' + y + ' tile"></div>');
                 $tile.data('pos', {x: x, y: y});
                 $board.append($tile);
@@ -144,8 +145,8 @@ var init = (function() {
                 }
             }
         }
-        for (var i = 0; i < bonus_squares.length; i++) {
-            getTile(bonus_squares[i][0], bonus_squares[i][1]).html("<div class='bonus'></div>");
+        for (var i = 0; i < board.bonus_squares.length; i++) {
+            getTile(board.bonus_squares[i][0], board.bonus_squares[i][1]).html("<div class='bonus'></div>");
         }
 
         var $tiles = $('#board .tile');
@@ -180,12 +181,10 @@ var init = (function() {
         blocks = state.blocks;
         turn = state.turn;
 
-        console.log(turn);
-
         for (var x = 0; x < board.dimension; x++) {
             for (var y = 0; y < board.dimension; y++) {
                 if (board.grid[x][y] >= 0) {
-                    getTile(x, y).addClass('p' + board.grid[x][y]);
+                    getTile(x, y).addClass('p' + board.grid[x][y]).removeClass('hover');
                 }
             }
         }
