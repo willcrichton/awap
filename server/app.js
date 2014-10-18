@@ -40,14 +40,15 @@ var BONUS_SQUARES = [
     [2, 9],
     [9, 17],
     [10, 2],
-    [17, 10]
+    [17, 10],
+    [8, 7], [7, 11], [11, 12], [12, 8]
 ];
 
 var BLOCKED_SQUARES = [
     [6, 6], [6, 7], [7, 6], [7, 7],
-    [13, 6], [13, 7], [14, 6], [14, 7],
+    [12, 6], [12, 7], [13, 6], [13, 7],
     [6, 12], [6, 13], [7, 12], [7, 13],
-    [13, 12], [13, 13], [14, 12], [14, 13]
+    [12, 12], [12, 13], [13, 12], [13, 13]
 ];
 
 var BLOCKS = [
@@ -74,7 +75,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = BLOCKS.length;
+var NUM_BLOCKS = 8; //BLOCKS.length;
 
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
@@ -117,21 +118,16 @@ Player.prototype = {
 var Board = function() {
     this.dimension = 20; //Square board is assumed
     this.grid = [];
-    this.pointsGrid = [];
     this.bonus_squares = BONUS_SQUARES;
 
     // populate the board with empty values
     for (var i = 0; i < this.dimension; i++) {
         this.grid[i] = [];
-        this.pointsGrid[i] = [];
         for (var j = 0; j < this.dimension; j++) {
             this.grid[i][j] = -1;
-            this.pointsGrid[i][j] = 1;
         }
     }
-    for (i = 0; i < BONUS_SQUARES.length; i++) {
-        this.pointsGrid[BONUS_SQUARES[i][0]][BONUS_SQUARES[i][1]] = BONUS_SQUARES[i][2];
-    }
+
     for (i = 0; i < BLOCKED_SQUARES.length; i++) {
         this.grid[BLOCKED_SQUARES[i][0]][BLOCKED_SQUARES[i][1]] = -2;
     }
@@ -220,6 +216,7 @@ var Game = function(players, fast) {
     this.over = false;
     this.started = false;
     this.fast = fast;
+    this.scores = [0, 0, 0, 0];
     this.gameId = crypto.randomBytes(8).toString('hex'); //unique ID
 
     // Generate a random list of Ids
@@ -289,12 +286,24 @@ Game.prototype = {
             return 'illegal move ' + JSON.stringify(move);
         }
 
-        pl.blocks.splice(move.block, 1);
+        var mult = 1;
+        var block = pl.blocks[move.block];
+        for (var i = 0; i < BONUS_SQUARES.length; i++) {
+            var bonus = BONUS_SQUARES[i];
+            for (var j = 0; j < block.length; j++) {
+                if (bonus[0] == move.pos.x + block[j].x && bonus[1] == move.pos.y + block[j].y) {
+                    mult = 2;
+                }
+            }
+        }
 
-        this.getRoom().emit('update', this.clientState());
+        this.scores[pl.number] += mult * pl.blocks[move.block].length;
+
+        pl.blocks.splice(move.block, 1);
 
         this.updateCanMove();
         if (this.checkIsOver()) {
+            this.getRoom().emit('update', this.clientState());
             this.quit();
             return false;
         }
@@ -302,6 +311,8 @@ Game.prototype = {
         do {
             this.turn = (this.turn + 1) % this.players.length;
         } while (!this.players[this.turn].canMove);
+
+        this.getRoom().emit('update', this.clientState());
 
         // Clear the last players timer and set the current players timer
         this.clearTimer();
@@ -397,7 +408,6 @@ Game.prototype = {
         var number = this.players.indexOf(player);
         var state = this.clientState();
         state.number = number;
-        state.bonusSquares = this.board.bonus_squares;
 
         player.game = this;
         player.number = number;
@@ -407,17 +417,7 @@ Game.prototype = {
 
     getScore: function(player) {
         // gets the number of squares on the board that belong to the player
-        var pointBoard = this.board.pointsGrid;
-        var numSquares = this.board.grid.reduce(function(s1, xs, col) {
-            return s1 + xs.reduce(function(s2, x, row) {
-                if (x == player.number) {
-                    return s2 + pointBoard[row][col];
-                } else {
-                    return s2;
-                }
-            }, 0);
-        }, 0);
-        return numSquares;
+        return this.scores[this.players.indexOf(player)];
     },
 
     getScores: function() {
