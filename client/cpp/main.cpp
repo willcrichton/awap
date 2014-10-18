@@ -1,14 +1,16 @@
 #include <iostream>
-#include "Point.h"
-#include "Game.h"
-#include "Parser.h"
+#include "game.h"
+#include "parser.h"
+#include "point.h"
+
+
 
 int main(){
   char BUF[8192] = { 0 };
   std::cin.get (BUF, 8192);
   Game game;
   while (!cin.fail()){
-    std::cin.ignore(); //Ignore \n.
+    std::cin.ignore(); //Ignore \n
     StringStream ss(BUF);
     args params = load_json(ss); 
     if(params.has_error)

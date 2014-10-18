@@ -2,7 +2,7 @@
 #define GAME
 
 #include <vector>
-#include "Point.h"
+#include "point.h"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ struct Move{
 };
 
 struct args{
-  vector<block> blocks;
+  vector<vector<block> > blocks;
   string url;
   vector<vector<int> > grid;
   vector<Point> bonus_squares;

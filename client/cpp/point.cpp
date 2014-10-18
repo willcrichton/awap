@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <iostream>
-#include "Point.h"
+#include "point.h"
 
 Point::Point(int xval, int yval)
 {

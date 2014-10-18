@@ -1,8 +1,9 @@
+#include <iostream>
+#include "parser.h"
+
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
-#include <iostream>
-#include "Parser.h"
 
 using namespace rapidjson;
 
@@ -83,7 +84,31 @@ args load_json(StringStream ss)
 	  parsedArgs.grid = grid;
 	}
     }  
-  
+
+  if(d.HasMember("blocks"))
+    {
+      Value& players = d["blocks"];
+      assert(players.IsArray());
+      vector<vector<block> > blocks;
+      for(int i = 0; i < players.Size(); i++)
+  	{
+	  assert(players[i].IsArray());
+	  vector<block> ithPlayerBlocks;
+	  for(int j = 0; j < players[i].Size(); j++)
+	    {
+	      block piece;
+	      assert(players[i][j].IsArray());
+	      for(int k = 0; k < players[i][j].Size(); k++){
+		Value& blok = players[i][j][k];
+		assert(blok.IsObject());
+		piece.push_back(Point(blok["x"].GetInt(), blok["y"].GetInt()));		
+	      }
+	      ithPlayerBlocks.push_back(piece);
+	    }
+	  blocks.push_back(ithPlayerBlocks);
+	}
+    } 
+
   return parsedArgs;
 }
 

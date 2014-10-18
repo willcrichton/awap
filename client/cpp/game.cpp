@@ -1,17 +1,25 @@
 #include <iostream>
 #include <sstream>
-#include "Game.h"
+#include "game.h"
 
 /*
-  Game.cpp - Responsible for generating moves to give to client.py         
+  game.cpp - Responsible for generating moves to give to client.py         
   Moves via stdout in the form of "# # # #" (block index, # rotations, x, y)
-  Important function is find_move, which should contain the main AI
+  Important function is find_move, which should contain the main AI. 
 */
 
 
+/* Returns a Move, defined in game.h as
+   struct Move{
+     int index;
+     int rotations;
+     int x;
+     int y;
+   }
+ */
 Move Game::find_move()
 {
-  //To Be Implemented
+  //Not Yet Implemented
   Move move = {0, 0, 0, 0};
   
   return move;
