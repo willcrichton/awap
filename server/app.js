@@ -338,7 +338,7 @@ Game.prototype = {
         var to_print = [];
         this.getRoom().emit('end', scores);
         this.players.forEach(function(player, idx) {
-            to_print.push(player.teamId + ': ' + scores[idx]);
+            to_print.push(player.teamId + ': ' + scores[idx][1]);
             player.quit();
         });
 
