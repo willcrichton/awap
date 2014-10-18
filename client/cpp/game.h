@@ -31,7 +31,7 @@ class Game{
  public:
   Game() {};
 
-  vector<block> blocks;
+  vector<vector<block> > blocks;
   vector<vector<int> > grid;
   vector<Point> bonus_squares;
   int my_number;

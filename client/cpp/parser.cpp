@@ -107,6 +107,8 @@ args load_json(StringStream ss)
 	    }
 	  blocks.push_back(ithPlayerBlocks);
 	}
+      parsedArgs.blocks = blocks;
+
     } 
 
   return parsedArgs;
