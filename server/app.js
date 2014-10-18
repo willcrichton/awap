@@ -372,7 +372,7 @@ Game.prototype = {
             } while (!this.players[this.turn].canMove);
 
             if (this.turn == oldTurn) return;
-
+  
             this.getRoom().emit('update', this.clientState());
             this.sendMoveRequest();
             this.clearTimer();
@@ -639,6 +639,7 @@ io.sockets.on('connection', function (socket) {
         if (game === null) return;
 
         if (game.over) {
+            game.sendSetup(socket.player);
             socket.emit('end', game.getScores());
         } else {
             if (!game.started) {
