@@ -23,6 +23,8 @@ var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
 
+var TESTING = true;
+
 var TEAMS = {
     'will'  : 'Will Crichton',
     'test'  : 'Anonymous',
@@ -509,7 +511,12 @@ function startOpenGames() {
     for (var i = 0; i < plannedGames.length; i++) {
         var game = plannedGames[i];
         if(game.players.every(filter)) {
-            addGame(new Game(game.players.map(getPlayerByTeam), game.fast));
+            var newGame = new Game(game.players.map(getPlayerByTeam), game.fast);
+            addGame(newGame);
+            if (game.creator) {
+                game.creator.emit('onNewGame', newGame.gameId);
+            }
+            
             plannedGames.splice(i, 1);
             break;
         }
@@ -530,7 +537,9 @@ function getCurrentGames() {
 
 function addGame(game) {
     games.push(game);
-    io.sockets.emit('games', getCurrentGames());
+    if (!TESTING) {
+        io.sockets.emit('games', getCurrentGames());
+    }
 }
 
 function createBots(numBots) {
@@ -567,14 +576,17 @@ var filePath = path.join(__dirname + '/matches');
 var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
 matches.split("\n").forEach(function(line) {
     var players = line.split(" ");
-    plannedGames.push({players: players, fast: false});
+    plannedGames.push({players: players, fast: false, creator: null});
 });
 
 io.set('heartbeat timeout', 600); // set heartbeat timeout to 10min
 
 io.sockets.on('connection', function (socket) {
     socket.player = new Player(socket);
-    socket.emit('games', getCurrentGames()); // only relevant to lobby.js
+
+    if (!TESTING) {
+        socket.emit('games', getCurrentGames()); // only relevant to lobby.js
+    }
 
     socket.on('clientInfo', function(args) {
         var teamId = getUniqueTeamId(args.teamId);
@@ -586,7 +598,7 @@ io.sockets.on('connection', function (socket) {
         if (teamId.toLowerCase().slice(0,4) == 'test' || args.fast) {
             var testers = createBots(3);
             testers.unshift(teamId);
-            plannedGames.push({players: testers, fast: args.fast});
+            plannedGames.push({players: testers, fast: args.fast, creator: socket});
         } else {
             startOpenGames();
         }
@@ -596,7 +608,7 @@ io.sockets.on('connection', function (socket) {
         var numBots = 4 - teams.length;
         var testers = createBots(numBots);
         teams = teams.concat(testers);
-        plannedGames.push({players: teams, fast: false});
+        plannedGames.push({players: teams, fast: false, creator: socket});
         console.log("added game with: " + teams.join(', '));
         startOpenGames();
     });
@@ -643,4 +655,13 @@ io.sockets.on('connection', function (socket) {
             game.sendSetup(socket.player);
         }
     });
+
+    socket.on('getGames', function(id) {
+            var pl = getPlayerByTeam(id);
+            socket.emit('games', games.filter(function(game) {
+                        return game.players.indexOf(pl) > -1;
+                    }).map(function(game) {
+                            return game.sanitize();
+                        }));
+        });
 });

@@ -168,6 +168,9 @@ h1 {
 #existingGames {
   width: 600px; }
 
+#duringTesting {
+  display: blok; }
+
 #newGames {
   width: 300px; }
   #newGames label {

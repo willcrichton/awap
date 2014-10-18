@@ -4,3 +4,7 @@ scores
 matches.txt
 matches.dot
 test.png
+*.map
+client.tar
+.sass-cache/
+*.swp
