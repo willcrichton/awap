@@ -394,7 +394,7 @@ Game.prototype = {
             blocks: this.players.map(function(p){ return p.blocks; }),
             board: this.board,
             turn: this.turn,
-            url: 'http://localhost:8080/game.html#' + this.gameId // TODO: change this on prod
+            url: 'http://game.acmalgo.com/game.html#' + this.gameId // TODO: change this on prod
         };
     },
 
