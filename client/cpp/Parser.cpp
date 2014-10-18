@@ -3,20 +3,19 @@
 #include "rapidjson/stringbuffer.h"
 #include <iostream>
 #include "Parser.h"
-#include <typeinfo>
 
 using namespace rapidjson;
 
-
-args load_json(char* BUF)
+args load_json(StringStream ss)
 {
   Document d;  
   args parsedArgs;
-  std::cin.get (BUF, 8192);
-  StringStream s(BUF);
-  d.ParseStream(s);
+  d.ParseStream(ss);
   
-  assert(d.IsObject());
+  if(!d.IsObject()){
+    std::cout << "Error: Malformed JSON\n";
+    assert(d.IsObject());
+  }
   
   if(d.HasMember("error"))
     {
@@ -29,28 +28,21 @@ args load_json(char* BUF)
   if(d.HasMember("url"))
     {
       parsedArgs.url = d["url"].GetString();
-      cout << "Parsed Url" << "\n";
     }
   
   if(d.HasMember("turn"))
     {
       parsedArgs.turn = d["turn"].GetInt();
-      cout << "Parsed turn" << "\n";
     }
   
   if(d.HasMember("number"))
     {
       parsedArgs.my_number = d["number"].GetInt();
-      cout << "Parsed number" << "\n";
     }
 
-  if(d.HasMember("move"))
+  if(d.HasMember("turn"))
     {
-      if(d["move"] == 1)
-	{
-	  parsedArgs.turn = 1;
-	}
-      parsedArgs.turn = 0;
+      parsedArgs.turn = d["turn"].GetInt();
     }
   
   if(d.HasMember("board"))
@@ -65,7 +57,6 @@ args load_json(char* BUF)
       	  for(int i = 0; i < bonus.Size(); i++)
       	    {
 	      bonus_squares.push_back(Point(bonus[i][0u].GetInt(), bonus[i][1].GetInt()));
-	      bonus_squares[i].print();
       	    }
       	  parsedArgs.bonus_squares = bonus_squares;
       	}
@@ -91,7 +82,6 @@ args load_json(char* BUF)
 	    }
 	  parsedArgs.grid = grid;
 	}
-
     }  
   
   return parsedArgs;

@@ -9,8 +9,7 @@
 */
 
 
-
-Move find_move()
+Move Game::find_move()
 {
   //To Be Implemented
   Move move = {0, 0, 0, 0};
@@ -18,12 +17,20 @@ Move find_move()
   return move;
 }
 
-
-void interpret_data(string args)
+bool Game::my_turn()
 {
-  
-  
-  
+  return turn == my_number;
+}
+
+
+void Game::interpret_data(args args)
+{
+  my_number = args.my_number;
+  dimension = args.dimension;
+  turn = args.turn;
+  blocks = args.blocks;
+  grid = args.grid;
+  bonus_squares = args.bonus_squares;
 }
 
 
@@ -81,7 +88,7 @@ int Game::score_move(block b, Point p)
   for(int i = 0; i < blockSize; i++){
     Point s = b[i].add(p);
     for(int j = 0; j < bonus_squares.size(); j++){
-      if(s.eq(bonus_squares[j].first)){
+      if(s.eq(bonus_squares[j])){
 	bonus_points += 2;
       }
       area_enclosed = max(area_enclosed, -1 * (s.distance(Point(N/2, N/2))));

@@ -29,20 +29,23 @@ struct args{
  
 class Game{
  public:
+  Game() {};
+
   vector<block> blocks;
   vector<vector<int> > grid;
-  vector<pair<Point, int> > bonus_squares;
-  int my_number;// = -1;
-  int dimension;// = -1;
-  int turn;// = -1;
+  vector<Point> bonus_squares;
+  int my_number;
+  int dimension;
+  int turn;
  
-  Game(string args);
+  
+
   Move find_move();
+  bool my_turn();
+  void interpret_data(args args);
 
  private:
   int area_enclosed;
-
-  void interpret_data(string args);
   bool can_place(block b, Point p);
   block rotate_block(block b, int num_rotations);
   int score_move(block b, Point p);

@@ -3,4 +3,4 @@
 
 using namespace rapidjson;
 
-args load_json(char* BUF);
+args load_json(StringStream ss);
