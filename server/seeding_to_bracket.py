@@ -22,13 +22,13 @@ for i in range(offset):
         for y in x:
             index = i*bracket_size+y-1
             temp.append(str(g[index][0]))
-        output += ' '.join([temp[0], temp[1], temp[2], temp[3]])
+        output += ' '.join([temp[0], temp[1], temp[3], temp[2]])
         output += "\n"
-        output += ' '.join([temp[1], temp[3], temp[2], temp[0]])
+        output += ' '.join([temp[1], temp[2], temp[0], temp[3]])
         output += "\n"
-        output += ' '.join([temp[2], temp[0], temp[3], temp[1]])
+        output += ' '.join([temp[3], temp[0], temp[2], temp[1]])
         output += "\n"
-        output += ' '.join([temp[3], temp[0], temp[1], temp[2]])
+        output += ' '.join([temp[2], temp[3], temp[1], temp[0]])
         output += "\n"
 output = output[:-1]
 w = open('matches', 'w')
