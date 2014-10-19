@@ -1,5 +1,5 @@
 bracket_size = 16
-bracket = [[1,8,9,16],[3,6,11,14],[2,7,11,14],[4,5,12,13]]
+bracket = [[1,8,9,16],[4,5,12,13],[2,7,10,15],[3,6,11,14]]
 
 a = open('scores', 'r')             #open it
 b = a.read()                        #read it
@@ -24,9 +24,9 @@ for i in range(offset):
             temp.append(str(g[index][0]))
         output += ' '.join([temp[0], temp[1], temp[2], temp[3]])
         output += "\n"
-        output += ' '.join([temp[1], temp[2], temp[3], temp[0]])
+        output += ' '.join([temp[1], temp[3], temp[2], temp[0]])
         output += "\n"
-        output += ' '.join([temp[2], temp[3], temp[0], temp[1]])
+        output += ' '.join([temp[2], temp[0], temp[3], temp[1]])
         output += "\n"
         output += ' '.join([temp[3], temp[0], temp[1], temp[2]])
         output += "\n"
