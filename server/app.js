@@ -577,7 +577,7 @@ var filePath = path.join(__dirname + '/matches');
 var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
 matches.split("\n").forEach(function(line) {
     var players = line.split(" ");
-    for(var i = 0; i < players.length(); i++){
+    for(var i = 0; i < players.length; i++){
         if(players[i] == "bot"){
             var testers = createBots(1);
             players[i] == testers[0];
