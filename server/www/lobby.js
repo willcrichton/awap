@@ -1,6 +1,7 @@
 $(document).ready(function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
     ws.on('games', function(games) {
+            console.log(games);
         var $list = $('#games');
         $list.html('');
 
@@ -9,6 +10,9 @@ $(document).ready(function() {
             $list.append('<li><a href="game.html#' + game.id + '">' + title + '</a></li>');
         });
     });
+    ws.on('onNewGame', function(game) {
+            window.location = '/game.html#' + game;
+        });
     $("#matchButton").click(function() {
         var teams = [];
         for (var i = 0; i < 4; i++) {
@@ -22,4 +26,10 @@ $(document).ready(function() {
         alert('Submitted your game. TODO: make this not an alert box');
         ws.emit('newGame', teams);
     });
+
+    $('#grabGamesButton').click(function() {
+            var $input = $('#getGamesId');
+            ws.emit('getGames', $input.val());
+            $input.val('');
+        });
 });

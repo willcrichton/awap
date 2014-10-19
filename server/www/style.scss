@@ -207,14 +207,18 @@ h1 {
     padding: 10px;
 }
 
-#existingGames{
+#existingGames {
     width: 600px;
 }
 
-#newGames{
-    width: 300px;
+#duringTesting {
+    display: block;
+}
 
-    label{
+#newGames {
+    width: 300px; 
+
+    label {
         display: inline-block;
         float: left;
         clear: left;
