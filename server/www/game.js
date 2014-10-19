@@ -220,7 +220,7 @@ function showBoard(){
     $('#board-wrapper, #blocks').show();
 }
 
-$(window).load(function() {
+$(document).ready(function() {
     var count = 1;
     var $ellipsis = $('#waiting span');
 
