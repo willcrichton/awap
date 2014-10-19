@@ -9,6 +9,7 @@ e = [x[0] for x in d]               #remove bots
 f = [x.split(' ') for x in e]       #split score from name
 g = [(x[0][:-1], x[1]) for x in f]  #make (name, score) tuple
 g.sort(key=lambda x: int(x[1]))     #sort by score
+g = g[::-1]
 
 while(len(g) % bracket_size != 0):
     g.append(('bot', '0'))
@@ -17,6 +18,10 @@ output = ""
 offset = len(g)/bracket_size
 
 for i in range(offset):
+    print("bracket: " + str(i))
+    not_ordered = g[i*bracket_size:(i+1)*bracket_size]
+    ordered = [[not_ordered[j-1] for j in b] for b in bracket]
+    print(str(ordered))
     for x in bracket:                   #for given offset get matches
         temp = []
         for y in x:
