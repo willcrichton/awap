@@ -342,7 +342,7 @@ Game.prototype = {
             to_print.push(player.teamId + ': ' + scores[idx][1]);
             player.quit();
         });
-
+        startOpenGames();
         if (!this.fast) {
             fs.appendFileSync('scores', to_print.join(', ') + "\n");
         }
