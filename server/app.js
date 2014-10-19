@@ -576,7 +576,12 @@ var filePath = path.join(__dirname + '/matches');
 var matches = fs.readFileSync(filePath, {encoding: 'utf-8'});
 matches.split("\n").forEach(function(line) {
     var players = line.split(" ");
-    //TODO: steal some newgame logic for bots
+    for(var i = 0; i < players.length(); i++){
+        if(players[i] == "bot"){
+            var testers = createBots(1);
+            players[i] == testers[0];
+        }
+    }
     plannedGames.push({players: players, fast: false, creator: null});
 });
 
