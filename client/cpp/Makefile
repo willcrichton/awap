@@ -1,13 +1,13 @@
 #Compiler:
 CC=g++
 
-all: build solver
+all: build game
 
 build:
 	mkdir build
 
-solver: build/main.o build/game.o build/point.o build/parser.o
-	$(CC) build/main.o build/point.o build/parser.o build/game.o -o solver
+game: build/main.o build/game.o build/point.o build/parser.o
+	$(CC) build/main.o build/point.o build/parser.o build/game.o -o game
 
 build/point.o: point.cpp
 	$(CC) -c point.cpp -o build/point.o
@@ -22,4 +22,4 @@ build/main.o: main.cpp
 	$(CC) -c main.cpp -o build/main.o
 
 clean:
-	rm -rf *o solver build
+	rm -rf *o game build

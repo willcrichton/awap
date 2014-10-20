@@ -14,8 +14,7 @@ args load_json(StringStream ss)
   d.ParseStream(ss);
   
   if(!d.IsObject()){
-    std::cout << "Error: Malformed JSON\n";
-    assert(d.IsObject());
+    return parsedArgs;
   }
   
   if(d.HasMember("error"))
