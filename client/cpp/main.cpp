@@ -10,12 +10,13 @@ int main(){
   std::cin.get (BUF, 8192);
   Game game;
   while (!cin.fail()){
-    std::cin.ignore(); //Ignore \n
+    std::cin.ignore();
     StringStream ss(BUF);
     args params = load_json(ss); 
     if(params.has_error)
       {
-	cout << "Error: " << params.error << "\n";
+	/* You might want to modify here */
+	
       }
     
     game.interpret_data(params);
