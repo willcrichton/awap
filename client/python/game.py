@@ -66,7 +66,6 @@ class Game:
       if nbd == 1:
         return -30
       return 2 * (12 - nbd)
-    #bonus_dist_weight = (lambda s: 
 
     def __init__(self, args):
         self.interpret_data(args)
@@ -83,8 +82,6 @@ class Game:
                   frontier.append(((newx, newy), i + 1))
           for ((nx, ny), d) in frontier:
             self.bonus_dist_map[(nx, ny)] = d
-        debug(str(self.bonus_dist_map))
-
 
     def score_move(self, block, point):
         score = 0
@@ -137,7 +134,6 @@ class Game:
         move_scores = map(lambda (i, j, b, p) : (i, j, b, p, self.score_move(b, p)), moves)
         sorted_moves = sorted(move_scores, lambda (i, j, b1, p1, s1), (k, l, b2, p2, s2) : int(s2 - s1))
         best_move = sorted_moves[0]
-        debug(str(best_move[4]))
         return (best_move[0], best_move[1], best_move[3].x, best_move[3].y)
 
     # Checks if a block can be placed at the given point
