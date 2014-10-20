@@ -45,35 +45,65 @@ class Game:
     dimension = -1 # Board is assumed to be square
     turn = -1
 
+    my_corner = (-1, -1)
+    my_center = (-1, -1)
+    distance_from_center = 20
+
     # variables for AI
-    area_enclosed = -1000000 #TODO this evil magic number will go away when my_corner exists
     
-    block_size_weight = (lambda s, bs : bs * 10)
+    """block_size_weight = (lambda s, bs : bs * 10)
     hits_bonus_weight = (lambda s, hb : 200 if hb else 0)
     bonus_points_weight = (lambda s, bp : bp * 2)
     delta_my_liberties_weight = (lambda s, dml : dml * 2)
     delta_other_liberties_weight = (lambda s, dol : dol * -5)
     area_enclosed_weight = (lambda s, ae : ae * 5)
+"""
+    points_weight = (lambda s, p: (p**2)/5)
+    center_dist_weight = (lambda s: 25 - (1.24**s.distance_from_center))
+    def bonus_dist_weight(self, nbd):
+      if nbd == 0:
+        return 30 
+      if nbd == 1:
+        return -30
+      return 2 * (12 - nbd)
+    #bonus_dist_weight = (lambda s: 
 
     def __init__(self, args):
         self.interpret_data(args)
+        c = self.dimension / 2
+        self.my_center = [(c+1, c+1), (c, c+1), (c, c), (c+1, c)][self.my_number]
+        #print >> sys.stderr, self.bonus_squares
+        self.bonus_dist_map = dict(((bx, by), 0) for (bx, by) in self.bonus_squares if self.grid[bx][by] == -1)
+        for i in xrange(25):
+          frontier = []
+          for (bx, by) in self.bonus_dist_map:
+            if self.bonus_dist_map[(bx, by)] == i:
+              for (newx, newy) in [(bx+1, by), (bx-1, by), (bx, by+1), (bx, by-1)]:
+                if (newx, newy) not in self.bonus_dist_map and newx >= 0 and newx < 20 and newy >= 0 and newy < 20:
+                  frontier.append(((newx, newy), i + 1))
+          for ((nx, ny), d) in frontier:
+            self.bonus_dist_map[(nx, ny)] = d
+        debug(str(self.bonus_dist_map))
+
 
     def score_move(self, block, point):
         score = 0
-        block_size = len(block) # bigger blocks are better
-        #hits_bonus = False
-        bonus_points = 0
-        area_enclosed = self.area_enclosed
+        points = len(block)
+        new_bonus_dist = 100
+        
+        newly_occupied = []
 
         N = self.dimension
         for offset in block:
             s = point + offset
+            newly_occupied.append(s)
+            new_bonus_dist = min(new_bonus_dist, self.bonus_dist_map[(s.x, s.y)])
             for bs in self.bonus_squares:
                 if s.x == bs[0] and s.y == bs[1]:
-                    bonus_points += bs[2]
-            area_enclosed = max(area_enclosed, -(s.distance(Point(N/2, N/2))))
+                    points *= 3
+            this_center_dist = s.distance(Point(self.my_center[0], self.my_center[1]))
+            self.distance_from_center = min(this_center_dist, self.distance_from_center)
 
-        self.area_enclosed = area_enclosed
         #N = self.dimension
         #for x in range(0, N):
         #    for y in range(0, N):
@@ -83,9 +113,9 @@ class Game:
         #
         #score -= point.distance(Point(N / 2, N / 2)) * 2
         
-        score += self.block_size_weight(block_size)
-        score += self.bonus_points_weight(bonus_points)
-        score += self.area_enclosed_weight(area_enclosed)
+        score += self.points_weight(points)
+        score += self.center_dist_weight()
+        score += self.bonus_dist_weight(new_bonus_dist)
         return int(score)
 
     # find_move is your place to start. When it's your turn,
@@ -107,7 +137,7 @@ class Game:
         move_scores = map(lambda (i, j, b, p) : (i, j, b, p, self.score_move(b, p)), moves)
         sorted_moves = sorted(move_scores, lambda (i, j, b1, p1, s1), (k, l, b2, p2, s2) : int(s2 - s1))
         best_move = sorted_moves[0]
-
+        debug(str(best_move[4]))
         return (best_move[0], best_move[1], best_move[3].x, best_move[3].y)
 
     # Checks if a block can be placed at the given point
@@ -161,15 +191,17 @@ class Game:
             self.turn = args['turn']
             self.grid = args['board']['grid']
             self.blocks = args['blocks'][self.my_number]
+            self.bonus_squares = args['board']['bonus_squares']
 
             for index, block in enumerate(self.blocks):
                 self.blocks[index] = [Point(offset) for offset in block]
 
-        if 'bonusSquares' in args:
-            self.bonus_squares = args['bonusSquares']
+#        if 'bonus_squares' in args:
+#           self.bonus_squares = args['bonus_squares']
 
         if (('move' in args) and (args['move'] == 1)):
             send_command(" ".join(str(x) for x in self.find_move()))
+        
 
     def is_my_turn(self):
         return self.turn == self.my_number
