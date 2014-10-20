@@ -2,12 +2,12 @@ bracket_size = 16
 bracket = [[1,8,9,16],[4,5,12,13],[2,7,10,15],[3,6,11,14]]
 
 a = open('scores', 'r')             #open it
-b = a.read()                        #read it
+b = a.read().strip()                 #read it
 c = b.split('\n')                   #split into games
 d = [x.split(',') for x in c]       #split into people
 e = [x[0] for x in d]               #remove bots
 f = [x.split(' ') for x in e]       #split score from name
-g = [(x[0][:-1], x[1]) for x in f]  #make (name, score) tuple
+g = [(x[0], x[1]) for x in f]  #make (name, score) tuple
 g.sort(key=lambda x: int(x[1]))     #sort by score
 g = g[::-1]
 

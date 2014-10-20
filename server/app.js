@@ -3,17 +3,22 @@
  ***********************************************************************/
 
 /* GENERAL TODO:
- *   SERVER
- *   - verify matchmaking + lobbying works on scale
- *   - change bot maker to use distributor
+ *  SERVER
+ *  - what happens if a player leaves the game? check premature games
+ *  - only registered team names can play during tournament
+ *  - add naming for non-team-name bots that players create
  *
  *  CLIENT
  *  - determine why python game client sends invalid first moves on some blocks
  *
  *  WEBPAGE
  *  - when you refresh a previous game, show the board
+ *  - show names next to each position
+ *  - show blocks over coins
+ *  - on receive new match, go to next match
  *  - add a 'back to scores' from board
  *  - add a 'back to lobby' from game
+ *  - remove games from lobby that are over
  */
 
 var nodestatic = require('node-static');
@@ -23,10 +28,15 @@ var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
 
-var TESTING = true;
+var TESTING = false;
 
 var TEAMS = {
     'will'  : 'Will Crichton',
+    'patrick': 'Pitrack',
+    'chris' : 'Christopher Yingerston',
+    'thomson' : 'Termsern',
+    'dillon' : 'Dillareau',
+    'brandon' : 'B-DAWG',
     'test'  : 'Anonymous',
 };
 
@@ -78,7 +88,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = 8; //BLOCKS.length;
+var NUM_BLOCKS = BLOCKS.length;
 
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
@@ -339,12 +349,12 @@ Game.prototype = {
         var to_print = [];
         this.getRoom().emit('end', scores);
         this.players.forEach(function(player, idx) {
-            to_print.push(player.teamId + ': ' + scores[idx][1]);
+            to_print.push(player.teamId + ' ' + scores[idx][1]);
             player.quit();
         });
         startOpenGames();
         if (!this.fast) {
-            fs.appendFileSync('scores', to_print.join(', ') + "\n");
+            fs.appendFileSync('scores', to_print.join(',') + "\n");
         }
     },
 
@@ -483,7 +493,7 @@ function getUniqueTeamId (teamId) {
 
     while(teams.indexOf(newTeamId) != -1){
         newTeamId = newTeamId.replace(/_\d+/,"");
-        newTeamId += ("_" + i);
+        newTeamId += ("@" + i);
         i++;
     }
     return newTeamId;
@@ -580,9 +590,10 @@ matches.split("\n").forEach(function(line) {
     for(var i = 0; i < players.length; i++){
         if(players[i] == "bot"){
             var testers = createBots(1);
-            players[i] == testers[0];
+            players[i] = testers[0];
         }
     }
+
     plannedGames.push({players: players, fast: false, creator: null});
 });
 
