@@ -609,7 +609,8 @@ io.sockets.on('connection', function (socket) {
     socket.on('clientInfo', function(args) {
         var teamId = getUniqueTeamId(args.teamId);
         socket.player.teamId = teamId;
-        console.log('Player ' + teamId + ' has joined.');
+        var address = socket.handshake.address;
+        console.log('Player ' + teamId + ' has joined from address ' + address.address +':'+ address.port + '.');
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
@@ -646,12 +647,14 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function() {
         var teamId = socket.player.teamId;
-        console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
+        if (socket.player && socket.player.game && socket.player.number !== -1) {
+            console.log(teamId + ' has quit an active game.');
+            socket.player.game.quit();
+        } else {
+            console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
+        }
         if(socket.player.teamId !== undefined){
             connectedPlayers.splice(connectedPlayers.indexOf(socket.player), 1);
-        }
-        if (socket.player && socket.player.game && socket.player.number !== -1) {
-            socket.player.game.quit();
         }
     });
 
