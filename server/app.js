@@ -4,12 +4,8 @@
 
 /* GENERAL TODO:
  *  SERVER
- *  - what happens if a player leaves the game? check premature games
  *  - only registered team names can play during tournament
  *  - add naming for non-team-name bots that players create
- *
- *  CLIENT
- *  - determine why python game client sends invalid first moves on some blocks
  *
  *  WEBPAGE
  *  - when you refresh a previous game, show the board
@@ -497,6 +493,19 @@ function getUniqueTeamId (teamId) {
         i++;
     }
     return newTeamId;
+}
+
+function isValidTeamId(teamId) {
+    teamId = teamId.split('@')[0];
+    return (TEAMS[teamId] !== undefined);
+}
+
+function getTeamIdFromName(TeamName){
+    for (key in TEAMS)
+        if(TEAMS[key] == TeamName){
+            return key;
+        }
+    return undefined;
 }
 
 // Returns first (and hopefully only) game with matching gameId
