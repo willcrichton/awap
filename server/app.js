@@ -5,20 +5,14 @@
 /* GENERAL TODO:
  *  SERVER
  *  - what happens if a player leaves the game? check premature games
- *  - only registered team names can play during tournament
  *  - add naming for non-team-name bots that players create
- *
- *  CLIENT
- *  - determine why python game client sends invalid first moves on some blocks
  *
  *  WEBPAGE
  *  - when you refresh a previous game, show the board
- *  - show names next to each position
- *  - show blocks over coins
- *  - on receive new match, go to next match
+ *  - show blocks over coins (defer)
+ *  - on receive new match, go to next match (defer)
  *  - add a 'back to scores' from board
  *  - add a 'back to lobby' from game
- *  - remove games from lobby that are over
  */
 
 var nodestatic = require('node-static');
@@ -41,10 +35,51 @@ var TEAMS = {
 };
 
 var BOT_NAMES = [
-    'Wilbur Bot',
-    'Johnny Bot',
-    'Stanley Bot',
-    'Cassandra Bot'
+    'Agnes Bot',
+    'Alfred Bot',
+    'Archy Bot',
+    'Bart Bot',
+    'Benjamin Bot',
+    'Bertram Bot',
+    'Bruni Bot',
+    'Buster Bot',
+    'Edith Bot',
+    'Ester Bot',
+    'Flo Bot',
+    'Francis Bot',
+    'Francisco Bot',
+    'Gil Bot',
+    'Gob Bot',
+    'Gus Bot',
+    'Hank Bot',
+    'Harold Bot',
+    'Harriet Bot',
+    'Henry Bot',
+    'Jacques Bot',
+    'Jorge Bot',
+    'Juan Bot',
+    'Kitty Bot',
+    'Lionel Bot',
+    'Louie Bot',
+    'Lucille Bot',
+    'Lupe Bot',
+    'Mabel Bot',
+    'Maeby Bot',
+    'Marco Bot',
+    'Marta Bot',
+    'Maurice Bot',
+    'Maynard Bot',
+    'Mildred Bot',
+    'Monty Bot',
+    'Mordecai Bot',
+    'Morty Bot',
+    'Pablo Bot',
+    'Seymour Bot',
+    'Stan Bot',
+    'Tobias Bot',
+    'Vivian Bot',
+    'Walter Bot',
+    'Wilbur Bot'
 ];
 
 //In the form of [x, y, value].
@@ -88,7 +123,7 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = BLOCKS.length;
+var NUM_BLOCKS = 8; //BLOCKS.length;
 
 var TURN_LENGTH = 5000;
 var DELAY_BETWEEN_TURNS = 300;
@@ -96,10 +131,10 @@ var DELAY_BETWEEN_TURNS = 300;
 //use express to protect admin page
 var fileserver = new nodestatic.Server('./www', {cache: 600});
 var server = require('http').createServer(function(request, response) {
-        request.addListener('end', function() {
-                fileserver.serve(request, response);
-            }).resume();
-    });
+    request.addListener('end', function() {
+        fileserver.serve(request, response);
+    }).resume();
+});
 server.listen(8080);
 
 var io = require('socket.io').listen(server, {log: false});
@@ -352,7 +387,13 @@ Game.prototype = {
             to_print.push(player.teamId + ' ' + scores[idx][1]);
             player.quit();
         });
+
         startOpenGames();
+
+        if (!TESTING) {
+            io.sockets.emit('games', getCurrentGames());
+        }
+
         if (!this.fast) {
             fs.appendFileSync('scores', to_print.join(',') + "\n");
         }
@@ -391,7 +432,7 @@ Game.prototype = {
             } while (!this.players[this.turn].canMove);
 
             if (this.turn == oldTurn) return;
-  
+
             this.getRoom().emit('update', this.clientState());
             this.sendMoveRequest();
             this.clearTimer();
@@ -421,6 +462,8 @@ Game.prototype = {
         var number = this.players.indexOf(player);
         var state = this.clientState();
         state.number = number;
+
+        state.players = this.players.map(function(pl) { return TEAMS[pl.teamId]; });
 
         player.game = this;
         player.number = number;
@@ -524,10 +567,11 @@ function startOpenGames() {
         if(game.players.every(filter)) {
             var newGame = new Game(game.players.map(getPlayerByTeam), game.fast);
             addGame(newGame);
+
             if (game.creator) {
                 game.creator.emit('onNewGame', newGame.gameId);
             }
-            
+
             plannedGames.splice(i, 1);
             break;
         }
@@ -608,6 +652,11 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('clientInfo', function(args) {
         var teamId = getUniqueTeamId(args.teamId);
+        if (!(teamId in TEAMS)) {
+            socket.emit('rejected');
+            return;
+        }
+
         socket.player.teamId = teamId;
         var address = socket.handshake.address;
         console.log('Player ' + teamId + ' has joined from address ' + address.address +':'+ address.port + '.');
@@ -633,11 +682,11 @@ io.sockets.on('connection', function (socket) {
     });
 
     /*socket.on('infoRequest', function() {
-        socket.emit('returnInfo',{
-            games: getCurrentGames(),
-            teams: teams
-        });
-    });*/
+      socket.emit('returnInfo',{
+      games: getCurrentGames(),
+      teams: teams
+      });
+      });*/
 
     socket.on('move', function(move) {
         if(socket.player.game !== null){
@@ -648,11 +697,12 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function() {
         var teamId = socket.player.teamId;
         if (socket.player && socket.player.game && socket.player.number !== -1) {
-            console.log(teamId + ' has quit an active game.');
+            console.log(TEAMS[teamId] + ' (' + teamId + ') has quit an active game.');
             socket.player.game.quit();
         } else {
             console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
         }
+
         if(socket.player.teamId !== undefined){
             connectedPlayers.splice(connectedPlayers.indexOf(socket.player), 1);
         }
@@ -678,11 +728,11 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('getGames', function(id) {
-            var pl = getPlayerByTeam(id);
-            socket.emit('games', games.filter(function(game) {
-                        return game.players.indexOf(pl) > -1;
-                    }).map(function(game) {
-                            return game.sanitize();
-                        }));
-        });
+        var pl = getPlayerByTeam(id);
+        socket.emit('games', games.filter(function(game) {
+            return game.players.indexOf(pl) > -1;
+        }).map(function(game) {
+            return game.sanitize();
+        }));
+    });
 });

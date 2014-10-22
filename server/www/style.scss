@@ -16,7 +16,7 @@ td {
 #container {
     padding: 10px;
     width: 1280px;
-    margin: 40px auto 0;
+    margin: 20px auto 0;
     overflow: auto;
 }
 
@@ -69,16 +69,15 @@ $border: rgba(75, 180, 240, 0.85);
     position: relative;
     z-index: 2;
     margin-right: 100px;
-    margin-top: 50px;
-    background: rgba(255, 255, 255, 0.4);
 
     .blockgroup {
         overflow: hidden;
-        border-top: 1px solid black;
         padding-top: 15px;
         padding-left: 10px;
-        height: 100px;
         padding-bottom: 15px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.4);
+        margin-bottom: 10px;
     }
 
     .blockgroup:first-child {
@@ -87,7 +86,7 @@ $border: rgba(75, 180, 240, 0.85);
     }
 
     .blockgroup.active {
-        background: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 210, 0.6);
     }
 
     $tileSize: 12px;
@@ -113,6 +112,7 @@ $border: rgba(75, 180, 240, 0.85);
     background: url('images/moon.png') no-repeat center center;
     padding: 20px;
     display: none;
+    margin-top: 25px;
 }
 
 #board {
@@ -194,7 +194,7 @@ a {
     margin-right: 10px;
     border-radius: 5px;
     padding: 10px;
-    height: 300px;
+    min-height: 300px;
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -216,7 +216,7 @@ h1 {
 }
 
 #newGames {
-    width: 300px; 
+    width: 300px;
 
     label {
         display: inline-block;

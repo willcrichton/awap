@@ -1,6 +1,6 @@
 var init = (function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
-    var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0;
+    var blocks, board, myNum = -1, curBlock = 0, rotation = 0, curPos, turn = 0, playerNames = [];
 
     function getTile(x, y) {
         return $('.tile.' + x + 'x' + y);
@@ -38,12 +38,11 @@ var init = (function() {
     function updateBlockList() {
         var $blocks = $('#blocks');
         $blocks.html('');
-        
-        console.log(turn);
 
         var maxHeight = 0;
         for (var i = 0; i < blocks.length; i++) {
             var $group = $('<div class="blockgroup p' + i + ' ' + (i == turn ? 'active' : '') + '"></div>');
+            $blocks.append('<h2>' + playerNames[i] + '</h2>');
             $blocks.append($group);
 
             for (var j = 0; j < blocks[i].length; j++) {
@@ -113,6 +112,8 @@ var init = (function() {
         board = state.board;
         myNum = state.number;
         turn = state.turn;
+        playerNames = state.players;
+
 
         $('#waiting').hide();
         showBoard();
@@ -124,7 +125,7 @@ var init = (function() {
         for (var i = 0; i < state.blocks.length; i++) {
             $board.append('<div class="corner"></div>');
         }
-        
+
         for (var x = 0; x < board.dimension; x++) {
             for (var y = 0; y < board.dimension; y++) {
                 var $tile = $('<div class="' + x + 'x' + y + ' tile"></div>');
@@ -133,7 +134,9 @@ var init = (function() {
             }
         }
 
-        $board.css('width', board.dimension * $('.tile').outerWidth());
+        console.log(state);
+        var tileWidth = 30; // $('.tile').outerWidt }()
+        $board.css('width', board.dimension * tileWidth);
 
         for (var x = 0; x < board.dimension; x++) {
             for (var y = 0; y < board.dimension; y++) {
@@ -212,6 +215,12 @@ var init = (function() {
                 fast: false
             });
         }
+    });
+
+    ws.on('onNewGame', function(game) {
+        setTimeout(function() {
+            window.location = '/game.html#' + game;
+        }, 5000);
     });
 });
 
