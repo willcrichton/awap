@@ -21,6 +21,7 @@ var fs = require('fs');
 var path = require('path');
 var childProcess = require('child_process');
 var crypto = require('crypto');
+var geoip = require('geoip-lite')
 
 var TESTING = false;
 
@@ -672,7 +673,8 @@ io.sockets.on('connection', function (socket) {
 
         socket.player.teamId = teamId;
         var address = socket.handshake.address;
-        console.log('Player ' + teamId + ' has joined from address ' + address.address +':'+ address.port + '.');
+        var location = geoip.lookup(address.address);
+        console.log('Player ' + teamId + ' has joined from address ' + address.address + ' (' + location.city + ', ' + location.region + ', ' + location.country + ')');
         connectedPlayers.push(socket.player);
 
         // Matching code - Needs fixing
