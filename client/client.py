@@ -19,6 +19,7 @@ SOCKET_PORT = 8080
 
 team_id = ''
 stdin_handle = None
+thread_handle = None
 is_fast = False
 
 # write message to stdout
@@ -59,6 +60,13 @@ class GameNamespace(BaseNamespace):
     def on_end(self, *args):
         scores = args[0]
         print(scores)
+
+    def on_rejected(self, *args):
+        print('server rejected connection (only valid team IDs are allowed during the competition)')
+        if thread_handle is not None:
+            thread_handle.join()
+
+        sys.exit()
 
 def main():
 
@@ -105,7 +113,8 @@ def main():
                     }
                 })
 
-    threading.Thread(target=get_input).start()
+    thread_handle = threading.Thread(target=get_input)
+    thread_handle.start()
     socket.wait()
 
 if __name__ == "__main__":
