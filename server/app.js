@@ -542,6 +542,19 @@ function getUniqueTeamId (teamId) {
     return newTeamId;
 }
 
+function isValidTeamId(teamId) {
+    teamId = teamId.split('@')[0];
+    return (TEAMS[teamId] !== undefined);
+}
+
+function getTeamIdFromName(TeamName){
+    for (key in TEAMS)
+        if(TEAMS[key] == TeamName){
+            return key;
+        }
+    return undefined;
+}
+
 // Returns first (and hopefully only) game with matching gameId
 function getGameById(gameId) {
     for (var i = 0; i < games.length; i++) {

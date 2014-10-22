@@ -6,5 +6,6 @@ matches.dot
 test.png
 *.map
 client.tar
+client/java/target
 .sass-cache/
 *.swp
