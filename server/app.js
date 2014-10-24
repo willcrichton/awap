@@ -711,7 +711,8 @@ io.sockets.on('connection', function (socket) {
           socket.emit('returnInfo',{
               games: games.map(function(game){
                 return {teams: game.players.map(function(player){return player.teamId}),
-                        over: game.over};
+                        over: game.over,
+                        url: 'http://game.acmalgo.com/game.html#' + game.gameId};
               }),
               plannedGames: plannedGames.map(function(game){return game.players}),
               teams: TEAMS,
