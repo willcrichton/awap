@@ -1,9 +1,9 @@
-function kick (ws, teamId) {
-    ws.emit('info', teamId);
+function kick (teamId) {
+    ws.emit('adminKickRequest', teamId);
 }
 
-function start () {
-    ws.emit('adminStartRequest', teamId);
+function start(id) {
+    ws.emit('adminStartRequest', id);
 }
 
 
@@ -34,7 +34,7 @@ $(document).ready(function() {
                 $list.append('<tr style="background-color: orange">\
                                 <td><a href="game.html#' + game.id + '">' + title + '</a></td>\
                                 <td style="text-align:center">\
-                                    <button type="button" onclick="start(\'' + team + '\')">Click Me!</button>\
+                                    <button type="button" onclick="start(\'' + game.id + '\')">Click Me!</button>\
                                 </td>\
                                 <td>other field</td>\
                               </tr>');

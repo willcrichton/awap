@@ -736,6 +736,14 @@ io.sockets.on('connection', function (socket) {
           });
       });
 
+    socket.on('adminStartRequest', function(id) {
+        getGameById(id).sendMoveRequest();
+    });
+
+    socket.on('adminKickRequest', function(teamId) {
+        getPlayerByTeam(teamId).socket.emit('rejected');
+    });
+
     socket.on('move', function(move) {
         if(socket.player.game !== null){
             socket.emit('moveResponse', socket.player.game.doMove(socket.player, move));
