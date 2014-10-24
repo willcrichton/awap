@@ -707,12 +707,14 @@ io.sockets.on('connection', function (socket) {
         startOpenGames();
     });
 
-    /*socket.on('infoRequest', function() {
-      socket.emit('returnInfo',{
-      games: getCurrentGames(),
-      teams: teams
+    socket.on('adminInfoRequest', function() {
+          socket.emit('returnInfo',{
+              games: games
+              plannedGames, plannedGames,
+              teams: TEAMS,
+              connectedTeams: connectedPlayers
+          });
       });
-      });*/
 
     socket.on('move', function(move) {
         if(socket.player.game !== null){

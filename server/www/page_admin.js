@@ -1,20 +1,7 @@
 $(document).ready(function() {
     var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
     ws.on('returnInfo', function(data) {
-    	var teams = data['teams'];
-    	console.log(teams);
-        var $list = $('#teams');
-        $list.html("<tr>\
-			          <td>Team Names</td>\
-			          <td>Buttons</td>\
-			        </tr>");
-
-        data['teams'].forEach(function(team) {
-            $list.append('<tr>\
-			            	<td> ' + team + '</td>\
-			            	<td style="text-align:center"> <button type="button">Click Me!</button></td>\
-			              </tr>');
-        });
+        console.log(data);
     });
     ws.emit('infoRequest');
     ws.on('games', function(games) {
