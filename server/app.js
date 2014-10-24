@@ -296,7 +296,7 @@ var Game = function(players, fast) {
         this.sendMoveRequest();
     }
 
-    console.log("Made a new game with " + players.map(function(p){return TEAMS[p.teamId];}).join(", ") + ".");
+    console.log("Made a new game with " + players.map(function(p){return getNameFromTeamId(p.teamId);}).join(", ") + ".");
 };
 
 Game.prototype = {
@@ -445,7 +445,7 @@ Game.prototype = {
         return {
             id: this.gameId,
             players: this.players.map(function(player) {
-                return TEAMS[player.teamId.split('@')[0]];
+                return getNameFromTeamId(player.teamId);
             })
         };
     },
@@ -465,11 +465,7 @@ Game.prototype = {
         state.number = number;
 
         state.players = this.players.map(function(pl) {
-            var two_part_team = pl.teamId.split('@');
-            if(two_part_team.length == 2){
-                return TEAMS[two_part_team[0]] + two_part_team[1];
-            }
-            return TEAMS[two_part_team[0]];
+            return getNameFromTeamId(pl.teamId);
         });
 
         player.game = this;
@@ -485,7 +481,7 @@ Game.prototype = {
 
     getScores: function() {
         return this.players.map((function(player) {
-            return [player.teamId in TEAMS ? TEAMS[player.teamId] : 'You', this.getScore(player)];
+            return [player.teamId.split('@')[0] in TEAMS ? getNameFromTeamId(player.teamId) : 'Anonymous', this.getScore(player)];
         }).bind(this));
     },
 
@@ -552,6 +548,14 @@ function getUniqueTeamId (teamId) {
 function isValidTeamId(teamId) {
     //teamId = teamId.split('@')[0];  
     return (teamId in TEAMS) || (teamId.substring(0,3) == "bot");
+}
+
+function getNameFromTeamId(teamId){
+    var two_part_team = teamId.split('@');
+    if(two_part_team.length == 2){
+        return TEAMS[two_part_team[0]] + "@" + two_part_team[1];
+    }
+    return TEAMS[two_part_team[0]];
 }
 
 function getTeamIdFromName(TeamName){
@@ -719,7 +723,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function() {
         var teamId = socket.player.teamId;
         if (socket.player && socket.player.game && socket.player.number !== -1) {
-            console.log(TEAMS[teamId] + ' (' + teamId + ') has quit an active game.');
+            console.log(getNameFromTeamId(teamId) + ' (' + teamId + ') has quit an active game.');
             socket.player.game.quit();
         } else {
             console.log((teamId === undefined ? 'Spectator' : teamId) + ' has disconnected.');
