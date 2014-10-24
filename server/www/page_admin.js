@@ -43,19 +43,19 @@ $(document).ready(function() {
                       <td>Buttons</td>\
                     </tr>");
         for(team in data.teams){
-            if(data.plannedGames.indexOf(team) >= 0){
-                $list.append('<tr style="background-color: green>\
+            if(data.connectedTeams.indexOf(team) >= 0){
+                $list.append('<tr style="background-color: green">\
                                   <td>' + team + '</td>\
-                                  <td>Buttons</td>\
+                                  <td style="text-align:center"> <button type="button">Click Me!</button></td>\
                               </tr>');
             }
             else{
-                $list.append('<tr style="background-color: red>\
+                $list.append('<tr style="background-color: red">\
                                   <td>' + team + '</td>\
-                                  <td>Buttons</td>\
+                                  <td style="text-align:center"> <button type="button">Click Me!</button></td>\
                               </tr>');
             }
-        });
+        }
     });
     ws.emit('adminInfoRequest');
 });
