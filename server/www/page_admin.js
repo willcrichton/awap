@@ -8,7 +8,7 @@ function start(id) {
 
 
 $(document).ready(function() {
-    var ws = io.connect(location.protocol+'//'+location.hostname+':8080');
+    ws = io.connect(location.protocol+'//'+location.hostname+':8080');
 
     ws.on('returnInfo', function(data) {
         var $list = $('#games');
