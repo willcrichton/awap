@@ -70,6 +70,13 @@ $border: rgba(75, 180, 240, 0.85);
     z-index: 2;
     margin-right: 100px;
 
+    h2 {
+        &.p0 { color: $red; }
+        &.p1 { color: $yellow; }
+        &.p2 { color: $green; }
+        &.p3 { color: rgba(128, 231, 255, 0.85); }
+    }
+
     .blockgroup {
         overflow: hidden;
         padding-top: 15px;

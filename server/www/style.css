@@ -64,6 +64,14 @@ td {
   position: relative;
   z-index: 2;
   margin-right: 100px; }
+  #blocks h2.p0 {
+    color: rgba(240, 0, 0, 0.85); }
+  #blocks h2.p1 {
+    color: rgba(230, 230, 20, 0.85); }
+  #blocks h2.p2 {
+    color: rgba(0, 240, 0, 0.85); }
+  #blocks h2.p3 {
+    color: rgba(128, 231, 255, 0.85); }
   #blocks .blockgroup {
     overflow: hidden;
     padding-top: 15px;

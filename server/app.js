@@ -701,8 +701,24 @@ io.sockets.on('connection', function (socket) {
     socket.on('newGame', function(teams) {
         var numBots = 4 - teams.length;
         var testers = createBots(numBots);
-        teams = teams.concat(testers);
-        plannedGames.push({players: teams, fast: false, creator: socket});
+        var finalTeams = [];
+        var botCounter = 0;
+        for (var i = 0; i < 4; i++) {
+            var foundTeam = false;
+            teams.forEach(function(team) {
+                if (team[0] == i) {
+                    finalTeams[i] = team[1];
+                    foundTeam = true;
+                }
+            });
+
+            if (!foundTeam) {
+                finalTeams[i] = testers[botCounter];
+                botCounter++;
+            }
+        }
+
+        plannedGames.push({players: finalTeams, fast: false, creator: socket});
         console.log("added game with: " + teams.join(', '));
         startOpenGames();
     });

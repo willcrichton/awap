@@ -17,7 +17,7 @@ $(document).ready(function() {
             var $input = $("input[name='teamid" + (i+1) + "']");
             var temp = $input.val();
             if(temp != ""){
-                teams.push(temp);
+                teams.push([i, temp]);
             }
             $input.val('');
         }

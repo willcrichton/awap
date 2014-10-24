@@ -42,7 +42,7 @@ var init = (function() {
         var maxHeight = 0;
         for (var i = 0; i < blocks.length; i++) {
             var $group = $('<div class="blockgroup p' + i + ' ' + (i == turn ? 'active' : '') + '"></div>');
-            $blocks.append('<h2>' + playerNames[i] + '</h2>');
+            $blocks.append('<h2 class="p' + i + '">' + playerNames[i] + '</h2>');
             $blocks.append($group);
 
             for (var j = 0; j < blocks[i].length; j++) {
