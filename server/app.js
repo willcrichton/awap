@@ -464,7 +464,13 @@ Game.prototype = {
         var state = this.clientState();
         state.number = number;
 
-        state.players = this.players.map(function(pl) { return TEAMS[pl.teamId]; });
+        state.players = this.players.map(function(pl) {
+            var two_part_team = pl.teamId.split('@');
+            if(two_part_team.length == 2){
+                return TEAMS[two_part_team[0]] + two_part_team[1];
+            }
+            return TEAMS[two_part_team[0]];
+        });
 
         player.game = this;
         player.number = number;
@@ -545,7 +551,7 @@ function getUniqueTeamId (teamId) {
 
 function isValidTeamId(teamId) {
     teamId = teamId.split('@')[0];
-    return (TEAMS[teamId] !== undefined);
+    return (teamId in TEAMS) || (teamId.substring(0,3) == "bot");
 }
 
 function getTeamIdFromName(TeamName){
@@ -666,7 +672,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('clientInfo', function(args) {
         var teamId = getUniqueTeamId(args.teamId);
-        if (!(teamId in TEAMS)) {
+        if (!(isValidTeamId(teamId))) {
             socket.emit('rejected');
             return;
         }
