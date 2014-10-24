@@ -445,7 +445,7 @@ Game.prototype = {
         return {
             id: this.gameId,
             players: this.players.map(function(player) {
-                return TEAMS[player.teamId];
+                return TEAMS[player.teamId.split('@')[0]];
             })
         };
     },
@@ -550,7 +550,7 @@ function getUniqueTeamId (teamId) {
 }
 
 function isValidTeamId(teamId) {
-    teamId = teamId.split('@')[0];
+    //teamId = teamId.split('@')[0];  
     return (teamId in TEAMS) || (teamId.substring(0,3) == "bot");
 }
 
@@ -575,23 +575,14 @@ function getGameById(gameId) {
 
 // Gets open players, looks at planned game and starts first open game
 function startOpenGames() {
-    var constOpenTeams = connectedPlayers.filter(function(player) {
+    var openTeams = connectedPlayers.filter(function(player) {
         return !player.isInGame();
     }).map(function(player) {
         return player.teamId;
     });
-    var openTeams;
 
-    var filter = function(t) {
-        if(openTeams.indexOf(t.split('@')[0]) >= 0){
-            openTeams.splice(openTeams.indexOf(t), 1);
-            return true;
-        }
-        return false;
-    };
-
+    var filter = function(t) {return openTeams.indexOf(t) >= 0; };
     for (var i = 0; i < plannedGames.length; i++) {
-        openTeams = constOpenTeams;
         var game = plannedGames[i];
         if(game.players.every(filter)) {
             var newGame = new Game(game.players.map(getPlayerByTeam), game.fast);
@@ -681,10 +672,11 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('clientInfo', function(args) {
         var teamId = getUniqueTeamId(args.teamId);
-        if (!(isValidTeamId(teamId))) {
+        if (!(isValidTeamId(teamId)) && !TESTING) {
             socket.emit('rejected');
             return;
         }
+        socket.emit('name', teamId);
 
         socket.player.teamId = teamId;
         var address = socket.handshake.address;

@@ -33,7 +33,7 @@ def write(message):
 # All events from socket go to the GameNamespace
 class GameNamespace(BaseNamespace):
     def on_connect(self, *args):
-        print 'Connected to server'
+        print 'Connecting to server'
         self.emit('clientInfo', {
             'teamId' : team_id,
             'fast'   : is_fast
@@ -66,6 +66,8 @@ class GameNamespace(BaseNamespace):
         if thread_handle is not None:
             thread_handle.join()
 
+    def on_name(self, *args):
+        print('You connected to the server with id: ' + args[0]);
         sys.exit()
 
 def main():
