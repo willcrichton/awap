@@ -575,14 +575,23 @@ function getGameById(gameId) {
 
 // Gets open players, looks at planned game and starts first open game
 function startOpenGames() {
-    var openTeams = connectedPlayers.filter(function(player) {
+    var constOpenTeams = connectedPlayers.filter(function(player) {
         return !player.isInGame();
     }).map(function(player) {
         return player.teamId;
     });
+    var openTeams;
 
-    var filter = function(t) { return openTeams.indexOf(t) >= 0; };
+    var filter = function(t) {
+        if(openTeams.indexOf(t.split('@')[0]) >= 0){
+            openTeams.splice(openTeams.indexOf(t), 1);
+            return true;
+        }
+        return false;
+    };
+
     for (var i = 0; i < plannedGames.length; i++) {
+        openTeams = constOpenTeams;
         var game = plannedGames[i];
         if(game.players.every(filter)) {
             var newGame = new Game(game.players.map(getPlayerByTeam), game.fast);
