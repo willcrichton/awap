@@ -4,7 +4,7 @@
 
 /* GENERAL TODO:
  *  SERVER
- *  - Accept team NAMES as well when taking games from the lobby 
+ *  - Accept team NAMES as well when taking games from the lobby
         (there is already a function 'getTeamIdFromName')
  *
  *  WEBPAGE
@@ -546,7 +546,7 @@ function getUniqueTeamId (teamId) {
 }
 
 function isValidTeamId(teamId) {
-    //teamId = teamId.split('@')[0];  
+    //teamId = teamId.split('@')[0];
     return (teamId in TEAMS) || (teamId.substring(0,3) == "bot");
 }
 
@@ -712,7 +712,7 @@ io.sockets.on('connection', function (socket) {
               games: games.map(function(game){
                 return {teams: game.players.map(function(player){return player.teamId}),
                         over: game.over,
-                        url: 'http://game.acmalgo.com/game.html#' + game.gameId};
+                        id: game.gameId};
               }),
               plannedGames: plannedGames.map(function(game){return game.players}),
               teams: TEAMS,
