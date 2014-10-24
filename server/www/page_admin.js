@@ -37,6 +37,25 @@ $(document).ready(function() {
                               </tr>');
             }
         });
+        $list = $('#teams');
+        $list.html("<tr>\
+                      <td>Teams</td>\
+                      <td>Buttons</td>\
+                    </tr>");
+        for(team in data.teams){
+            if(data.plannedGames.indexOf(team) >= 0){
+                $list.append('<tr style="background-color: green>\
+                                  <td>' + team + '</td>\
+                                  <td>Buttons</td>\
+                              </tr>');
+            }
+            else{
+                $list.append('<tr style="background-color: red>\
+                                  <td>' + team + '</td>\
+                                  <td>Buttons</td>\
+                              </tr>');
+            }
+        });
     });
     ws.emit('adminInfoRequest');
 });
