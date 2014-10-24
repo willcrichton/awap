@@ -65,10 +65,10 @@ class GameNamespace(BaseNamespace):
         print('server rejected connection (only valid team IDs are allowed during the competition)')
         if thread_handle is not None:
             thread_handle.join()
+        sys.exit()
 
     def on_name(self, *args):
         print('You connected to the server with id: ' + args[0]);
-        sys.exit()
 
 def main():
 
