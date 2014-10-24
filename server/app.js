@@ -4,8 +4,8 @@
 
 /* GENERAL TODO:
  *  SERVER
- *  - what happens if a player leaves the game? check premature games
- *  - add naming for non-team-name bots that players create
+ *  - Accept team NAMES as well when taking games from the lobby 
+        (there is already a function 'getTeamIdFromName')
  *
  *  WEBPAGE
  *  - when you refresh a previous game, show the board
