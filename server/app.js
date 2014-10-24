@@ -709,10 +709,13 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('adminInfoRequest', function() {
           socket.emit('returnInfo',{
-              games: games
-              plannedGames, plannedGames,
+              games: games.map(function(game){
+                return {teams: game.players.map(function(player){return player.teamId}),
+                        over: game.over};
+              }),
+              plannedGames: plannedGames.map(function(game){return game.players}),
               teams: TEAMS,
-              connectedTeams: connectedPlayers
+              connectedTeams: connectedPlayers.map(function(player){return player.teamId})
           });
       });
 
