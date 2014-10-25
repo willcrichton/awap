@@ -3,9 +3,9 @@
 #include "game.h"
 
 /*
-  game.cpp - Responsible for generating moves to give to client.py         
+  game.cpp - Responsible for generating moves to give to client.py
   Moves via stdout in the form of "# # # #" (block index, # rotations, x, y)
-  Important function is find_move, which should contain the main AI. 
+  Important function is find_move, which should contain the main AI.
 */
 
 
@@ -17,11 +17,25 @@
      int y;
    }
  */
+
 Move Game::find_move()
 {
-  //Not Yet Implemented
+  for (int x = 0; x < dimension; x++) {
+    for (int y = 0; y < dimension; y++) {
+      for (int rot = 0; rot < 4; rot++) {
+        for (int i = 0; i < blocks.size(); i++) {
+          block b = blocks[my_number][i];
+          block bb = rotate_block(b, rot);
+          if (can_place(bb, Point(x, y))) {
+            Move move = {i, rot, x, y};
+            return move;
+          }
+        }
+      }
+    }
+  }
+
   Move move = {0, 0, 0, 0};
-  
   return move;
 }
 
@@ -49,20 +63,21 @@ bool Game::can_place(block b, Point p)
   bool onRelCorner = false;
   int N = dimension - 1;
 
-  Point corners[4] ={ Point(0,0), Point(N, 0), Point(0, N), Point(N, N) };
+  Point corners[4] = { Point(0,0), Point(N, 0), Point(0, N), Point(N, N) };
   Point corner = corners[my_number];
   for(int i = 0; i < b.size(); i++){
     Point q = b[i].add(p);
     int x = q.x;
     int y = q.y;
     if (x > N || x < 0 || y < 0 || y > N || grid[x][y] >= 0
-	|| (x > 0 && grid[x-1][y] == my_number)
-	|| (y > 0 && grid[x][y-1] == my_number)
-	|| (x < N && grid[x+1][y] == my_number)
-	|| (y < N && grid[x][y+1] == my_number)) {
+        || grid[x][y] == -2
+        || (x > 0 && grid[x-1][y] == my_number)
+        || (y > 0 && grid[x][y-1] == my_number)
+        || (x < N && grid[x+1][y] == my_number)
+        || (y < N && grid[x][y+1] == my_number)) {
       return false;
     }
-    
+
     onAbsCorner = onAbsCorner || q.eq(corner);
     onRelCorner = onRelCorner
       || (x > 0 && y > 0 && grid[x-1][y-1] == my_number)
@@ -70,8 +85,8 @@ bool Game::can_place(block b, Point p)
       || (x > 0 && y < N && grid[x-1][y+1] == my_number)
       || (x < N && y < N && grid[x+1][y+1] == my_number);
   }
-  
-  return !((grid[corner.x][corner.y] < 0 && !onAbsCorner) || (!onAbsCorner && !onRelCorner));      
+
+  return grid[corner.x][corner.y] < 0 ? onAbsCorner : onRelCorner;
 }
 
 
@@ -92,17 +107,17 @@ int Game::score_move(block b, Point p)
   int blockSize = b.size();
   int bonus_points = 0;
   int N = dimension;
-  
+
   for(int i = 0; i < blockSize; i++){
     Point s = b[i].add(p);
     for(int j = 0; j < bonus_squares.size(); j++){
       if(s.eq(bonus_squares[j])){
-	bonus_points += 2;
+        bonus_points += 2;
       }
       area_enclosed = max(area_enclosed, -1 * (s.distance(Point(N/2, N/2))));
     }
   }
-  
+
   return score;
 }
 
@@ -111,4 +126,9 @@ string Game::toString(Move m)
   stringstream ss;
   ss << m.index << " " << m.rotations << " " << m.x << " " << m.y;
   return ss.str();
+}
+
+void Game::debug(string s)
+{
+  std::cout << "DEBUG " << s << "\n";
 }
