@@ -62,7 +62,9 @@ public class Game {
 			Point q = offset.add(p);
 			int x = q.getX(), y = q.getY();
 
-			if (x > N || x < 0 || y < 0 || y > N || getPos(x, y) >= 0
+			if (x > N || x < 0 || y < 0 || y > N
+          || getPos(x, y) >= 0
+          || getPos(x, y) == -2
 					|| (x > 0 && getPos(x - 1, y) == number)
 					|| (y > 0 && getPos(x, y - 1) == number)
 					|| (x < N && getPos(x + 1, y) == number)

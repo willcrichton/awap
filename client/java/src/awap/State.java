@@ -48,6 +48,7 @@ public class State {
 	@SuppressWarnings("unchecked")
 	public void setBoard(Map<String, Object> board) {
 		this.board = (List<List<Integer>>) board.get("grid");
+    this.bonusSquares = (List<List<Integer>>) board.get("bonus_squares");
 		this.setDimension((int) board.get("dimension"));
 	}
 
@@ -96,7 +97,5 @@ public class State {
 		return bonusSquares;
 	}
 
-	public void setBonusSquares(List<List<Integer>> bonusSquares) {
-		this.bonusSquares = bonusSquares;
-	}
+  public void setPlayers(List<String> players) {}
 }
