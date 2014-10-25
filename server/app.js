@@ -227,9 +227,9 @@ var BLOCKS = [
     [[0, 0], [1, 0], [2, 0], [3, 0], [1, 1]] // line with a tumor (http://goo.gl/1nz2zY)
 ];
 
-var NUM_BLOCKS = 8; //BLOCKS.length;
+var NUM_BLOCKS = BLOCKS.length;
 
-var TURN_LENGTH = 5000;
+var TURN_LENGTH = 10000;
 var DELAY_BETWEEN_TURNS = 300;
 
 //use express to protect admin page

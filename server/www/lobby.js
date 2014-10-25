@@ -15,6 +15,10 @@ $(document).ready(function() {
         alert(msg);
     });
 
+    ws.on('onNewGame', function(id) {
+        window.location = '/game.html#' + id;
+    });
+
     $("#matchButton").click(function() {
         var teams = [];
         for (var i = 0; i < 4; i++) {
