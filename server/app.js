@@ -23,7 +23,7 @@ var childProcess = require('child_process');
 var crypto = require('crypto');
 var geoip = require('geoip-lite')
 
-var TESTING = false;
+var TESTING = true;
 
 var TEAMS = {
     'will'  : 'Will Crichton',
@@ -697,6 +697,8 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('newGame', function(teams) {
+        if (!TESTING) return;
+
         var numBots = 4 - teams.length;
         var testers = createBots(numBots);
         var finalTeams = [];
@@ -717,7 +719,7 @@ io.sockets.on('connection', function (socket) {
         }
 
         plannedGames.push({players: finalTeams, fast: false, creator: socket});
-        console.log("added game with: " + teams.join(', '));
+        console.log("added game with: " + finalTeams.join(', '));
         startOpenGames();
     });
 
@@ -740,6 +742,10 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('adminKickRequest', function(teamId) {
         getPlayerByTeam(teamId).socket.emit('rejected');
+    });
+
+    socket.on('adminAnnouncement', function(msg) {
+        io.sockets.emit('alert', msg);
     });
 
     socket.on('move', function(move) {

@@ -73,6 +73,11 @@ $(document).ready(function() {
                               </tr>');
             }
         }
+
+        $('input[type=submit]').click(function() {
+            ws.emit('adminAnnouncement', $('input[type=text]').val());
+            $('input[type=text]').val('');
+        });
     });
     ws.emit('adminInfoRequest');
 });

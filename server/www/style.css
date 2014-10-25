@@ -230,4 +230,9 @@ h1 {
     #scores tr .score {
       text-align: right; }
 
+#announcements input[type=text] {
+  width: 500px;
+  padding: 3px 5px;
+  margin-bottom: 15px; }
+
 /*# sourceMappingURL=style.css.map */

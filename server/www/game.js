@@ -222,6 +222,10 @@ var init = (function() {
             window.location = '/game.html#' + game;
         }, 5000);
     });
+
+    ws.on('alert', function(msg) {
+        alert(msg);
+    });
 });
 
 function showBoard(){
