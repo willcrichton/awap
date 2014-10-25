@@ -23,7 +23,7 @@ var childProcess = require('child_process');
 var crypto = require('crypto');
 var geoip = require('geoip-lite')
 
-var TESTING = false;
+var TESTING = true;
 
 var TEAMS = {
     'will'  : 'Will Crichton',
@@ -83,7 +83,7 @@ var BOT_NAMES = [
     'Wilbur Bot'
 ];
 
-//In the form of [x, y, value].
+//In the form of [x, y].
 var BONUS_SQUARES = [
     [2, 9],
     [9, 17],
@@ -336,18 +336,16 @@ Game.prototype = {
         }
 
         var mult = 1;
-        var block = pl.blocks[move.block];
         for (var i = 0; i < BONUS_SQUARES.length; i++) {
             var bonus = BONUS_SQUARES[i];
-            for (var j = 0; j < block.length; j++) {
-                if (bonus[0] == move.pos.x + block[j].x && bonus[1] == move.pos.y + block[j].y) {
+            for (var j = 0; j < newBlock.length; j++) {
+                if (bonus[0] == move.pos.x + newBlock[j].x && bonus[1] == move.pos.y + newBlock[j].y) {
                     mult = 2;
                 }
             }
         }
 
         this.scores[pl.number] += mult * pl.blocks[move.block].length;
-
         pl.blocks.splice(move.block, 1);
 
         this.updateCanMove();
@@ -699,6 +697,8 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('newGame', function(teams) {
+        if (!TESTING) return;
+
         var numBots = 4 - teams.length;
         var testers = createBots(numBots);
         var finalTeams = [];
@@ -719,7 +719,7 @@ io.sockets.on('connection', function (socket) {
         }
 
         plannedGames.push({players: finalTeams, fast: false, creator: socket});
-        console.log("added game with: " + teams.join(', '));
+        console.log("added game with: " + finalTeams.join(', '));
         startOpenGames();
     });
 
@@ -742,6 +742,10 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('adminKickRequest', function(teamId) {
         getPlayerByTeam(teamId).socket.emit('rejected');
+    });
+
+    socket.on('adminAnnouncement', function(msg) {
+        io.sockets.emit('alert', msg);
     });
 
     socket.on('move', function(move) {

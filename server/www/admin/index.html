@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="style.css" rel="stylesheet">
+    <link href="../style.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="jquery.min.js"></script>
+    <script src="/jquery.min.js"></script>
     <script src="page_admin.js"></script>
   </head>
   <body>
     <div id="container">
       <h1>Admin Page</h1>
+      <div id="announcements">
+        <input type="text" placeholder="Make an announcement..."> <input type="submit" value="Submit">
+      </div>
       <table id="games" border="1" style="width:500px; float:left;">
         <tr>
           <td>Games</td>

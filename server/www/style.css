@@ -173,6 +173,12 @@ h1 {
   background: white;
   padding: 10px; }
 
+#resources {
+  margin-top: 20px;
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid grey; }
+
 #existingGames {
   width: 600px; }
 
@@ -223,5 +229,10 @@ h1 {
       width: 80%; }
     #scores tr .score {
       text-align: right; }
+
+#announcements input[type=text] {
+  width: 500px;
+  padding: 3px 5px;
+  margin-bottom: 15px; }
 
 /*# sourceMappingURL=style.css.map */

@@ -11,6 +11,10 @@ $(document).ready(function() {
         });
     });
 
+    ws.on('alert', function(msg) {
+        alert(msg);
+    });
+
     $("#matchButton").click(function() {
         var teams = [];
         for (var i = 0; i < 4; i++) {
@@ -21,7 +25,7 @@ $(document).ready(function() {
             }
             $input.val('');
         }
-        alert('Submitted your game. TODO: make this not an alert box');
+        alert('Submitted your game. Give it a few seconds to show up in the match list.');
         ws.emit('newGame', teams);
     });
 
