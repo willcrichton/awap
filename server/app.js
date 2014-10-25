@@ -83,7 +83,7 @@ var BOT_NAMES = [
     'Wilbur Bot'
 ];
 
-//In the form of [x, y, value].
+//In the form of [x, y].
 var BONUS_SQUARES = [
     [2, 9],
     [9, 17],
@@ -336,18 +336,16 @@ Game.prototype = {
         }
 
         var mult = 1;
-        var block = pl.blocks[move.block];
         for (var i = 0; i < BONUS_SQUARES.length; i++) {
             var bonus = BONUS_SQUARES[i];
-            for (var j = 0; j < block.length; j++) {
-                if (bonus[0] == move.pos.x + block[j].x && bonus[1] == move.pos.y + block[j].y) {
+            for (var j = 0; j < newBlock.length; j++) {
+                if (bonus[0] == move.pos.x + newBlock[j].x && bonus[1] == move.pos.y + newBlock[j].y) {
                     mult = 2;
                 }
             }
         }
 
         this.scores[pl.number] += mult * pl.blocks[move.block].length;
-
         pl.blocks.splice(move.block, 1);
 
         this.updateCanMove();
