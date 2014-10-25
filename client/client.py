@@ -7,7 +7,6 @@
 from socketIO_client import SocketIO, BaseNamespace
 from subprocess import Popen, PIPE, STDOUT
 from argparse import ArgumentParser
-import pty
 import os
 import sys
 import fileinput

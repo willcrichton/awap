@@ -26,7 +26,7 @@ struct args{
   bool has_error;
   string error;
 };
- 
+
 class Game{
  public:
   Game() {};
@@ -37,8 +37,8 @@ class Game{
   int my_number;
   int dimension;
   int turn;
- 
-  
+
+
 
   Move find_move();
   bool my_turn();
@@ -51,7 +51,7 @@ class Game{
   int score_move(block b, Point p);
 
   string toString(Move m);
-
+  void debug(string s);
 
 };
 #endif /* GAME */
