@@ -639,7 +639,7 @@ function getUniqueTeamId (teamId) {
     var teams = connectedPlayers.map(function(p) {return p.teamId; });
 
     while(teams.indexOf(newTeamId) != -1){
-        newTeamId = newTeamId.replace(/_\d+/,"");
+        newTeamId = newTeamId.replace(/@\d+/,"");
         newTeamId += ("@" + i);
         i++;
     }
