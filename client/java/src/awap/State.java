@@ -49,7 +49,7 @@ public class State {
 	public void setBoard(Map<String, Object> board) {
 		this.board = (List<List<Integer>>) board.get("grid");
     this.bonusSquares = (List<List<Integer>>) board.get("bonus_squares");
-		this.setDimension((int) board.get("dimension"));
+		this.setDimension((Integer) board.get("dimension"));
 	}
 
 	public int getMove() {
