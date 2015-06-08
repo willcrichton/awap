@@ -8,6 +8,11 @@ GRAPH_NODE_COUNT = 100
 
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
+V_ERRORS = 0
+V_GAME_INFO = 1
+VERBOSE_LEVELS = [V_ERRORS, V_GAME_INFO]
+
+
 class Game:
     def __init__(self, player):
         self.state = {
@@ -28,13 +33,14 @@ class Game:
         nodes = self.state['graph'].nodes()
         return {
             'node': random.choice(nodes),
-            'money': 1000,
+            'money': 100,
             'time_created': self.state['time'],
             'time_started': None
         }
 
-    def log(self, message):
-        print 'Time %d: %s' % (self.state['time'], message)
+    def log(self, message, verbocity):
+        if(verbocity in VERBOSE_LEVELS):
+            print 'Time %d: %s' % (self.state['time'], message)
 
     def build_cost(self):
         # Might be geometrically increasing
@@ -46,7 +52,7 @@ class Game:
     def process_commands(self, commands):
         for command in commands:
             if not isinstance(command, dict) or 'type' not in command:
-                self.log(GENERIC_COMMAND_ERROR)
+                self.log(GENERIC_COMMAND_ERROR, V_ERRORS)
                 continue
             
             command_type = command['type']
@@ -54,19 +60,20 @@ class Game:
             # Building a new location on the graph
             if command_type == 'build':
                 if not 'node' in command:
-                    self.log(GENERIC_COMMAND_ERROR)
+                    self.log(GENERIC_COMMAND_ERROR, V_ERRORS)
                     continue
 
                 node = command['node']
                 if node in self.state['buildings']:
-                    self.log('Can\'t build on the same place you\'ve already built')
+                    self.log('Can\'t build on the same place you\'ve already built', V_ERRORS)
                     continue
                 
                 cost = self.build_cost()
                 if self.state['money'] < cost:
-                    self.log('Don\'t have enough money to build a restaurant, need %s' % cost)
+                    self.log('Don\'t have enough money to build a restaurant, need %s' % cost, V_ERRORS)
                     continue
 
+                self.log("Build station at " + str(node), V_GAME_INFO)
                 self.state['money'] -= cost
                 self.state['buildings'].append(node)
 
@@ -78,8 +85,9 @@ class Game:
 
                 order = command['order']
                 path = command['path']
+                self.log("Player accepted order and provided path: " + str(path), V_GAME_INFO)
                 if not self.can_satisfy_order(order, path):
-                    self.log('Can\'t satisfy order %s with path %s' % (order, path))
+                    self.log('Can\'t satisfy order %s with path %s' % (order, path), V_ERRORS)
                     continue
 
                 self.state['pending_orders'].remove(order)
@@ -88,25 +96,31 @@ class Game:
                 order['time_started'] = self.state['time']
 
     def step(self):
+        print("====== Starting step " + str(self.state['time']) + " ======")
+
+        # Create new order for player
         new_order = self.generate_order()
         if new_order is not None:
             if new_order['node'] in self.state['buildings']:
                 self.state['money'] += new_order['money']
             else:
                 self.state['pending_orders'].append(new_order)
+        self.log("Created new order at " + str(new_order['node']), V_GAME_INFO)
 
+        # Evaluate which orders the player has finished
         predicate = lambda (order, path): (order['time_started'] + len(path) - 1) <= self.state['time']
         completed_orders = filter(predicate, self.state['active_orders'])
         for (order, path) in completed_orders:
+            self.log("Player completed order to " + str(order['node']), V_GAME_INFO)
             self.state['active_orders'].remove((order, path))
             self.state['money'] += order['money'] # times a scaling factor?
-            
-        print self.state['money']
         
+        # Let player take their turn
+        print "Player has " + str(self.state['money']) + " dollars before their turn"
         commands = self.player.step(deepcopy(self.state))
         if not isinstance(commands, list):
-            self.log('Player.step must return a list of commands')
+            self.log('Player.step must return a list of commands', V_ERRORS)
         else:
             self.process_commands(commands)
-        
+
         self.state['time'] += 1

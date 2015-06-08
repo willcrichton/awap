@@ -16,6 +16,8 @@ class BasePlayer:
 
 # This is the class the competitors would implement
 class Player(BasePlayer):
+    first_step = True;
+
     def step(self, state):
         if len(state['pending_orders']) == 0: return []
         
@@ -24,5 +26,9 @@ class Player(BasePlayer):
         order = state['pending_orders'][0]
         path = nx.shortest_path(graph, station, order['node'])
 
-        return [self.build_command(station),
+        if(self.first_step):
+            self.first_step = False
+            return [self.build_command(station),
                 self.send_command(order, path)]
+        else:
+            return [self.send_command(order, path)]
