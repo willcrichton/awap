@@ -16,7 +16,7 @@ VERBOSE_LEVELS = [V_ERRORS, V_GAME_INFO]
 class Game:
     def __init__(self, player):
         self.state = {
-            'graph': nx.complete_graph(GRAPH_NODE_COUNT),
+            'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
             'time': 0,
             'money': STARTING_MONEY,
             'buildings': [],
