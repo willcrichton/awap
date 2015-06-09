@@ -5,6 +5,7 @@ from copy import deepcopy
 BUILD_COST = 1000
 STARTING_MONEY = 1000
 GRAPH_NODE_COUNT = 100
+ORDER_PERIOD = 4
 
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
@@ -38,13 +39,15 @@ class Game:
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        nodes = self.state['graph'].nodes()
-        return {
-            'node': random.choice(nodes),         # Originating node for the order
-            'money': 100,                         # Initial reward for completing order
-            'time_created': self.state['time'],   # Time step when order is created
-            'time_started': None                  # Time step when player starts a delivery
-        }
+        if(self.state['time'] % ORDER_PERIOD == 0):
+            nodes = self.state['graph'].nodes()
+            return {
+                'node': random.choice(nodes),         # Originating node for the order
+                'money': 100,                         # Initial reward for completing order
+                'time_created': self.state['time'],   # Time step when order is created
+                'time_started': None                  # Time step when player starts a delivery
+            }
+        return None
 
     def log(self, message, verbocity):
         if(verbocity in VERBOSE_LEVELS):
@@ -94,7 +97,7 @@ class Game:
                     continue
 
                 node = command['node']
-                if node in self.state['buildings']:
+                if G.node[node]['building'] == True:
                     self.log('Can\'t build on the same place you\'ve already built', V_ERRORS)
                     continue
 
@@ -140,7 +143,7 @@ class Game:
                 self.state['money'] += new_order['money']
             else:
                 self.state['pending_orders'].append(new_order)
-        self.log("Created new order at " + str(new_order['node']), V_GAME_INFO)
+                self.log("Created new order at " + str(new_order['node']), V_GAME_INFO)
 
         # Then remove all finished orders (and update graph)
         predicate = lambda (order, path): (order['time_started'] + len(path) - 1) <= self.state['time']

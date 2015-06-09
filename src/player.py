@@ -22,13 +22,20 @@ class Player(BasePlayer):
         if len(state['pending_orders']) == 0: return []
         
         graph = state['graph']
+        for (u,v) in graph.edges():
+            if(graph.edge[u][v]['in_use'] == True):
+                graph.remove_edge(u,v)
         station = graph.nodes()[0]
         order = state['pending_orders'][0]
-        path = nx.shortest_path(graph, station, order['node'])
+        try:
+            path = nx.shortest_path(graph, station, order['node'])
 
-        if(self.first_step):
-            self.first_step = False
-            return [self.build_command(station),
-                self.send_command(order, path)]
-        else:
-            return [self.send_command(order, path)]
+            if(self.first_step):
+                self.first_step = False
+                return [self.build_command(station),
+                        self.send_command(order, path)]
+            else:
+                return [self.send_command(order, path)]
+        except:
+            print("Client found no path")
+            return []

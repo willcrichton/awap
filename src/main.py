@@ -5,7 +5,7 @@ def main():
     player = Player()
     game = Game(player)
 
-    for _ in range(1, 10):
+    for _ in range(1, 30):
         game.step()
 
     print 'Money: $%d' % game.state['money']
