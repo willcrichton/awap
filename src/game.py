@@ -12,43 +12,48 @@ class Game:
     def __init__(self, player):
         self.state = {
             'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
-            'time': 0,
-            'money': STARTING_MONEY,
-            'pending_orders': [],
-            'active_orders': []
+            'time': 0,                  # Current time step
+            'money': STARTING_MONEY,    # Current amount of money
+            'pending_orders': [],       # Orders generated but not with a train on the way
+            'active_orders': []         # Orders with a train on the way
         }
         self.player = player
 
         G = self.state['graph']
         for (u, v) in G.edges():
-            G.edge[u][v]['in_use'] = False
+            G.edge[u][v]['in_use'] = False # True if edge is used for any train
 
         for n in G.nodes():
-            G.node[n]['building'] = False
+            G.node[n]['building'] = False  # True if the node is a player's building
 
+    # True iff there's no orders pending or active
     def no_orders(self):
         return len(self.state['pending_orders']) == 0 and len(self.state['active_orders']) == 0
 
+    # Create a new order to put in pending_orders
+    # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        # Can return None instead if we don't want to make an order this time step
         nodes = self.state['graph'].nodes()
         return {
-            'node': random.choice(nodes),
-            'money': 1000,
-            'time_created': self.state['time'],
-            'time_started': None
+            'node': random.choice(nodes),         # Originating node for the order
+            'money': 100,                         # Initial reward for completing order
+            'time_created': self.state['time'],   # Time step when order is created
+            'time_started': None                  # Time step when player starts a delivery
         }
 
     def log(self, message):
         print 'Time %d: %s' % (self.state['time'], message)
 
+    # Get the cost for constructing a new building
     def build_cost(self):
-        # Might be geometrically increasing
         return BUILD_COST
 
+    # Converts a list of nodes into a list of edge pairs
+    # e.g. [0, 1, 2] -> [(0, 1), (1, 2)]
     def path_to_edges(self, path):
         return [(path[i], path[i + 1]) for i in range(0, len(path) - 1)]
 
+    # True iff the user can satisfy the given order with the given path
     def can_satisfy_order(self, order, path):
         G = self.state['graph']
         for (u, v) in self.path_to_edges(path):
@@ -62,7 +67,12 @@ class Game:
 
         return True
 
+    # Attempt to execute each of the commands returned from the player
     def process_commands(self, commands):
+        if not isinstance(commands, list):
+            self.log('Player.step must return a list of commands')
+            return
+
         G = self.state['graph']
         for command in commands:
             if not isinstance(command, dict) or 'type' not in command:
@@ -110,8 +120,11 @@ class Game:
 
                 order['time_started'] = self.state['time']
 
+    # Take the world through a time step
     def step(self):
         G = self.state['graph']
+
+        # First create a new order
         new_order = self.generate_order()
         if new_order is not None:
             if G.node[new_order['node']]['building']:
@@ -119,6 +132,7 @@ class Game:
             else:
                 self.state['pending_orders'].append(new_order)
 
+        # Then remove all finished orders (and update graph)
         predicate = lambda (order, path): (order['time_started'] + len(path) - 1) <= self.state['time']
         completed_orders = filter(predicate, self.state['active_orders'])
         for (order, path) in completed_orders:
@@ -128,10 +142,9 @@ class Game:
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False
 
+        # Get commands from player and process them
         commands = self.player.step(deepcopy(self.state))
-        if not isinstance(commands, list):
-            self.log('Player.step must return a list of commands')
-        else:
-            self.process_commands(commands)
+        self.process_commands(commands)
 
+        # Go to the next time step
         self.state['time'] += 1
