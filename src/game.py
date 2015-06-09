@@ -11,14 +11,20 @@ GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and sen
 class Game:
     def __init__(self, player):
         self.state = {
-            'graph': nx.complete_graph(GRAPH_NODE_COUNT),
+            'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
             'time': 0,
             'money': STARTING_MONEY,
-            'buildings': [],
             'pending_orders': [],
             'active_orders': []
         }
         self.player = player
+
+        G = self.state['graph']
+        for (u, v) in G.edges():
+            G.edge[u][v]['in_use'] = False
+
+        for n in G.nodes():
+            G.node[n]['building'] = False
 
     def no_orders(self):
         return len(self.state['pending_orders']) == 0 and len(self.state['active_orders']) == 0
@@ -40,15 +46,29 @@ class Game:
         # Might be geometrically increasing
         return BUILD_COST
 
+    def path_to_edges(self, path):
+        return [(path[i], path[i + 1]) for i in range(0, len(path) - 1)]
+
     def can_satisfy_order(self, order, path):
+        G = self.state['graph']
+        for (u, v) in self.path_to_edges(path):
+            if G.edge[u][v]['in_use']:
+                self.log('Cannot use edge (%d, %d) that is already in use (your path: %s)' % (u, v, path))
+                return False
+
+        if path[-1] != order['node']:
+            self.log('Path must end at the order node')
+            return False
+
         return True
 
     def process_commands(self, commands):
+        G = self.state['graph']
         for command in commands:
             if not isinstance(command, dict) or 'type' not in command:
                 self.log(GENERIC_COMMAND_ERROR)
                 continue
-            
+
             command_type = command['type']
 
             # Building a new location on the graph
@@ -58,17 +78,17 @@ class Game:
                     continue
 
                 node = command['node']
-                if node in self.state['buildings']:
+                if G.node[node]['building']:
                     self.log('Can\'t build on the same place you\'ve already built')
                     continue
-                
+
                 cost = self.build_cost()
                 if self.state['money'] < cost:
                     self.log('Don\'t have enough money to build a restaurant, need %s' % cost)
                     continue
 
                 self.state['money'] -= cost
-                self.state['buildings'].append(node)
+                G.node[node]['building'] = True
 
             # Satisfying an order ("send"ing a train)
             elif command_type == 'send':
@@ -85,12 +105,16 @@ class Game:
                 self.state['pending_orders'].remove(order)
                 self.state['active_orders'].append((order, path))
 
+                for (u, v) in self.path_to_edges(path):
+                    G.edge[u][v]['in_use'] = True
+
                 order['time_started'] = self.state['time']
 
     def step(self):
+        G = self.state['graph']
         new_order = self.generate_order()
         if new_order is not None:
-            if new_order['node'] in self.state['buildings']:
+            if G.node[new_order['node']]['building']:
                 self.state['money'] += new_order['money']
             else:
                 self.state['pending_orders'].append(new_order)
@@ -100,13 +124,14 @@ class Game:
         for (order, path) in completed_orders:
             self.state['active_orders'].remove((order, path))
             self.state['money'] += order['money'] # times a scaling factor?
-            
-        print self.state['money']
-        
+
+            for (u, v) in self.path_to_edges(path):
+                G.edge[u][v]['in_use'] = False
+
         commands = self.player.step(deepcopy(self.state))
         if not isinstance(commands, list):
             self.log('Player.step must return a list of commands')
         else:
             self.process_commands(commands)
-        
+
         self.state['time'] += 1
