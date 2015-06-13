@@ -1,6 +1,6 @@
 function renderGraph(graph) {
     var nodes = _.keys(graph).map(function(k) {
-        return {name: 'lol'};
+        return {name: '', label: 'Test'};
     });
 
     // Links = edges
@@ -16,7 +16,7 @@ function renderGraph(graph) {
 
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
-        .linkDistance(30)
+        .linkDistance(50)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
         .links(links);
@@ -31,20 +31,51 @@ function renderGraph(graph) {
         .attr('width', window.innerWidth)
         .attr('height', window.innerHeight);
 
+    svg.append("defs").selectAll("marker")
+        .data(["end"])
+        .enter().append("marker")
+        .attr("id", function(d) { return d; })
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 20) // change this if circles change size
+        .attr("refY", -1.5)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5");
+
     var link = svg
         .selectAll('.link')
         .data(links)
         .enter()
-        .append('line')
-        .attr('class', 'link');
+        .append('path')
+        .attr('class', 'link')
+        .attr('d', function(d) {
+            var dx = d.target.x - d.source.x,
+                dy = d.target.y - d.source.y,
+                dr = Math.sqrt(dx * dx + dy * dy);
+            return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+        })
+        .attr('marker-end', 'url(#end)');
+
+        /*.append('line')
+        .attr('class', 'link')
+        .attr('marker-end', 'url(#end)');*/
 
     var node = svg
         .selectAll('node')
         .data(nodes)
         .enter()
-        .append('circle')
+        .append('g')
+
+    node.append('circle')
         .attr('class', 'node')
-        .attr('r', 5)
+        .attr('r', 12);
+
+    node.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('y', 5)
+        .text(function(d) { return d.index; });
 
     // Update with values from the force constraint
     link.attr("x1", function(d) { return d.source.x; })
@@ -52,8 +83,9 @@ function renderGraph(graph) {
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+    node.attr("transform", function(d) {
+        return "translate(" + d.x + ", " + d.y + ")";
+    });
 
     return svg;
 }
@@ -62,10 +94,27 @@ function updateGraph(svg, state) {
     var link = svg.selectAll('.link');
     var node = svg.selectAll('.node');
 
-    node.attr('fill', function(d) {
-        if (d.index == 0) {
-            return '#f00';
+    node.attr('class', function(d) {
+        var c = 'node';
+        var data = state.node_data[d.index];
+        if (data.building) {
+            c += ' building';
         }
+
+        if (data.num_orders > 0) {
+            c += ' has-order';
+        }
+
+        return c;
+    });
+
+    link.attr('class', function(d) {
+        var c = 'link';
+        if (state.graph[d.source.index][d.target.index].in_use) {
+            c += ' in-use';
+        }
+
+        return c;
     });
 }
 

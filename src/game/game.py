@@ -5,7 +5,7 @@ from copy import deepcopy
 
 BUILD_COST = 1000
 STARTING_MONEY = 1000
-GRAPH_NODE_COUNT = 100
+GRAPH_NODE_COUNT = 50
 
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
@@ -26,9 +26,11 @@ class Game:
 
         for n in G.nodes():
             G.node[n]['building'] = False  # True if the node is a player's building
+            G.node[n]['num_orders'] = 0
 
     def to_json(self):
         copy = deepcopy(self.state)
+        copy['node_data'] = copy['graph'].node
         copy['graph'] = nx.to_dict_of_dicts(copy['graph'])
         return json.dumps(copy)
 
@@ -136,6 +138,7 @@ class Game:
             if G.node[new_order['node']]['building']:
                 self.state['money'] += new_order['money']
             else:
+                G.node[new_order['node']]['num_orders'] += 1
                 self.state['pending_orders'].append(new_order)
 
         # Then remove all finished orders (and update graph)
@@ -144,6 +147,8 @@ class Game:
         for (order, path) in completed_orders:
             self.state['active_orders'].remove((order, path))
             self.state['money'] += order['money'] # times a scaling factor?
+
+            G.node[order['node']]['num_orders'] -= 1
 
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False

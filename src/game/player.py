@@ -18,11 +18,12 @@ class BasePlayer:
 class Player(BasePlayer):
     def step(self, state):
         if len(state['pending_orders']) == 0: return []
-        
+
         graph = state['graph']
         station = graph.nodes()[0]
-        order = state['pending_orders'][0]
-        path = nx.shortest_path(graph, station, order['node'])
 
-        return [self.build_command(station),
-                self.send_command(order, path)]
+        commands = [self.send_command(order, nx.shortest_path(graph, station, order['node']))
+                    for order in state['pending_orders']]
+        commands.insert(0, self.build_command(station))
+
+        return commands

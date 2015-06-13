@@ -4,6 +4,23 @@
 }
 
 .link {
-    stroke: #999;
-    stroke-width: 2px;
+    fill: none;
+    stroke: #666;
+    stroke-width: 1.5px;
+}
+
+.building {
+    fill: #f00;
+}
+
+.in-use {
+    stroke: #0f0;
+}
+
+.has-order {
+    fill: #00f;
+}
+
+text {
+    fill: white;
 }
