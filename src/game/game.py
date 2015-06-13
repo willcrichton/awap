@@ -1,5 +1,6 @@
 import networkx as nx
 import random
+import json
 from copy import deepcopy
 
 BUILD_COST = 1000
@@ -25,6 +26,11 @@ class Game:
 
         for n in G.nodes():
             G.node[n]['building'] = False  # True if the node is a player's building
+
+    def to_json(self):
+        copy = deepcopy(self.state)
+        copy['graph'] = nx.to_dict_of_dicts(copy['graph'])
+        return json.dumps(copy)
 
     # True iff there's no orders pending or active
     def no_orders(self):
