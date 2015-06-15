@@ -38,6 +38,11 @@ class Game:
     def no_orders(self):
         return len(self.state['pending_orders']) == 0 and len(self.state['active_orders']) == 0
 
+    # True iff the game should end
+    def is_over(self):
+        # Arbitrary end condition for now, should think about this
+        return self.state['time'] == 10
+
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):

@@ -58,10 +58,6 @@ function renderGraph(graph) {
         })
         .attr('marker-end', 'url(#end)');
 
-        /*.append('line')
-        .attr('class', 'link')
-        .attr('marker-end', 'url(#end)');*/
-
     var node = svg
         .selectAll('node')
         .data(nodes)
@@ -110,9 +106,25 @@ function updateGraph(svg, state) {
 
     link.attr('class', function(d) {
         var c = 'link';
-        if (state.graph[d.source.index][d.target.index].in_use) {
-            c += ' in-use';
-        }
+
+        state.active_orders.forEach(function(data) {
+            var order = data[0];
+            var path = data[1];
+            console.log(order.time_started, state.time);
+
+            for (var i = 0; i < path.length - 1; ++i) {
+                if (d.source.index == path[i] &&
+                    d.target.index == path[i + 1]) {
+                    c += ' in-use';
+
+                    if (state.time - order.time_started == i + 1) {
+                        c += ' is-train';
+                    }
+
+                    break;
+                }
+            }
+        });
 
         return c;
     });
