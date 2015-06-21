@@ -110,7 +110,6 @@ function updateGraph(svg, state) {
         state.active_orders.forEach(function(data) {
             var order = data[0];
             var path = data[1];
-            console.log(order.time_started, state.time);
 
             for (var i = 0; i < path.length - 1; ++i) {
                 if (d.source.index == path[i] &&
@@ -128,19 +127,47 @@ function updateGraph(svg, state) {
 
         return c;
     });
+
+    $('#time').text('Time: ' + state.time);
 }
+
 
 function main() {
     $('#container').css('height', window.innerHeight);
 
     $.get('/graph').done(function(resp) {
         var svg = renderGraph(JSON.parse(resp).graph);
-        setInterval(function() {
+
+        function step() {
             $.get('/step').done(function(resp) {
                 updateGraph(svg, JSON.parse(resp));
             });
-        }, 5000);
+        }
+
+        $('#step').click(step);
+
+        var playing = false;
+        var interval;
+        var speed = $('#speed').val();
+        $('#play').click(function() {
+            if (!playing) {
+                $(this).text('Pause');
+                interval = setInterval(step, 1000 * speed);
+            } else {
+                $(this).text('Play');
+                clearInterval(interval);
+            }
+
+            playing = !playing;
+        });
+
+        $('#speed').change(function() {
+            speed = $(this).val();
+            clearInterval(interval);
+            interval = setInterval(step, 1000 * speed);
+        });
     });
 }
+
 
 $(document).ready(main);
