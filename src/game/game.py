@@ -13,6 +13,7 @@ class Game:
     def __init__(self, player):
         self.state = {
             'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
+            #'graph': nx.gnp_random_graph(50, 0.05),
             'time': 0,                  # Current time step
             'money': STARTING_MONEY,    # Current amount of money
             'pending_orders': [],       # Orders generated but not with a train on the way

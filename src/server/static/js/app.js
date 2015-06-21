@@ -17,6 +17,7 @@ function renderGraph(graph) {
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
         .linkDistance(50)
+        .symmetricDiffLinkLengths(20)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
         .links(links);
@@ -44,7 +45,9 @@ function renderGraph(graph) {
         .append("path")
         .attr("d", "M0,-5L10,0L0,5");
 
-    var link = svg
+    var group = svg.append('g');
+
+    var link = group
         .selectAll('.link')
         .data(links)
         .enter()
@@ -58,7 +61,7 @@ function renderGraph(graph) {
         })
         .attr('marker-end', 'url(#end)');
 
-    var node = svg
+    var node = group
         .selectAll('node')
         .data(nodes)
         .enter()
@@ -131,15 +134,21 @@ function updateGraph(svg, state) {
     $('#time').text('Time: ' + state.time);
 }
 
+function $get(url) {
+    return $.get(url).fail(function() {
+        alert('Server is down.');
+    });
+}
+
 
 function main() {
     $('#container').css('height', window.innerHeight);
 
-    $.get('/graph').done(function(resp) {
+    $get('/graph').done(function(resp) {
         var svg = renderGraph(JSON.parse(resp).graph);
 
         function step() {
-            $.get('/step').done(function(resp) {
+            $get('/step').done(function(resp) {
                 updateGraph(svg, JSON.parse(resp));
             });
         }
