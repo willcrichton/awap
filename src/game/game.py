@@ -10,10 +10,9 @@ GRAPH_NODE_COUNT = 50
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
 class Game:
-    def __init__(self, player):
+    def __init__(self, player, graph):
         self.state = {
-            'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
-            #'graph': nx.gnp_random_graph(50, 0.05),
+            'graph': graph,
             'time': 0,                  # Current time step
             'money': STARTING_MONEY,    # Current amount of money
             'pending_orders': [],       # Orders generated but not with a train on the way
