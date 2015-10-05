@@ -6,6 +6,7 @@ from order import Order
 
 BUILD_COST = 1000
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
+DEBUG = 1
 
 class Game:
     def __init__(self, player):
@@ -38,7 +39,8 @@ class Game:
         return Order(self.state)
 
     def log(self, message):
-        print message
+        if(DEBUG):
+            print message
 
     # Get the cost for constructing a new building
     def build_cost(self):
