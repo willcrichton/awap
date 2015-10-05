@@ -1,9 +1,11 @@
 import random
 import json
+import multiprocessing
 from copy import deepcopy
 from state import State
 from order import Order
 
+STEP_TIMEOUT = 3
 BUILD_COST = 1000
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 DEBUG = 1
@@ -151,8 +153,17 @@ class Game:
                 G.edge[u][v]['in_use'] = False
 
         # Get commands from player and process them
-        commands = self.player.step(deepcopy(self.state))
-        self.process_commands(commands)
+        queue = multiprocessing.Queue()
+        p = multiprocessing.Process(target=self.player._step,
+                                    args=(self.state,queue))
+        p.start()
+        p.join(STEP_TIMEOUT)
+        if p.is_alive():
+            self.log('Player timed out')
+            p.terminate()
+            p.join()
+        else:
+            self.process_commands(queue.get())
 
         # Go to the next time step
         self.state.incr_time()
