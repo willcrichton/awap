@@ -5,7 +5,7 @@ import sys
 
 def print_usage():
     print 'Usage: %s [shell|web]' % sys.argv[0]
-    exit()
+    exit(1)
 
 def main():
     player = Player()
@@ -20,7 +20,7 @@ def main():
         while not game.is_over():
             game.step()
 
-        print 'Money: %s' % game.state['money']
+        print 'Money: %s' % game.state.get_money()
     else: print_usage()
 
 if __name__ == "__main__":
