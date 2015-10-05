@@ -16,8 +16,8 @@ function renderGraph(graph) {
 
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
-        .linkDistance(50)
-        .symmetricDiffLinkLengths(20)
+        .linkDistance(10)
+        .symmetricDiffLinkLengths(10)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
         .links(links);
@@ -37,13 +37,13 @@ function renderGraph(graph) {
         .enter().append("marker")
         .attr("id", function(d) { return d; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 20) // change this if circles change size
-        .attr("refY", -1.5)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
+        .attr("refX", 0) // change this if circles change size
+        .attr("refY", 0)
+        .attr("markerWidth", 0)
+        .attr("markerHeight", 0)
         .attr("orient", "auto")
         .append("path")
-        .attr("d", "M0,-5L10,0L0,5");
+        .attr("d", "M1,-5L10,0L0,5");
 
     var group = svg.append('g');
 
@@ -69,7 +69,7 @@ function renderGraph(graph) {
 
     node.append('circle')
         .attr('class', 'node')
-        .attr('r', 12);
+        .attr('r', 7);
 
     node.append('text')
         .attr('text-anchor', 'middle')
