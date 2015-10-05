@@ -5,14 +5,13 @@ from copy import deepcopy
 
 BUILD_COST = 1000
 STARTING_MONEY = 1000
-GRAPH_NODE_COUNT = 50
 
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
 class Game:
-    def __init__(self, player, graph):
+    def __init__(self, player, settings):
         self.state = {
-            'graph': graph,
+            'graph': settings.Graph(),
             'time': 0,                  # Current time step
             'money': STARTING_MONEY,    # Current amount of money
             'pending_orders': [],       # Orders generated but not with a train on the way
