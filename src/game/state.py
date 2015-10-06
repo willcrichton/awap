@@ -19,13 +19,12 @@ class State:
     def get_pending_orders(self): return self.pending_orders
     def get_active_orders(self): return self.active_orders
 
-    def to_json(self):
+    def to_dict(self):
         obj = deepcopy(self.__dict__)
-        obj['node_data'] = self.get_graph().node
-        obj['graph'] = nx.to_dict_of_dicts(self.get_graph())
+        del obj['graph']
         obj['pending_orders'] = map(lambda x: x.__dict__, obj['pending_orders'])
         obj['active_orders'] = map(lambda (x, path): (x.__dict__, path), obj['active_orders'])
-        return json.dumps(obj)
+        return obj
 
     def incr_money(self, money):
         self.money += money

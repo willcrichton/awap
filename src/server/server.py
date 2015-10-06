@@ -11,11 +11,11 @@ def home():
 @app.route('/step')
 def step():
     game.step()
-    return game.to_json()
+    return json.dumps(game.to_dict())
 
 @app.route('/graph')
 def graph():
-    return game.to_json()
+    return json.dumps(game.get_graph())
 
 def run_server(g):
     global game

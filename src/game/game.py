@@ -1,3 +1,4 @@
+import networkx as nx
 import random
 import json
 import multiprocessing
@@ -8,7 +9,7 @@ from order import Order
 STEP_TIMEOUT = 3
 BUILD_COST = 1000
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
-DEBUG = 1
+DEBUG = 0
 
 class Game:
     def __init__(self, player):
@@ -23,8 +24,14 @@ class Game:
             G.node[n]['building'] = False  # True if the node is a player's building
             G.node[n]['num_orders'] = 0
 
-    def to_json(self):
-        return self.state.to_json()
+    def to_dict(self):
+        G = self.state.get_graph()
+        dict = self.state.to_dict()
+        dict['buildings'] = [i for i, x in G.node.iteritems() if x['building']]
+        return dict
+
+    def get_graph(self):
+        return nx.to_dict_of_dicts(self.state.get_graph())
 
     # True iff there's no orders pending or active
     def no_orders(self):

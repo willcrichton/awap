@@ -97,14 +97,21 @@
 
         node.attr('class', function(d) {
             var c = 'node';
-            var data = state.node_data[d.index];
-            if (data.building) {
+            if (state.buildings.indexOf(d.index) > -1) {
                 c += ' building';
             }
 
-            if (data.num_orders > 0) {
-                c += ' has-order';
-            }
+            state.pending_orders.forEach(function(order) {
+                if (order.node == d.index) {
+                    c += ' has-order';
+                }
+            });
+
+            state.active_orders.forEach(function(order) {
+                if (order[0].node == d.index) {
+                    c += ' has-order';
+                }
+            });
 
             return c;
         });
@@ -141,6 +148,7 @@
     var speed = $('#speed').val();
 
     function togglePlay(step) {
+        console.log(playing);
         if (!playing) {
             $(this).text('Pause');
             interval = setInterval(step, 1000 / speed);
@@ -166,7 +174,7 @@
         $('#container').css('height', window.innerHeight);
 
         $get('/graph').done(function(resp) {
-            var svg = renderGraph(JSON.parse(resp).graph);
+            var svg = renderGraph(JSON.parse(resp));
 
             function step() {
                 $get('/step').done(function(resp) {
@@ -176,7 +184,7 @@
 
             $('#step').click(step);
 
-            $('#play').click(function() { togglePlay(step); });
+            $('#play').click(function() { togglePlay.call(this, step); });
 
             $('#speed').change(function() {
                 speed = $(this).val();
