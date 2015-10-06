@@ -1,4 +1,5 @@
 import networkx as nx
+from numpy import random as nrand
 import random
 import json
 from copy import deepcopy
@@ -18,6 +19,9 @@ class Game:
             'active_orders': []         # Orders with a train on the way
         }
         self.player = player
+        self.params = settings.Params()
+        random.seed(self.params['seed'])
+        nrand.seed(hash(self.params['seed']) % 2**32)
 
         G = self.state['graph']
         for (u, v) in G.edges():
@@ -45,10 +49,20 @@ class Game:
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        nodes = self.state['graph'].nodes()
+        if (random.random() > self.params['order_chance']):
+            return None
+        
+        hub = random.choice(self.params['hubs'])
+        idx = hub[0] * self.params['graph_size'] + hub[1]
+        node = self.state['graph'].nodes()[idx]
+        for i in range(int(abs(nrand.normal(0, self.params['order_var'])))):
+            node = random.choice(self.state['graph'].neighbors(node))
+
+        money = int(nrand.normal(100, self.params['score_var']))
+
         return {
-            'node': random.choice(nodes),         # Originating node for the order
-            'money': 100,                         # Initial reward for completing order
+            'node': node,                         # Originating node for the order
+            'money': money,                       # Initial reward for completing order
             'time_created': self.state['time'],   # Time step when order is created
             'time_started': None                  # Time step when player starts a delivery
         }

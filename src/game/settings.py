@@ -1,17 +1,18 @@
 import random
 import networkx as nx
 
-GRAPH_SEED = 'i am a random seed'
-REQUEST_SEED = 'i am a different random seed'
+GRAPH_SEED = 'banana phone 123'
+ORDER_SEED = 'phanana bone'
 GRAPH_SIZE = 10         # Graph height & width
 SPARCITY = 0.05         # Proportion of edges which will be removed
-DIAGONALS = 0.10        # Proportion of vertices with diagonals
+DIAGONALS = 0.15        # Proportion of vertices with diagonals
+HUBS = 5                # Number of hubs where orders are centered around
+ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
+ORDER_VAR = 5.0         # Stddev for the Gaussian used to generate orders
+SCORE_VAR = 25.0        # Stddev for score distribution (centered around 100)
 
 def NODE_INDEX(row, col):
     return row * GRAPH_SIZE + col
-
-def NODE_RC(index):
-    return (index / GRAPH_SIZE, index % GRAPH_SIZE)
 
 # General class that returns various settings that will be used
 class Settings:
@@ -54,7 +55,23 @@ class Settings:
             graph.add_edge(ind1, ind2)
 
         return graph
-        
 
+    # Other tune-able parameters used in the game
+    def Params(self):
+       
+        # Hubs are the the center of where orders are being generated from
+        # These hubs will be unknown to your code running in player.py
+        hubs = []
+        for i in range(HUBS):
+            row = int(random.random() * GRAPH_SIZE)
+            col = int(random.random() * GRAPH_SIZE)
+            hubs.append((row, col))
 
-
+        return {
+            'graph_size': GRAPH_SIZE,
+            'seed': ORDER_SEED,
+            'hubs': hubs,
+            'order_chance': ORDER_CHANCE,
+            'order_var': ORDER_VAR,
+            'score_var': SCORE_VAR
+        }
