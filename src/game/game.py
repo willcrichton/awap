@@ -53,8 +53,7 @@ class Game:
             return None
         
         hub = random.choice(self.params['hubs'])
-        idx = hub[0] * self.params['graph_size'] + hub[1]
-        node = self.state['graph'].nodes()[idx]
+        node = self.state['graph'].nodes()[hub]
         for i in range(int(abs(nrand.normal(0, self.params['order_var'])))):
             node = random.choice(self.state['graph'].neighbors(node))
 

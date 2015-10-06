@@ -17,7 +17,7 @@ function renderGraph(graph) {
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
         .linkDistance(10)
-        .symmetricDiffLinkLengths(10)
+        .symmetricDiffLinkLengths(15)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
         .links(links);
@@ -43,7 +43,7 @@ function renderGraph(graph) {
         .attr("markerHeight", 0)
         .attr("orient", "auto")
         .append("path")
-        .attr("d", "M1,-5L10,0L0,5");
+        .attr("d", "M0,-5L10,0L0,5");
 
     var group = svg.append('g');
 
@@ -53,12 +53,19 @@ function renderGraph(graph) {
         .enter()
         .append('path')
         .attr('class', 'link')
+
         .attr('d', function(d) {
             var dx = d.target.x - d.source.x,
                 dy = d.target.y - d.source.y,
                 dr = Math.sqrt(dx * dx + dy * dy);
-            return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
         })
+        //.attr('d', function(d) {
+        //    var dx = d.target.x - d.source.x,
+        //        dy = d.target.y - d.source.y,
+        //        dr = Math.sqrt(dx * dx + dy * dy);
+        //    return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+        //})
         .attr('marker-end', 'url(#end)');
 
     var node = group
@@ -115,8 +122,10 @@ function updateGraph(svg, state) {
             var path = data[1];
 
             for (var i = 0; i < path.length - 1; ++i) {
-                if (d.source.index == path[i] &&
-                    d.target.index == path[i + 1]) {
+                if ((d.source.index == path[i] &&
+                     d.target.index == path[i + 1]) ||
+                    (d.target.index == path[i] &&
+                     d.source.index == path[i + 1])) {
                     c += ' in-use';
 
                     if (state.time - order.time_started == i + 1) {
