@@ -17,7 +17,7 @@ function renderGraph(graph) {
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
         .linkDistance(10)
-        .symmetricDiffLinkLengths(15)
+        .symmetricDiffLinkLengths(20)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
         .links(links);
@@ -37,10 +37,6 @@ function renderGraph(graph) {
         .enter().append("marker")
         .attr("id", function(d) { return d; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 0) // change this if circles change size
-        .attr("refY", 0)
-        .attr("markerWidth", 0)
-        .attr("markerHeight", 0)
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M0,-5L10,0L0,5");
@@ -60,12 +56,6 @@ function renderGraph(graph) {
                 dr = Math.sqrt(dx * dx + dy * dy);
             return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
         })
-        //.attr('d', function(d) {
-        //    var dx = d.target.x - d.source.x,
-        //        dy = d.target.y - d.source.y,
-        //        dr = Math.sqrt(dx * dx + dy * dy);
-        //    return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-        //})
         .attr('marker-end', 'url(#end)');
 
     var node = group

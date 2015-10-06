@@ -54,9 +54,12 @@ class Game:
         
         hub = random.choice(self.params['hubs'])
         node = self.state['graph'].nodes()[hub]
+
+        # Perform a random walk on a Gaussian distance from the hub
         for i in range(int(abs(nrand.normal(0, self.params['order_var'])))):
             node = random.choice(self.state['graph'].neighbors(node))
 
+        # Money for the order is from a Gaussian centered around 100
         money = int(nrand.normal(100, self.params['score_var']))
 
         return {
