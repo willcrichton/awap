@@ -1,7 +1,7 @@
 from game.game import Game
 from game.player import Player
 from server.server import run_server
-import sys, json
+import sys, json, zlib
 
 def print_usage():
     print 'Usage: %s [shell|web]' % sys.argv[0]
@@ -17,12 +17,12 @@ def main():
     if command == 'web':
         run_server(game)
     elif command == 'shell':
-        print json.dumps(game.get_graph())
+        output = json.dumps(game.get_graph())
         while not game.is_over():
             game.step()
-            print json.dumps(game.to_dict())
+            output += json.dumps(game.to_dict())
 
-        print 'Money: %s' % game.state.get_money()
+        print zlib.compress(output)
     else: print_usage()
 
 if __name__ == "__main__":
