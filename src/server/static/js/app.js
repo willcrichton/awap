@@ -139,6 +139,7 @@
         });
 
         $('#time').text('Time: ' + state.time);
+        $('#money').text('Money: ' + state.money);
     }
 
     var playing = false;
