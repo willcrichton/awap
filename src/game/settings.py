@@ -20,8 +20,11 @@ class Settings:
 
     # Returns an nx.Graph object specifying the graph
     def Graph(self):
-        # return self.GridGraph()
-        return nx.newman_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3)
+        # Try these graphs included! Play around with the constants!
+        return self.GridGraph()
+        # return nx.newman_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
+        # return connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
+        # return nx.random_regular_graph(5, GRAPH_SIZE, GRAPH_SEED)
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)
     def GridGraph(self):
