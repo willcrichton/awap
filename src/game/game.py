@@ -1,25 +1,27 @@
 import networkx as nx
+from numpy import random as nrand
 import random
 import json
 from copy import deepcopy
 
 BUILD_COST = 1000
 STARTING_MONEY = 1000
-GRAPH_NODE_COUNT = 50
 
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
 class Game:
-    def __init__(self, player):
+    def __init__(self, player, settings):
         self.state = {
-            'graph': nx.circular_ladder_graph(GRAPH_NODE_COUNT/2).to_directed(),
-            #'graph': nx.gnp_random_graph(50, 0.05),
+            'graph': settings.Graph(),
             'time': 0,                  # Current time step
             'money': STARTING_MONEY,    # Current amount of money
             'pending_orders': [],       # Orders generated but not with a train on the way
             'active_orders': []         # Orders with a train on the way
         }
         self.player = player
+        self.params = settings.Params()
+        random.seed(self.params['seed'])
+        nrand.seed(hash(self.params['seed']) % 2**32)
 
         G = self.state['graph']
         for (u, v) in G.edges():
@@ -47,10 +49,22 @@ class Game:
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        nodes = self.state['graph'].nodes()
+        if (random.random() > self.params['order_chance']):
+            return None
+        
+        hub = random.choice(self.params['hubs'])
+        node = self.state['graph'].nodes()[hub]
+
+        # Perform a random walk on a Gaussian distance from the hub
+        for i in range(int(abs(nrand.normal(0, self.params['order_var'])))):
+            node = random.choice(self.state['graph'].neighbors(node))
+
+        # Money for the order is from a Gaussian centered around 100
+        money = int(nrand.normal(100, self.params['score_var']))
+
         return {
-            'node': random.choice(nodes),         # Originating node for the order
-            'money': 100,                         # Initial reward for completing order
+            'node': node,                         # Originating node for the order
+            'money': money,                       # Initial reward for completing order
             'time_created': self.state['time'],   # Time step when order is created
             'time_started': None                  # Time step when player starts a delivery
         }

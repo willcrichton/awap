@@ -1,5 +1,6 @@
 from game.game import Game
 from game.player import Player
+from game.settings import Settings
 from server.server import run_server
 import sys
 
@@ -9,7 +10,8 @@ def print_usage():
 
 def main():
     player = Player()
-    game = Game(player)
+    settings = Settings()
+    game = Game(player, settings)
 
     if len(sys.argv) == 1: print_usage()
 

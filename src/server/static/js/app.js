@@ -16,7 +16,7 @@ function renderGraph(graph) {
 
     // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
     var force = cola.d3adaptor()
-        .linkDistance(50)
+        .linkDistance(10)
         .symmetricDiffLinkLengths(20)
         .size([window.innerWidth, window.innerHeight])
         .nodes(nodes)
@@ -37,10 +37,6 @@ function renderGraph(graph) {
         .enter().append("marker")
         .attr("id", function(d) { return d; })
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 20) // change this if circles change size
-        .attr("refY", -1.5)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M0,-5L10,0L0,5");
@@ -53,11 +49,12 @@ function renderGraph(graph) {
         .enter()
         .append('path')
         .attr('class', 'link')
+
         .attr('d', function(d) {
             var dx = d.target.x - d.source.x,
                 dy = d.target.y - d.source.y,
                 dr = Math.sqrt(dx * dx + dy * dy);
-            return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
         })
         .attr('marker-end', 'url(#end)');
 
@@ -69,7 +66,7 @@ function renderGraph(graph) {
 
     node.append('circle')
         .attr('class', 'node')
-        .attr('r', 12);
+        .attr('r', 7);
 
     node.append('text')
         .attr('text-anchor', 'middle')
@@ -115,8 +112,10 @@ function updateGraph(svg, state) {
             var path = data[1];
 
             for (var i = 0; i < path.length - 1; ++i) {
-                if (d.source.index == path[i] &&
-                    d.target.index == path[i + 1]) {
+                if ((d.source.index == path[i] &&
+                     d.target.index == path[i + 1]) ||
+                    (d.target.index == path[i] &&
+                     d.source.index == path[i + 1])) {
                     c += ' in-use';
 
                     if (state.time - order.time_started == i + 1) {
