@@ -1,4 +1,3 @@
-import random
 import json
 
 order_id = 0

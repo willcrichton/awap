@@ -8,7 +8,6 @@ from state import State
 from order import Order
 
 STEP_TIMEOUT = 3
-BUILD_COST = 1000
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 DEBUG = 0
 
@@ -71,7 +70,7 @@ class Game:
 
     # Get the cost for constructing a new building
     def build_cost(self):
-        return BUILD_COST
+        return self.params['build_cost']
 
     # Converts a list of nodes into a list of edge pairs
     # e.g. [0, 1, 2] -> [(0, 1), (1, 2)]
@@ -170,12 +169,16 @@ class Game:
         completed_orders = filter(predicate, self.state.get_active_orders())
         for (order, path) in completed_orders:
             self.state.get_active_orders().remove((order, path))
-            self.state.incr_money(order.get_money()) # times a scaling factor?
+            self.state.incr_money(order.get_money())
 
             G.node[order.get_node()]['num_orders'] -= 1
 
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False
+
+        # Remove all negative money orders
+        isnegative = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
+        filter(isnegative, self.state.get_pending_orders())
 
         # Get commands from player and process them
         queue = multiprocessing.Queue()
