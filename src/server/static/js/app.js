@@ -1,181 +1,197 @@
-function renderGraph(graph) {
-    var nodes = _.keys(graph).map(function(k) {
-        return {name: '', label: 'Test'};
-    });
+(function() {
+    function renderGraph(graph) {
+        var nodes = _.keys(graph).map(function(k) {
+            return {name: '', label: 'Test'};
+        });
 
-    // Links = edges
-    var links = _(graph)
-        .mapValues(function(v, from) {
-            return _.keys(v).map(function(to) {
-                return {source: parseInt(from), target: parseInt(to)};
+        // Links = edges
+        var links = _(graph)
+            .mapValues(function(v, from) {
+                return _.keys(v).map(function(to) {
+                    return {source: parseInt(from), target: parseInt(to)};
+                });
             })
-        })
         .values()
         .flatten()
         .value();
 
-    // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
-    var force = cola.d3adaptor()
-        .linkDistance(10)
-        .symmetricDiffLinkLengths(20)
-        .size([window.innerWidth, window.innerHeight])
-        .nodes(nodes)
-        .links(links);
+        // Uses http://marvl.infotech.monash.edu/webcola/ to simulate physics
+        var force = cola.d3adaptor()
+            .linkDistance(10)
+            .symmetricDiffLinkLengths(20)
+            .size([window.innerWidth, window.innerHeight])
+            .nodes(nodes)
+            .links(links);
 
-    // Iterate the force constraint
-    force.start();
-    for (var i = 0; i < 1000; i++) { force.tick(); }
-    force.stop();
+        // Iterate the force constraint
+        force.start();
+        for (var i = 0; i < 1000; i++) { force.tick(); }
+        force.stop();
 
-    // Create d3 object and find the appropriate SVG elements
-    var svg = d3.select('body').append('svg')
-        .attr('width', window.innerWidth)
-        .attr('height', window.innerHeight);
+        // Create d3 object and find the appropriate SVG elements
+        var svg = d3.select('body').append('svg')
+            .attr('width', window.innerWidth)
+            .attr('height', window.innerHeight);
 
-    svg.append("defs").selectAll("marker")
-        .data(["end"])
-        .enter().append("marker")
-        .attr("id", function(d) { return d; })
-        .attr("viewBox", "0 -5 10 10")
-        .attr("orient", "auto")
-        .append("path")
-        .attr("d", "M0,-5L10,0L0,5");
+        svg.append("defs").selectAll("marker")
+            .data(["end"])
+            .enter().append("marker")
+            .attr("id", function(d) { return d; })
+            .attr("viewBox", "0 -5 10 10")
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5");
 
-    var group = svg.append('g');
+        var group = svg.append('g');
 
-    var link = group
-        .selectAll('.link')
-        .data(links)
-        .enter()
-        .append('path')
-        .attr('class', 'link')
+        var link = group
+            .selectAll('.link')
+            .data(links)
+            .enter()
+            .append('path')
+            .attr('class', 'link')
 
-        .attr('d', function(d) {
-            var dx = d.target.x - d.source.x,
-                dy = d.target.y - d.source.y,
-                dr = Math.sqrt(dx * dx + dy * dy);
-            return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
-        })
-        .attr('marker-end', 'url(#end)');
+            .attr('d', function(d) {
+                var dx = d.target.x - d.source.x,
+                    dy = d.target.y - d.source.y,
+                    dr = Math.sqrt(dx * dx + dy * dy);
+                return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
+            })
+            .attr('marker-end', 'url(#end)');
 
-    var node = group
-        .selectAll('node')
-        .data(nodes)
-        .enter()
-        .append('g')
+        var node = group
+            .selectAll('node')
+            .data(nodes)
+            .enter()
+            .append('g')
 
-    node.append('circle')
-        .attr('class', 'node')
-        .attr('r', 7);
+        node.append('circle')
+            .attr('class', 'node')
+            .attr('r', 7);
 
-    node.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('y', 5)
-        .text(function(d) { return d.index; });
+        node.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', 5)
+            .text(function(d) { return d.index; });
 
-    // Update with values from the force constraint
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+        // Update with values from the force constraint
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
 
-    node.attr("transform", function(d) {
-        return "translate(" + d.x + ", " + d.y + ")";
-    });
+        node.attr("transform", function(d) {
+            return "translate(" + d.x + ", " + d.y + ")";
+        });
 
-    return svg;
-}
+        return svg;
+    }
 
-function updateGraph(svg, state) {
-    var link = svg.selectAll('.link');
-    var node = svg.selectAll('.node');
+    function updateGraph(svg, state) {
+        var link = svg.selectAll('.link');
+        var node = svg.selectAll('.node');
 
-    node.attr('class', function(d) {
-        var c = 'node';
-        var data = state.node_data[d.index];
-        if (data.building) {
-            c += ' building';
-        }
+        node.attr('class', function(d) {
+            var c = 'node';
+            if (state.buildings.indexOf(d.index) > -1) {
+                c += ' building';
+            }
 
-        if (data.num_orders > 0) {
-            c += ' has-order';
-        }
-
-        return c;
-    });
-
-    link.attr('class', function(d) {
-        var c = 'link';
-
-        state.active_orders.forEach(function(data) {
-            var order = data[0];
-            var path = data[1];
-
-            for (var i = 0; i < path.length - 1; ++i) {
-                if ((d.source.index == path[i] &&
-                     d.target.index == path[i + 1]) ||
-                    (d.target.index == path[i] &&
-                     d.source.index == path[i + 1])) {
-                    c += ' in-use';
-
-                    if (state.time - order.time_started == i + 1) {
-                        c += ' is-train';
-                    }
-
-                    break;
+            state.pending_orders.forEach(function(order) {
+                if (order.node == d.index) {
+                    c += ' has-order';
                 }
-            }
+            });
+
+            state.active_orders.forEach(function(order) {
+                if (order[0].node == d.index) {
+                    c += ' has-order';
+                }
+            });
+
+            return c;
         });
 
-        return c;
-    });
+        link.attr('class', function(d) {
+            var c = 'link';
 
-    $('#time').text('Time: ' + state.time);
-}
+            state.active_orders.forEach(function(data) {
+                var order = data[0];
+                var path = data[1];
 
-function $get(url) {
-    return $.get(url).fail(function() {
-        alert('Server is down.');
-    });
-}
+                for (var i = 0; i < path.length - 1; ++i) {
+                    if ((d.source.index == path[i] &&
+                         d.target.index == path[i + 1]) ||
+                        (d.target.index == path[i] &&
+                         d.source.index == path[i + 1])) {
+                        c += ' in-use';
 
+                        if (state.time - order.time_started == i + 1) {
+                            c += ' is-train';
+                        }
 
-function main() {
-    $('#container').css('height', window.innerHeight);
-
-    $get('/graph').done(function(resp) {
-        var svg = renderGraph(JSON.parse(resp).graph);
-
-        function step() {
-            $get('/step').done(function(resp) {
-                updateGraph(svg, JSON.parse(resp));
+                        break;
+                    }
+                }
             });
+
+            return c;
+        });
+
+        $('#time').text('Time: ' + state.time);
+    }
+
+    var playing = false;
+    var interval;
+    var speed = $('#speed').val();
+
+    function togglePlay(step) {
+        console.log(playing);
+        if (!playing) {
+            $(this).text('Pause');
+            interval = setInterval(step, 1000 / speed);
+        } else {
+            $(this).text('Play');
+            clearInterval(interval);
         }
 
-        $('#step').click(step);
+        playing = !playing;
+    }
 
-        var playing = false;
-        var interval;
-        var speed = $('#speed').val();
-        $('#play').click(function() {
-            if (!playing) {
-                $(this).text('Pause');
-                interval = setInterval(step, 1000 * speed);
-            } else {
-                $(this).text('Play');
-                clearInterval(interval);
+    function $get(url) {
+        return $.get(url).fail(function() {
+            alert('Server is down.');
+            if (playing) {
+                togglePlay();
+            }
+        });
+    }
+
+
+    function main() {
+        $('#container').css('height', window.innerHeight);
+
+        $get('/graph').done(function(resp) {
+            var svg = renderGraph(JSON.parse(resp));
+
+            function step() {
+                $get('/step').done(function(resp) {
+                    updateGraph(svg, JSON.parse(resp));
+                });
             }
 
-            playing = !playing;
+            $('#step').click(step);
+
+            $('#play').click(function() { togglePlay.call(this, step); });
+
+            $('#speed').change(function() {
+                speed = $(this).val();
+                clearInterval(interval);
+                interval = setInterval(step, 1000 / speed);
+            });
         });
-
-        $('#speed').change(function() {
-            speed = $(this).val();
-            clearInterval(interval);
-            interval = setInterval(step, 1000 * speed);
-        });
-    });
-}
+    }
 
 
-$(document).ready(main);
+    $(document).ready(main);
+})();

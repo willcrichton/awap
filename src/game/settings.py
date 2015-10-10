@@ -2,15 +2,17 @@ import math
 import random
 import networkx as nx
 
-GRAPH_SEED = 'banana phone'
+GRAPH_SEED = 'banana phone 123'
 ORDER_SEED = 'phanana bone'
 GRAPH_SIZE = 100        # Graph size
-SPARCITY = 0.05         # Proportion of edges which will be removed
-DIAGONALS = 0.15        # Proportion of vertices with diagonals
 HUBS = 5                # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
 ORDER_VAR = 5.0         # Stddev for the Gaussian used to generate orders
 SCORE_VAR = 25.0        # Stddev for score distribution (centered around 100)
+
+# These two constants modify the GridGraph
+SPARCITY = 0.05         # Proportion of edges which will be removed
+DIAGONALS = 0.15        # Proportion of vertices with diagonals
 
 def NODE_INDEX(row, col, row_size):
     return row * row_size + col
@@ -21,9 +23,8 @@ class Settings:
     # Returns an nx.Graph object specifying the graph
     def Graph(self):
         # Try these graphs included! Play around with the constants!
-        return self.GridGraph()
-        # return nx.newman_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
-        # return connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
+        # return self.GridGraph()
+        return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
         # return nx.random_regular_graph(5, GRAPH_SIZE, GRAPH_SEED)
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)

@@ -1,3 +1,4 @@
+#!/bin/bash
 if [[ -n "$VIRTUAL_ENV" ]]; then
     python src/main.py $@
 else

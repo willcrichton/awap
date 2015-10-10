@@ -1,6 +1,9 @@
 import networkx as nx
 
 class BasePlayer:
+    def _step(self, state, queue):
+        queue.put(self.step(state))
+
     def build_command(self, node):
         return {
             'type': 'build',
@@ -17,13 +20,11 @@ class BasePlayer:
 # This is the class the competitors would implement
 class Player(BasePlayer):
     def step(self, state):
-        if len(state['pending_orders']) == 0: return []
-
-        graph = state['graph']
+        graph = state.get_graph()
         station = graph.nodes()[0]
 
-        commands = [self.send_command(order, nx.shortest_path(graph, station, order['node']))
-                    for order in state['pending_orders']]
+        commands = [self.send_command(order, nx.shortest_path(graph, station, order.get_node()))
+                    for order in state.get_pending_orders()]
         commands.insert(0, self.build_command(station))
 
         return commands
