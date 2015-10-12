@@ -167,34 +167,50 @@ $(function() {
         });
     }
 
+    function playGame(step) {
+        $('#step').click(step);
+
+        $('#play').click(function() { togglePlay.call(this, step); });
+
+        $('#speed').change(function() {
+            speed = $(this).val();
+            clearInterval(interval);
+            interval = setInterval(step, 1000 / speed);
+        });
+    }
+
     function main() {
         $('#container').css('height', window.innerHeight);
 
         if (LOG != '') {
-
-        } else {
-            console.log('No log detected, querying server...');
-        }
-
-        $get('/graph').done(function(resp) {
-            var svg = renderGraph(JSON.parse(resp));
+            var svg = renderGraph(LOG.graph);
+            var curStep = 0;
 
             function step() {
-                $get('/step').done(function(resp) {
-                    updateGraph(svg, JSON.parse(resp));
-                });
+                if (curStep == LOG.orders.length) {
+                    alert('Game is over');
+                    togglePlay(step);
+                }
+
+                updateGraph(svg, LOG.orders[curStep]);
+                curStep++;
             }
 
-            $('#step').click(step);
+            playGame(step);
+        } else {
+            console.log('No log detected, querying server...');
+            $get('/graph').done(function(resp) {
+                var svg = renderGraph(JSON.parse(resp));
 
-            $('#play').click(function() { togglePlay.call(this, step); });
+                function step() {
+                    $get('/step').done(function(resp) {
+                        updateGraph(svg, JSON.parse(resp));
+                    });
+                }
 
-            $('#speed').change(function() {
-                speed = $(this).val();
-                clearInterval(interval);
-                interval = setInterval(step, 1000 / speed);
+                playGame(step);
             });
-        });
+        }
     }
 
     main();
