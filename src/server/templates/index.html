@@ -1,23 +1,14 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Startup Tycoon</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
-  </head>
-  <body>
-    <form id="controls" class="form-inline" onsubmit="return false">
-      <button id="step" class="btn btn-default">Step</button>
-      <button id="play" class="btn btn-default">Play</button>
-      <div class="form-group"><input type="number" id="speed" value="1" step="any" />
-      <span id="time">Time: 0</span>
-      <span id="money">Money: 0</span>
-    </form>
-    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="/static/js/app.js"></script>
-  </body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<form id="controls" class="form-inline" onsubmit="return false">
+  <button id="step" class="btn btn-default">Step</button>
+  <button id="play" class="btn btn-default">Play</button>
+  <div class="form-group"><input type="number" id="speed" value="1" step="any"></div>
+  <span id="time">Time: 0</span>
+  <span id="money">Money: 0</span>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>var LOG = {{ log | safe }};</script>
+<script src="/static/js/app.js"></script>
+{% endblock %}

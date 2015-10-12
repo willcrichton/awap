@@ -1,4 +1,4 @@
-(function() {
+$(function() {
     function renderGraph(graph) {
         var nodes = _.keys(graph).map(function(k) {
             return {name: '', label: 'Test'};
@@ -147,7 +147,6 @@
     var speed = $('#speed').val();
 
     function togglePlay(step) {
-        console.log(playing);
         if (!playing) {
             $(this).text('Pause');
             interval = setInterval(step, 1000 / speed);
@@ -168,9 +167,14 @@
         });
     }
 
-
     function main() {
         $('#container').css('height', window.innerHeight);
+
+        if (LOG != '') {
+
+        } else {
+            console.log('No log detected, querying server...');
+        }
 
         $get('/graph').done(function(resp) {
             var svg = renderGraph(JSON.parse(resp));
@@ -193,6 +197,5 @@
         });
     }
 
-
-    $(document).ready(main);
-})();
+    main();
+});
