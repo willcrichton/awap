@@ -2,7 +2,7 @@ import math
 import random
 import networkx as nx
 
-GRAPH_SEED = 'banana phone 1'
+GRAPH_SEED = 'banana phone 2'
 ORDER_SEED = 'phanana bone'
 GRAPH_SIZE = 100        # Graph size
 HUBS = 5                # Number of hubs where orders are centered around

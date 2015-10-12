@@ -169,16 +169,16 @@ class Game:
         completed_orders = filter(predicate, self.state.get_active_orders())
         for (order, path) in completed_orders:
             self.state.get_active_orders().remove((order, path))
-            self.state.incr_money(order.get_money())
-
+            self.state.incr_money(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor'])
+            self.log("Fulfilled order of " + str(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']))
             G.node[order.get_node()]['num_orders'] -= 1
 
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False
 
         # Remove all negative money orders
-        isnegative = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
-        filter(isnegative, self.state.get_pending_orders())
+        positive = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
+        self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
         # Get commands from player and process them
         queue = multiprocessing.Queue()
