@@ -50,7 +50,7 @@ class Game:
     def generate_order(self):
         if (random.random() > self.params['order_chance']):
             return None
-        
+
         graph = self.state.get_graph()
         hub = random.choice(self.params['hubs'])
         node = graph.nodes()[hub]

@@ -3,6 +3,24 @@ import networkx as nx
 import json
 
 class State:
+    """
+    Describes the entire state of the game at a point in time. Tracks the
+    following information:
+    -----
+    graph : networkx.Graph
+        The graph of the city. Stations and homes both exist on nodes, and edges
+        are used to send widgets from stations to homes.
+    time : int
+        The current time step. Starts at 0, incremented by 1 every step.
+    money : int
+        How much money you have.
+    pending_orders : order list
+        A list of outstanding orders that do not have widgets set for delivery.
+        See order.py for how orders are described.
+    active_orders : order list
+        A list of orders with a delivery in progress.
+    """
+
     def __init__(self, graph, starting_money):
         self.graph = graph
         self.time = 0

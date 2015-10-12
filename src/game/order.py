@@ -3,6 +3,20 @@ import json
 order_id = 0
 
 class Order:
+    """
+    Describes a single order from a home. Tracks the following information:
+    -----
+    node : int
+        The node (or destination) in the graph issuing the order.
+    money : int
+        The quantity of cash given for satisfying this order.
+    time_created : int
+        The time step the order was created.
+    time_started : int
+        The time step delivery was started to the order. None if the order is
+        still pending.
+    """
+
     def __init__(self, state, node, money):
         global order_id
         self.node = node
