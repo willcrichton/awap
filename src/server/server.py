@@ -32,7 +32,7 @@ def graph():
 
 @app.route('/teams')
 def teams():
-    return urllib2.urlopen(LOG_SERVER + '/teams').read()
+    return requests.get(LOG_SERVER + '/teams').text
 
 def run_server(g):
     global game
