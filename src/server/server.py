@@ -1,24 +1,21 @@
 from flask import Flask, render_template, request
-import json, csv, urllib2, urllib, re, zlib
+import json, csv, re, zlib, base64, requests
 
 app = Flask(__name__)
 game = None
 
-LOG_SERVER = 'http://unix6.andrew.cmu.edu:15213/jlareau%40andrew.cmu.edu_6_awapcompetition_autograde.txt'
+LOG_SERVER = 'http://128.237.157.112:5000'
 
 @app.route('/')
 def home():
     team = request.args.get('team', '')
-    log = ''
+    log = json.dumps('')
     if team != '':
-        data = {}
-        data['team'] = team
-        url = LOG_SERVER + '?' + urllib.urlencode(data)
-        log = urllib2.urlopen(url).read()
-        compressed = re.findall(r'== START GAME OUTPUT --\n(.*)\n-- END GAME OUTPUT ==', log, re.DOTALL)[0]
-        log = zlib.decompress(compressed, zlib.MAX_WBITS | 16)
+        log = requests.get(LOG_SERVER + '/data', params={'team': team}).text
         print log
-    return render_template('index.html', log=json.dumps(log))
+        compressed = re.findall(r'== START GAME OUTPUT --(.*)-- END GAME OUTPUT ==', log)[0]
+        log = zlib.decompress(base64.b64decode(compressed))
+    return render_template('index.html', log=log)
 
 @app.route('/tournament')
 def tournament():
@@ -35,11 +32,7 @@ def graph():
 
 @app.route('/teams')
 def teams():
-    with open('awapteams.csv', 'r') as f:
-        lines = f.read().split("\r")
-        teams = [line.split(",")[0] for line in lines]
-        teams.sort()
-        return json.dumps(teams)
+    return urllib2.urlopen(LOG_SERVER + '/teams').read()
 
 def run_server(g):
     global game

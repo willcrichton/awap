@@ -167,11 +167,37 @@ $(function() {
         });
     }
 
+    function playGame(step) {
+        $('#step').click(step);
+
+        $('#play').click(function() { togglePlay.call(this, step); });
+
+        $('#speed').change(function() {
+            speed = $(this).val();
+            clearInterval(interval);
+            interval = setInterval(step, 1000 / speed);
+        });
+    }
+
     function main() {
         $('#container').css('height', window.innerHeight);
 
+        console.log(LOG);
         if (LOG != '') {
+            var svg = renderGraph(LOG.graph);
+            var curStep = 0;
 
+            function step() {
+                if (curStep == LOG.orders.length) {
+                    alert('Game is over');
+                    togglePlay(step);
+                }
+
+                updateGraph(svg, LOG.orders[curStep]);
+                curStep++;
+            }
+
+            playGame(step);
         } else {
             console.log('No log detected, querying server...');
         }
@@ -185,15 +211,7 @@ $(function() {
                 });
             }
 
-            $('#step').click(step);
-
-            $('#play').click(function() { togglePlay.call(this, step); });
-
-            $('#speed').change(function() {
-                speed = $(this).val();
-                clearInterval(interval);
-                interval = setInterval(step, 1000 / speed);
-            });
+            playGame(step);
         });
     }
 
