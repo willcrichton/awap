@@ -2,13 +2,11 @@ from copy import deepcopy
 import networkx as nx
 import json
 
-STARTING_MONEY = 1000
-
 class State:
-    def __init__(self, graph):
+    def __init__(self, graph, starting_money):
         self.graph = graph
         self.time = 0
-        self.money = STARTING_MONEY
+        self.money = starting_money
         self.pending_orders = []
         self.active_orders = []
 

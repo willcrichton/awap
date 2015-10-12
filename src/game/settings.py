@@ -7,8 +7,9 @@ ORDER_SEED = 'phanana bone'
 GRAPH_SIZE = 100        # Graph size
 HUBS = 5                # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
-ORDER_VAR = 5.0         # Stddev for the Gaussian used to generate orders
+ORDER_VAR = 3.0         # Stddev for the Gaussian used to generate random walk
 SCORE_VAR = 25.0        # Stddev for score distribution (centered around 100)
+STARTING_MONEY = 1000
 BUILD_COST = 1000
 DECAY_FACTOR = 2.0
 
@@ -25,8 +26,8 @@ class Settings:
     # Returns an nx.Graph object specifying the graph
     def Graph(self):
         # Try these graphs included! Play around with the constants!
-        return self.GridGraph()
-        # return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
+        # return self.GridGraph()
+        return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
         # return nx.random_regular_graph(5, GRAPH_SIZE, GRAPH_SEED)
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)
@@ -86,6 +87,7 @@ class Settings:
             'order_chance': ORDER_CHANCE,
             'order_var': ORDER_VAR,
             'score_var': SCORE_VAR,
+            'starting_money': STARTING_MONEY,
             'build_cost': BUILD_COST,
             'decay_factor': DECAY_FACTOR
         }

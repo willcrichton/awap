@@ -13,9 +13,9 @@ DEBUG = 0
 
 class Game:
     def __init__(self, player, settings):
-        self.state = State(settings.Graph())
-        self.player = player
         self.params = settings.Params()
+        self.state = State(settings.Graph(), self.params['starting_money'])
+        self.player = player
         random.seed(self.params['seed'])
         nrand.seed(hash(self.params['seed']) % 2**32)
 
