@@ -9,9 +9,10 @@ HUBS = 5                # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
 ORDER_VAR = 3.0         # Stddev for the Gaussian used to generate random walk
 SCORE_VAR = 25.0        # Stddev for score distribution (centered around 100)
-STARTING_MONEY = 1000
-BUILD_COST = 1000
-DECAY_FACTOR = 2.0
+STARTING_MONEY = 1000   # Starting money value
+BUILD_COST = 1000       # Cost to build a widget station
+DECAY_FACTOR = 2.0      # Amount that order value decays per step
+GAME_LENGTH = 100       # Number of steps in a game
 
 # These two constants modify the GridGraph
 SPARCITY = 0.02         # Proportion of edges which will be removed
@@ -27,8 +28,8 @@ class Settings:
     def Graph(self):
         # Try these graphs included! Play around with the constants!
         # return self.GridGraph()
-        return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, GRAPH_SEED)
-        # return nx.random_regular_graph(5, GRAPH_SIZE, GRAPH_SEED)
+        return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, seed=GRAPH_SEED)
+        # return nx.random_regular_graph(5, GRAPH_SIZE, seed=GRAPH_SEED)
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)
     def GridGraph(self):
@@ -76,6 +77,7 @@ class Settings:
        
         # Hubs are the the center of where orders are being generated from
         # These hubs will be unknown to your code running in player.py
+        random.seed(GRAPH_SEED)
         hubs = []
         for i in range(HUBS):
             hubs.append(int(random.random() * GRAPH_SIZE))
@@ -89,5 +91,6 @@ class Settings:
             'score_var': SCORE_VAR,
             'starting_money': STARTING_MONEY,
             'build_cost': BUILD_COST,
-            'decay_factor': DECAY_FACTOR
+            'decay_factor': DECAY_FACTOR,
+            'game_length': GAME_LENGTH,
         }

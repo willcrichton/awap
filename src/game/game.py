@@ -43,7 +43,7 @@ class Game:
     # True iff the game should end
     def is_over(self):
         # Arbitrary end condition for now, should think about this
-        return self.state.get_time() == 10
+        return self.state.over
 
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
@@ -151,6 +151,10 @@ class Game:
 
     # Take the world through a time step
     def step(self):
+        if self.state.get_time() >= self.params['game_length']:
+            self.state.over = True
+            return
+
         self.log("~~~~~~~ TIME %d ~~~~~~~" % self.state.get_time())
 
         G = self.state.get_graph()

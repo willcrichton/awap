@@ -9,6 +9,7 @@ class State:
         self.money = starting_money
         self.pending_orders = []
         self.active_orders = []
+        self.over = False
 
     def get_graph(self): return self.graph
     def get_time(self): return self.time
