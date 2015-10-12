@@ -182,7 +182,6 @@ $(function() {
     function main() {
         $('#container').css('height', window.innerHeight);
 
-        console.log(LOG);
         if (LOG != '') {
             var svg = renderGraph(LOG.graph);
             var curStep = 0;
@@ -200,19 +199,18 @@ $(function() {
             playGame(step);
         } else {
             console.log('No log detected, querying server...');
+            $get('/graph').done(function(resp) {
+                var svg = renderGraph(JSON.parse(resp));
+
+                function step() {
+                    $get('/step').done(function(resp) {
+                        updateGraph(svg, JSON.parse(resp));
+                    });
+                }
+
+                playGame(step);
+            });
         }
-
-        $get('/graph').done(function(resp) {
-            var svg = renderGraph(JSON.parse(resp));
-
-            function step() {
-                $get('/step').done(function(resp) {
-                    updateGraph(svg, JSON.parse(resp));
-                });
-            }
-
-            playGame(step);
-        });
     }
 
     main();

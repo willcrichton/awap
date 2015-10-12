@@ -12,7 +12,6 @@ def home():
     log = json.dumps('')
     if team != '':
         log = requests.get(LOG_SERVER + '/data', params={'team': team}).text
-        print log
         compressed = re.findall(r'== START GAME OUTPUT --(.*)-- END GAME OUTPUT ==', log)[0]
         log = zlib.decompress(base64.b64decode(compressed))
     return render_template('index.html', log=log)
