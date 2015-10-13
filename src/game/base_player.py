@@ -5,10 +5,6 @@ class BasePlayer:
     send_command.
     """
 
-    # Utility for the calling code. Ignore me
-    def _step(self, state, queue):
-        queue.put(self.step(state))
-
     def build_command(self, node):
         """
         Create a command for building a new station.
