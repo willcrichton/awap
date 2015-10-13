@@ -109,6 +109,10 @@ class Game:
                 self.log('Cannot use edge (%d, %d) that is already in use (your path: %s)' % (u, v, path))
                 return False
 
+        if not G.node[path[0]]['building']:
+            self.log('Path must start at a station')
+            return False
+
         if path[-1] != order.get_node():
             self.log('Path must end at the order node')
             return False
