@@ -4,7 +4,9 @@
 
 0. If you're running Windows, install [Cygwin](http://cygwin.com/install.html). As a part of the installation, select `git` and `python` as packages to install. Boot Cygwin and proceed to 1. If you're not on Windows, open a terminal.
 
-1. Follow these instructions:
+1. Install [pip](http://pip.readthedocs.org/en/stable/installing/) if you do not already have it.
+
+2. Follow these instructions:
 
 ```
 sudo pip install virtualenv
