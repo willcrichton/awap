@@ -13,7 +13,17 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Getting started
+## Exploring the code
+
+You should look at the following files:
+
+* `src/game/player.py` - You will implement your algorithm here.
+* `src/game/state.py` - All the state maintained for the game.
+* `src/game/order.py` - Representation of orders in the game.
+
+You don't need to look at any other files.
+
+## Running the code
 
 To run your algorithm quickly with no visuals, do
 
