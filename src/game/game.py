@@ -1,5 +1,4 @@
 import networkx as nx
-from numpy import random as nrand
 import random
 import json
 import multiprocessing
@@ -16,8 +15,7 @@ class Game:
         self.params = settings.Params()
         self.state = State(settings.Graph(), self.params['starting_money'])
         self.player = player
-        random.seed(self.params['seed'][::-1])
-        nrand.seed(hash(self.params['seed']) % 2**32)
+        random.seed(self.params['seed'])
 
         G = self.state.get_graph()
         for (u, v) in G.edges():
@@ -56,11 +54,11 @@ class Game:
         node = graph.nodes()[hub]
 
         # Perform a random walk on a Gaussian distance from the hub
-        for i in range(int(abs(nrand.normal(0, self.params['order_var'])))):
+        for i in range(int(abs(random.gauss(0, self.params['order_var'])))):
             node = random.choice(graph.neighbors(node))
 
         # Money for the order is from a Gaussian centered around 100
-        money = int(nrand.normal(100, self.params['score_var']))
+        money = int(random.gauss(100, self.params['score_var']))
 
         return Order(self.state, node, money)
 
