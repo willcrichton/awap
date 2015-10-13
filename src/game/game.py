@@ -16,7 +16,7 @@ class Game:
         self.params = settings.Params()
         self.state = State(settings.Graph(), self.params['starting_money'])
         self.player = player
-        random.seed(self.params['seed'])
+        random.seed(self.params['seed'][::-1])
         nrand.seed(hash(self.params['seed']) % 2**32)
 
         G = self.state.get_graph()
