@@ -5,9 +5,36 @@ import multiprocessing
 from copy import deepcopy
 from state import State
 from order import Order
+from threading import Thread
+import functools
 
 STEP_TIMEOUT = 3
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
+
+def timeout(timeout):
+    def deco(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            res = [Exception('function [%s] timeout [%s seconds] exceeded!' % (func.__name__, timeout))]
+            def newFunc():
+                try:
+                    res[0] = func(*args, **kwargs)
+                except Exception, e:
+                    res[0] = e
+            t = Thread(target=newFunc)
+            t.daemon = True
+            try:
+                t.start()
+                t.join(timeout)
+            except Exception, je:
+                print 'error starting thread'
+                raise je
+            ret = res[0]
+            if isinstance(ret, BaseException):
+                raise ret
+            return ret
+        return wrapper
+    return deco
 
 class Game:
     def __init__(self, player, settings):
@@ -181,18 +208,14 @@ class Game:
         positive = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
         self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
-        # Get commands from player and process them
-        queue = multiprocessing.Queue()
-        p = multiprocessing.Process(target=self.player._step,
-                                    args=(self.state,queue))
-        p.start()
-        p.join(STEP_TIMEOUT)
-        if p.is_alive():
-            self.log('Player timed out')
-            p.terminate()
-            p.join()
-        else:
-            self.process_commands(queue.get())
+        func = timeout(timeout=0.5)(self.player.step)
+        try:
+            commands = func(self.state)
+        except Exception as exception:
+            self.log(exception)
+            commands = []
+
+        self.process_commands(commands)
 
         # Go to the next time step
         self.state.incr_time()
