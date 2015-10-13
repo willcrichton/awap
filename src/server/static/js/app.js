@@ -84,6 +84,7 @@ $(function() {
             return "translate(" + d.x + ", " + d.y + ")";
         });
 
+        svg[0][0] = svgPanZoom(svg[0][0])
         return svg;
     }
 

@@ -7,6 +7,10 @@ class Player(BasePlayer):
     name or the base class.
     """
 
+    def __init__(self):
+        # Initialize any persistent variables you want here
+        pass
+
     def step(self, state):
         """
         Determine actions based on the current state of the city. Called every
