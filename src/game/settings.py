@@ -2,6 +2,8 @@ import math
 import random
 import networkx as nx
 
+DEBUG = 0               # 0 = no debug messages, 1 = debug messages
+
 GRAPH_SEED = 'banana phone 2'
 ORDER_SEED = 'phanana bone'
 GRAPH_SIZE = 100        # Graph size
@@ -83,6 +85,7 @@ class Settings:
             hubs.append(int(random.random() * GRAPH_SIZE))
 
         return {
+            'debug': DEBUG,
             'graph_size': GRAPH_SIZE,
             'seed': ORDER_SEED,
             'hubs': hubs,

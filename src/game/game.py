@@ -8,7 +8,6 @@ from order import Order
 
 STEP_TIMEOUT = 3
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
-DEBUG = 0
 
 class Game:
     def __init__(self, player, settings):
@@ -63,7 +62,7 @@ class Game:
         return Order(self.state, node, money)
 
     def log(self, message):
-        if(DEBUG):
+        if(self.params['debug']):
             print message
 
     # Get the cost for constructing a new building
