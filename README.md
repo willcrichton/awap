@@ -1,7 +1,6 @@
-Startup Tycoon
-----
+# Startup Tycoon
 
-# Setup
+## Setup
 
 0. If you're running Windows, install [Cygwin](http://cygwin.com/install.html). As a part of the installation, select `git` and `python` as packages to install. Boot Cygwin and proceed to 1. If you're not on Windows, open a terminal.
 
@@ -14,7 +13,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-# Getting started
+## Getting started
 
 To run your algorithm quickly with no visuals, do
 
