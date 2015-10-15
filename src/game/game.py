@@ -2,6 +2,7 @@ import networkx as nx
 import random
 import json
 import multiprocessing
+import logging as log
 from copy import deepcopy
 from state import State
 from order import Order
@@ -38,6 +39,9 @@ def timeout(timeout):
 class Game:
     def __init__(self, Player, settings):
         self.params = settings.Params()
+        log.basicConfig(level=self.params['log_level'],
+                        format='%(levelname)7s:%(filename)s:%(lineno)03d :: %(message)s')
+
         self.state = State(settings.Graph(), self.params['starting_money'])
 
         def initialize_player(state): return Player(state)
@@ -45,8 +49,7 @@ class Game:
         try:
             player = func(deepcopy(self.state))
         except Exception as exception:
-            self.log(exception)
-            exit()
+            log.error(exception)
 
         self.player = player
         random.seed(self.params['seed'])
@@ -96,10 +99,6 @@ class Game:
 
         return Order(self.state, node, money)
 
-    def log(self, message):
-        if(self.params['debug']):
-            print message
-
     # Get the cost for constructing a new building
     def build_cost(self):
         return self.params['build_cost']
@@ -114,15 +113,15 @@ class Game:
         G = self.state.get_graph()
         for (u, v) in self.path_to_edges(path):
             if G.edge[u][v]['in_use']:
-                self.log('Cannot use edge (%d, %d) that is already in use (your path: %s)' % (u, v, path))
+                log.warning('Cannot use edge (%d, %d) that is already in use (your path: %s)' % (u, v, path))
                 return False
 
         if not G.node[path[0]]['building']:
-            self.log('Path must start at a station')
+            log.warning('Path must start at a station')
             return False
 
         if path[-1] != order.get_node():
-            self.log('Path must end at the order node')
+            log.warning('Path must end at the order node')
             return False
 
         return True
@@ -130,13 +129,13 @@ class Game:
     # Attempt to execute each of the commands returned from the player
     def process_commands(self, commands):
         if not isinstance(commands, list):
-            self.log('Player.step must return a list of commands')
+            log.warning('Player.step must return a list of commands')
             return
 
         G = self.state.get_graph()
         for command in commands:
             if not isinstance(command, dict) or 'type' not in command:
-                self.log(GENERIC_COMMAND_ERROR)
+                log.warning(GENERIC_COMMAND_ERROR)
                 continue
 
             command_type = command['type']
@@ -144,17 +143,17 @@ class Game:
             # Building a new location on the graph
             if command_type == 'build':
                 if not 'node' in command:
-                    self.log(GENERIC_COMMAND_ERROR)
+                    log.warning(GENERIC_COMMAND_ERROR)
                     continue
 
                 node = command['node']
                 if G.node[node]['building']:
-                    self.log('Can\'t build on the same place you\'ve already built')
+                    log.warning('Can\'t build on the same place you\'ve already built')
                     continue
 
                 cost = self.build_cost()
                 if self.state.get_money() < cost:
-                    self.log('Don\'t have enough money to build a restaurant, need %s' % cost)
+                    log.warning('Don\'t have enough money to build a restaurant, need %s' % cost)
                     continue
 
                 self.state.incr_money(-cost)
@@ -163,13 +162,13 @@ class Game:
             # Satisfying an order ("send"ing a train)
             elif command_type == 'send':
                 if 'order' not in command or 'path' not in command:
-                    self.log(GENERIC_COMMAND_ERROR)
+                    log.warning(GENERIC_COMMAND_ERROR)
                     continue
 
                 order = command['order']
                 path = command['path']
                 if not self.can_satisfy_order(order, path):
-                    self.log('Can\'t satisfy order %s with path %s' % (order, path))
+                    log.warning('Can\'t satisfy order %s with path %s' % (order, path))
                     continue
 
                 pending_orders = self.state.get_pending_orders()
@@ -191,7 +190,7 @@ class Game:
             self.state.over = True
             return
 
-        self.log("~~~~~~~ TIME %d ~~~~~~~" % self.state.get_time())
+        log.info("~~~~~~~ TIME %d ~~~~~~~" % self.state.get_time())
 
         G = self.state.get_graph()
 
@@ -210,7 +209,7 @@ class Game:
         for (order, path) in completed_orders:
             self.state.get_active_orders().remove((order, path))
             self.state.incr_money(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor'])
-            self.log("Fulfilled order of " + str(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']))
+            log.info("Fulfilled order of " + str(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']))
             G.node[order.get_node()]['num_orders'] -= 1
 
             for (u, v) in self.path_to_edges(path):
@@ -224,7 +223,7 @@ class Game:
         try:
             commands = func(deepcopy(self.state))
         except Exception as exception:
-            self.log(exception)
+            log.error(exception)
             commands = []
 
         self.process_commands(commands)

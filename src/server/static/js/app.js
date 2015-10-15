@@ -176,7 +176,9 @@ $(function() {
         $('#speed').change(function() {
             speed = $(this).val();
             clearInterval(interval);
-            interval = setInterval(step, 1000 / speed);
+            if (playing) {
+                interval = setInterval(step, 1000 / speed);
+            }
         });
     }
 
