@@ -9,9 +9,8 @@ def print_usage():
     exit(1)
 
 def main():
-    player = Player()
     settings = Settings()
-    game = Game(player, settings)
+    game = Game(Player, settings)
 
     if len(sys.argv) == 1: print_usage()
 

@@ -8,7 +8,6 @@ from order import Order
 from threading import Thread
 import functools
 
-STEP_TIMEOUT = 3
 GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
 
 def timeout(timeout):
@@ -37,9 +36,18 @@ def timeout(timeout):
     return deco
 
 class Game:
-    def __init__(self, player, settings):
+    def __init__(self, Player, settings):
         self.params = settings.Params()
         self.state = State(settings.Graph(), self.params['starting_money'])
+
+        def initialize_player(state): return Player(state)
+        func = timeout(timeout=self.params['init_timeout'])(initialize_player)
+        try:
+            player = func(deepcopy(self.state))
+        except Exception as exception:
+            self.log(exception)
+            exit()
+
         self.player = player
         random.seed(self.params['seed'])
 
@@ -212,9 +220,9 @@ class Game:
         positive = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
         self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
-        func = timeout(timeout=0.5)(self.player.step)
+        func = timeout(timeout=self.params['step_timeout'])(self.player.step)
         try:
-            commands = func(self.state)
+            commands = func(deepcopy(self.state))
         except Exception as exception:
             self.log(exception)
             commands = []
