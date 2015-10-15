@@ -102,7 +102,8 @@ class Game:
 
     # Get the cost for constructing a new building
     def build_cost(self):
-        return self.params['build_cost']
+        current = len([i for i, x in self.state.graph.node.iteritems() if x['is_station']])
+        return self.params['build_cost'] * (self.params['build_factor'] ** current)
 
     # Converts a list of nodes into a list of edge pairs
     # e.g. [0, 1, 2] -> [(0, 1), (1, 2)]

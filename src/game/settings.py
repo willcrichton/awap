@@ -15,10 +15,11 @@ SCORE_MEAN = 100.0      # Mean for score distribution of an order
 SCORE_VAR = 25.0        # Stddev for score distribution of an order
 STARTING_MONEY = 1000   # Starting money value
 BUILD_COST = 1000       # Cost to build a widget station
+BUILD_FACTOR = 1.5      # Multiplicative factor for each subsequent station
 DECAY_FACTOR = 2.0      # Amount that order value decays per step
 GAME_LENGTH = 100       # Number of steps in a game
-INIT_TIMEOUT = 1.0
-STEP_TIMEOUT = 0.5
+INIT_TIMEOUT = 1.0      # Timeout in seconds for Player initialization
+STEP_TIMEOUT = 0.5      # Timeout in seconds for each step
 
 # These two constants modify the GridGraph
 SPARCITY = 0.02         # Proportion of edges which will be removed
@@ -59,6 +60,7 @@ class Settings:
             'score_var': SCORE_VAR,
             'starting_money': STARTING_MONEY,
             'build_cost': BUILD_COST,
+            'build_factor': BUILD_FACTOR,
             'decay_factor': DECAY_FACTOR,
             'game_length': GAME_LENGTH,
             'init_timeout': INIT_TIMEOUT,
