@@ -2,7 +2,7 @@ import math
 import random
 import networkx as nx
 
-DEBUG = 0               # 0 = no debug messages, 1 = debug messages
+DEBUG = 1               # 0 = no debug messages, 1 = debug messages
 
 GRAPH_SEED = 'banana phone 2'
 ORDER_SEED = 'phanana bone'
@@ -15,6 +15,8 @@ STARTING_MONEY = 1000   # Starting money value
 BUILD_COST = 1000       # Cost to build a widget station
 DECAY_FACTOR = 2.0      # Amount that order value decays per step
 GAME_LENGTH = 100       # Number of steps in a game
+INIT_TIMEOUT = 1.0
+STEP_TIMEOUT = 0.5
 
 # These two constants modify the GridGraph
 SPARCITY = 0.02         # Proportion of edges which will be removed
@@ -42,7 +44,7 @@ class Settings:
         graph = nx.Graph()
         graph.add_nodes_from(range(GRAPH_SIZE))
 
-        # NOTE: there is no check for graph connectivity! 
+        # NOTE: there is no check for graph connectivity!
         # Add horizontal edges
         for r in range(width):
             for c in range(width - 1):
@@ -76,7 +78,7 @@ class Settings:
 
     # Other tune-able parameters used in the game
     def Params(self):
-       
+
         # Hubs are the the center of where orders are being generated from
         # These hubs will be unknown to your code running in player.py
         random.seed(GRAPH_SEED)
@@ -96,4 +98,6 @@ class Settings:
             'build_cost': BUILD_COST,
             'decay_factor': DECAY_FACTOR,
             'game_length': GAME_LENGTH,
+            'init_timeout': INIT_TIMEOUT,
+            'step_timeout': STEP_TIMEOUT,
         }

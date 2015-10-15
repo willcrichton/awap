@@ -17,8 +17,10 @@ class State:
     pending_orders : order list
         A list of outstanding orders that do not have widgets set for delivery.
         See order.py for how orders are described.
-    active_orders : order list
-        A list of orders with a delivery in progress.
+    active_orders : (order, path) list
+        A list of orders with a delivery in progress. Each element in the list
+        is a tuple containing the order and a list of nodes corresponding to the
+        path that order is taking.
     """
 
     def __init__(self, graph, starting_money):
