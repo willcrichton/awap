@@ -4,8 +4,8 @@ import networkx as nx
 
 DEBUG = 0               # 0 = no debug messages, 1 = debug messages
 
-GRAPH_SEED = 'banana phone 2'
-ORDER_SEED = 'phanana bone'
+GRAPH_SEED = 'i am a graph seed!'   # Seed for generating a graph
+ORDER_SEED = 'i am an order seed!'  # Seed for generating orders
 GRAPH_SIZE = 100        # Graph size
 HUBS = 5                # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
@@ -28,10 +28,36 @@ class Settings:
 
     # Returns an nx.Graph object specifying the graph
     def Graph(self):
-        # Try these graphs included! Play around with the constants!
-        # return self.GridGraph()
-        return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, seed=GRAPH_SEED)
+        # Try these included graphs! Play around with the constants!
+        # Feel free to define your own graph for testing.
+
+        return self.GridGraph()
+        # return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, seed=GRAPH_SEED)
         # return nx.random_regular_graph(5, GRAPH_SIZE, seed=GRAPH_SEED)
+
+    # Parameters passed to the game
+    def Params(self):
+       
+        # Hubs are the the center of where orders are being generated from
+        # These hubs will be unknown to your code running in player.py
+        random.seed(GRAPH_SEED)
+        hubs = []
+        for i in range(HUBS):
+            hubs.append(int(random.random() * GRAPH_SIZE))
+
+        return {
+            'debug': DEBUG,
+            'graph_size': GRAPH_SIZE,
+            'seed': ORDER_SEED,
+            'hubs': hubs,
+            'order_chance': ORDER_CHANCE,
+            'order_var': ORDER_VAR,
+            'score_var': SCORE_VAR,
+            'starting_money': STARTING_MONEY,
+            'build_cost': BUILD_COST,
+            'decay_factor': DECAY_FACTOR,
+            'game_length': GAME_LENGTH,
+        }
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)
     def GridGraph(self):
@@ -73,27 +99,3 @@ class Settings:
             graph.add_edge(ind1, ind2)
 
         return graph
-
-    # Other tune-able parameters used in the game
-    def Params(self):
-       
-        # Hubs are the the center of where orders are being generated from
-        # These hubs will be unknown to your code running in player.py
-        random.seed(GRAPH_SEED)
-        hubs = []
-        for i in range(HUBS):
-            hubs.append(int(random.random() * GRAPH_SIZE))
-
-        return {
-            'debug': DEBUG,
-            'graph_size': GRAPH_SIZE,
-            'seed': ORDER_SEED,
-            'hubs': hubs,
-            'order_chance': ORDER_CHANCE,
-            'order_var': ORDER_VAR,
-            'score_var': SCORE_VAR,
-            'starting_money': STARTING_MONEY,
-            'build_cost': BUILD_COST,
-            'decay_factor': DECAY_FACTOR,
-            'game_length': GAME_LENGTH,
-        }

@@ -22,6 +22,11 @@ You should look at the following files:
 * `src/game/player.py` - You will implement your algorithm here.
 * `src/game/state.py` - All the state maintained for the game.
 * `src/game/order.py` - Representation of orders in the game.
+* `src/game/settings.py` - Constants and graphs used in the game.
+
+The graphs used in the code are NetworkX graphs. Some useful links:
+* [Documentation](https://networkx.github.io/documentation/latest/)
+* [Short tutorial](http://networkx.lanl.gov/networkx_tutorial.pdf)
 
 You don't need to look at any other files.
 
