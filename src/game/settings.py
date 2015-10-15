@@ -1,8 +1,9 @@
 import math
 import random
+import logging as log
 import networkx as nx
 
-DEBUG = 1               # 0 = no debug messages, 1 = debug messages
+LOG_LEVEL = log.INFO # change this to log.WARNING to suppress info messages
 
 GRAPH_SEED = 'i am a graph seed!'   # Seed for generating a graph
 ORDER_SEED = 'i am an order seed!'  # Seed for generating orders
@@ -40,7 +41,7 @@ class Settings:
 
     # Parameters passed to the game
     def Params(self):
-       
+
         # Hubs are the the center of where orders are being generated from
         # These hubs will be unknown to your code running in player.py
         random.seed(GRAPH_SEED)
@@ -49,7 +50,6 @@ class Settings:
             hubs.append(int(random.random() * GRAPH_SIZE))
 
         return {
-            'debug': DEBUG,
             'graph_size': GRAPH_SIZE,
             'seed': ORDER_SEED,
             'hubs': hubs,
@@ -63,6 +63,7 @@ class Settings:
             'game_length': GAME_LENGTH,
             'init_timeout': INIT_TIMEOUT,
             'step_timeout': STEP_TIMEOUT,
+            'log_level': LOG_LEVEL,
         }
 
     # A very visualizable grid graph (GRAPH_SIZE should be a square)
@@ -107,4 +108,3 @@ class Settings:
             graph.add_edge(ind1, ind2)
 
         return graph
-

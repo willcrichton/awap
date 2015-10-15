@@ -9,7 +9,11 @@ class State:
     -----
     graph : networkx.Graph
         The graph of the city. Stations and homes both exist on nodes, and edges
-        are used to send widgets from stations to homes.
+        are used to send widgets from stations to homes. Contains node and edge
+        information as dictionaries in graph.node[node] and
+        graph.edge[source][destination]. Edges are {'in_use': bool} indicating
+        whether they are currently in use for an active order. Nodes are
+        {'is_station': bool} indicating whether they a station.
     time : int
         The current time step. Starts at 0, incremented by 1 every step.
     money : int

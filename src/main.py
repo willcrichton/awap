@@ -2,6 +2,7 @@ from game.game import Game
 from game.player import Player
 from game.settings import Settings
 from server.server import run_server
+import logging as log
 import sys, json
 
 def print_usage():
@@ -9,8 +10,7 @@ def print_usage():
     exit(1)
 
 def main():
-    settings = Settings()
-    game = Game(Player, settings)
+    game = Game(Player)
 
     if len(sys.argv) == 1: print_usage()
 
@@ -21,7 +21,7 @@ def main():
         while not game.is_over():
             game.step()
 
-        print 'Final money: %d' % game.state.get_money()
+        log.info('Final money: %d' % game.state.get_money())
     else: print_usage()
 
 if __name__ == "__main__":
