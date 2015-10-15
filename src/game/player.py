@@ -19,8 +19,6 @@ class Player(BasePlayer):
           The initial state of the game. See state.py for more information.
         """
 
-        print nx.to_dict_of_dicts(state.get_graph())
-
         return
 
     def step(self, state):
