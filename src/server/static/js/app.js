@@ -67,7 +67,7 @@ $(function() {
 
         node.append('circle')
             .attr('class', 'node')
-            .attr('r', 7);
+            .attr('r', 10);
 
         node.append('text')
             .attr('text-anchor', 'middle')
