@@ -92,7 +92,7 @@ class Game:
             node = random.choice(graph.neighbors(node))
 
         # Money for the order is from a Gaussian centered around 100
-        money = int(random.gauss(100, self.params['score_var']))
+        money = int(random.gauss(self.params['score_mean'], self.params['score_var']))
 
         return Order(self.state, node, money)
 

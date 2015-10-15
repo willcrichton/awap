@@ -10,7 +10,8 @@ GRAPH_SIZE = 100        # Graph size
 HUBS = 5                # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
 ORDER_VAR = 3.0         # Stddev for the Gaussian used to generate random walk
-SCORE_VAR = 25.0        # Stddev for score distribution (centered around 100)
+SCORE_MEAN = 100.0      # Mean for score distribution of an order
+SCORE_VAR = 25.0        # Stddev for score distribution of an order
 STARTING_MONEY = 1000   # Starting money value
 BUILD_COST = 1000       # Cost to build a widget station
 DECAY_FACTOR = 2.0      # Amount that order value decays per step
@@ -54,6 +55,7 @@ class Settings:
             'hubs': hubs,
             'order_chance': ORDER_CHANCE,
             'order_var': ORDER_VAR,
+            'score_mean': SCORE_MEAN,
             'score_var': SCORE_VAR,
             'starting_money': STARTING_MONEY,
             'build_cost': BUILD_COST,
@@ -67,6 +69,8 @@ class Settings:
     def GridGraph(self):
         random.seed(GRAPH_SEED)
         width = int(round(math.sqrt(GRAPH_SIZE)))
+        if width**2 != GRAPH_SIZE:
+            raise ValueError("GRAPH_SIZE must be a square for GridGraph")
 
         # Generate the base grid (no diagonals added yet)
         graph = nx.Graph()
