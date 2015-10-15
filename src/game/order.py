@@ -5,7 +5,7 @@ order_id = 0
 class Order:
     """
     Describes a single order from a home. Tracks the following information:
-    -----
+    --- Fields ---
     node : int
         The node (or destination) in the graph issuing the order.
     money : int

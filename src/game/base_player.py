@@ -8,9 +8,12 @@ class BasePlayer:
     def build_command(self, node):
         """
         Create a command for building a new station.
-        -----
+        --- Parameters ---
         node : int
             The node in the graph you want to build a station on.
+        --- Returns ---
+        command : command
+            A command which will build a station at the input node.
         """
 
         return {
@@ -21,12 +24,15 @@ class BasePlayer:
     def send_command(self, order, path):
         """
         Create a command for sending widgets to satisfy a particular order.
-        -----
+        --- Parameters ---
         order : dict
             The order object gotten from State.get_pending_orders().
         path  : int list
             All nodes on the path from the source (a station) to the destination
             (given by the order). First element is the source, last is the dest.
+        --- Returns ---
+        command : command
+            A command which will send a widget along the given path.
         """
 
         return {

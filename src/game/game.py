@@ -3,14 +3,15 @@ import random
 import json
 import multiprocessing
 import logging as log
+import functools
+import traceback
+from importlib import import_module
 from copy import deepcopy
 from state import State
 from order import Order
 from threading import Thread
-from settings import Settings
-import functools
-
-GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
+from settings import *
+from graphs import generate_graph
 
 def timeout(timeout):
     def deco(func):
@@ -38,13 +39,11 @@ def timeout(timeout):
     return deco
 
 class Game:
-    def __init__(self, Player):
-        settings = Settings()
-        self.params = settings.Params()
-        log.basicConfig(level=self.params['log_level'],
+    def __init__(self, player_module_path):
+        log.basicConfig(level=LOG_LEVEL,
                         format='%(levelname)7s:%(filename)s:%(lineno)03d :: %(message)s')
 
-        self.state = State(settings.Graph(), self.params['starting_money'])
+        self.state = State(generate_graph())
         G = self.state.get_graph()
         for (u, v) in G.edges():
             G.edge[u][v]['in_use'] = False # True if edge is used for any train
@@ -52,16 +51,19 @@ class Game:
         for n in G.nodes():
             G.node[n]['is_station'] = False  # True if the node is a player's building
 
-        def initialize_player(state): return Player(state)
-        func = timeout(timeout=self.params['init_timeout'])(initialize_player)
+        def initialize_player(state):
+            module = import_module(player_module_path)
+            return module.Player(state)
+
+        func = timeout(timeout=INIT_TIMEOUT)(initialize_player)
         try:
             player = func(deepcopy(self.state))
         except Exception as exception:
-            log.error(exception)
+            log.error(traceback.format_exc(exception))
             exit()
 
         self.player = player
-        random.seed(self.params['seed'])
+        random.seed(ORDER_SEED)
 
     def to_dict(self):
         G = self.state.get_graph()
@@ -79,31 +81,31 @@ class Game:
     # True iff the game should end
     def is_over(self):
         # Arbitrary end condition for now, should think about this
-        return self.state.over
+        return self.state.get_time() >= GAME_LENGTH
 
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        if (random.random() > self.params['order_chance']):
+        if (random.random() > ORDER_CHANCE):
             return None
 
         graph = self.state.get_graph()
-        hub = random.choice(self.params['hubs'])
-        node = graph.nodes()[hub]
+        node = random.choice(graph.nodes())
 
         # Perform a random walk on a Gaussian distance from the hub
-        for i in range(int(abs(random.gauss(0, self.params['order_var'])))):
+        for i in range(int(abs(random.gauss(0, ORDER_VAR)))):
             node = random.choice(graph.neighbors(node))
 
         # Money for the order is from a Gaussian centered around 100
-        money = int(random.gauss(self.params['score_mean'], self.params['score_var']))
+        money = int(random.gauss(SCORE_MEAN, SCORE_VAR))
 
         return Order(self.state, node, money)
 
     # Get the cost for constructing a new building
+    # TODO: CHANGEME??
     def build_cost(self):
         current = len([i for i, x in self.state.graph.node.iteritems() if x['is_station']])
-        return self.params['build_cost'] * (self.params['build_factor'] ** current)
+        return BUILD_COST * (BUILD_FACTOR ** current)
 
     # Converts a list of nodes into a list of edge pairs
     # e.g. [0, 1, 2] -> [(0, 1), (1, 2)]
@@ -134,6 +136,7 @@ class Game:
             log.warning('Player.step must return a list of commands')
             return
 
+        GENERIC_COMMAND_ERROR = 'Commands must be constructed with build_command and send_command'
         G = self.state.get_graph()
         for command in commands:
             if not isinstance(command, dict) or 'type' not in command:
@@ -188,8 +191,8 @@ class Game:
 
     # Take the world through a time step
     def step(self):
-        if self.state.get_time() >= self.params['game_length']:
-            self.state.over = True
+        if self.is_over():
+            log.warning("Attempted to step after game was over")
             return
 
         log.info("~~~~~~~ TIME %d ~~~~~~~" % self.state.get_time())
@@ -205,25 +208,28 @@ class Game:
                 self.state.get_pending_orders().append(new_order)
 
         # Then remove all finished orders (and update graph)
-        predicate = lambda (order, path): (order.get_time_started() + len(path) - 1) <= self.state.get_time()
+        predicate = lambda (order, path): \
+                    (order.get_time_started() + len(path) - 1) <= \
+                    self.state.get_time()
         completed_orders = filter(predicate, self.state.get_active_orders())
         for (order, path) in completed_orders:
             self.state.get_active_orders().remove((order, path))
-            self.state.incr_money(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor'])
-            log.info("Fulfilled order of " + str(order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']))
+            money_gained = self.state.money_from(order)
+            self.state.incr_money(money_gained)
+            log.info("Fulfilled order of %d" % money_gained)
 
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False
 
         # Remove all negative money orders
-        positive = lambda order: (order.get_money() - (self.state.get_time() - order.get_time_created()) * self.params['decay_factor']) >= 0
+        positive = lambda order: self.state.money_from(order) >= 0
         self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
-        func = timeout(timeout=self.params['step_timeout'])(self.player.step)
+        func = timeout(timeout=STEP_TIMEOUT)(self.player.step)
         try:
             commands = func(deepcopy(self.state))
         except Exception as exception:
-            log.error(exception)
+            log.error(traceback.format_exc(exception))
             commands = []
 
         self.process_commands(commands)

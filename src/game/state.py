@@ -1,4 +1,5 @@
 from copy import deepcopy
+from settings import *
 import networkx as nx
 import json
 
@@ -6,7 +7,7 @@ class State:
     """
     Describes the entire state of the game at a point in time. Tracks the
     following information:
-    -----
+    --- Fields ---
     graph : networkx.Graph
         The graph of the city. Stations and homes both exist on nodes, and edges
         are used to send widgets from stations to homes. Contains node and edge
@@ -27,10 +28,10 @@ class State:
         path that order is taking.
     """
 
-    def __init__(self, graph, starting_money):
+    def __init__(self, graph):
         self.graph = graph
         self.time = 0
-        self.money = starting_money
+        self.money = STARTING_MONEY
         self.pending_orders = []
         self.active_orders = []
         self.over = False
@@ -53,3 +54,8 @@ class State:
 
     def incr_time(self):
         self.time += 1
+
+    def money_from(self, order):
+        return order.get_money() - \
+            (self.get_time() - order.get_time_created()) * \
+            DECAY_FACTOR
