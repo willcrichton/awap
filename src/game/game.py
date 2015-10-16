@@ -42,7 +42,7 @@ class Game:
     def __init__(self, player_module_path):
         log.basicConfig(level=LOG_LEVEL,
                         format='%(levelname)7s:%(filename)s:%(lineno)03d :: %(message)s')
-
+        self.random = random.Random()
         self.state = State(generate_graph())
         G = self.state.get_graph()
         for (u, v) in G.edges():
@@ -63,7 +63,7 @@ class Game:
             exit()
 
         self.player = player
-        random.seed(ORDER_SEED)
+        self.random.seed(ORDER_SEED)
 
     def to_dict(self):
         G = self.state.get_graph()
@@ -86,18 +86,18 @@ class Game:
     # Create a new order to put in pending_orders
     # Can return None instead if we don't want to make an order this time step
     def generate_order(self):
-        if (random.random() > ORDER_CHANCE):
+        if (self.random.random() > ORDER_CHANCE):
             return None
 
         graph = self.state.get_graph()
-        node = random.choice(graph.nodes())
+        node = self.random.choice(graph.nodes())
 
         # Perform a random walk on a Gaussian distance from the hub
-        for i in range(int(abs(random.gauss(0, ORDER_VAR)))):
-            node = random.choice(graph.neighbors(node))
+        for i in range(int(abs(self.random.gauss(0, ORDER_VAR)))):
+            node = self.random.choice(graph.neighbors(node))
 
         # Money for the order is from a Gaussian centered around 100
-        money = int(random.gauss(SCORE_MEAN, SCORE_VAR))
+        money = int(self.random.gauss(SCORE_MEAN, SCORE_VAR))
 
         return Order(self.state, node, money)
 
