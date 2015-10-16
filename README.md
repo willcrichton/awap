@@ -2,14 +2,16 @@
 
 ## Setup
 
-0. If you're running Windows, install [Cygwin](http://cygwin.com/install.html). As a part of the installation, select `git` and `python` as packages to install. Boot Cygwin and proceed to 1. If you're not on Windows, open a terminal.
+1. If you're running Windows, install [Cygwin](http://cygwin.com/install.html). As a part of the installation, select `git` and `python` as packages to install. Boot Cygwin and proceed to step 2. If you're not on Windows, open a terminal.
 
-1. Install [pip](http://pip.readthedocs.org/en/stable/installing/) if you do not already have it.
+2. Install [pip](http://pip.readthedocs.org/en/stable/installing/) if you do not already have it.
 
-2. Follow these instructions:
+3. Follow these instructions:
 
 ```
 sudo pip install virtualenv
+git clone git@github.com:willcrichton/awap.git
+cd awap
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
