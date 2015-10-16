@@ -24,7 +24,8 @@ You should look at the following files:
 * `src/game/player.py` - You will implement your algorithm here.
 * `src/game/state.py` - All the state maintained for the game.
 * `src/game/order.py` - Representation of orders in the game.
-* `src/game/settings.py` - Constants and graphs used in the game.
+* `src/game/settings.py` - Constants used in the game.
+* `src/game/graphs.py` - Functions for generating graphs.
 
 You don't need to look at any other files.
 
