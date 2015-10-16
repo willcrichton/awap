@@ -38,9 +38,23 @@ text {
     background: white;
     border: 1px solid black;
     margin: 0 auto;
-    width: 500px;
+    width: 120px;
+    height: 300px;
     padding: 10px 0;
-    margin-bottom: -55px;
-    position: relative;
-    top: 20px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    margin-top: -150px;
+}
+
+#controls button {
+    width: 80%;
+}
+
+#controls > div {
+    margin-bottom: 5px;
+}
+
+#controls input {
+    width: 80%;
 }

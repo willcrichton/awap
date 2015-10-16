@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <form id="controls" class="form-inline" onsubmit="return false">
-  <button id="step" class="btn btn-default">Step</button>
-  <button id="play" class="btn btn-default">Play</button>
-  <div class="form-group"><input type="number" id="speed" value="1" step="any"></div>
-  <span id="time">Time: 0</span>
-  <span id="money">Money: 0</span>
+  <div><button id="step" class="btn btn-default">Step</button></div>
+  <div><button id="play" class="btn btn-default">Play</button></div>
+  <div><input type="number" id="speed" value="1" step="any" min="0"></div>
+  <div><span id="time">Time: 0</span></div>
+  <div><span id="money">Money: 0</span></div>
 </form>
 {% endblock %}
 {% block scripts %}

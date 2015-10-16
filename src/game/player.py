@@ -1,4 +1,5 @@
 import networkx as nx
+import random
 from base_player import BasePlayer
 from settings import *
 
@@ -59,7 +60,7 @@ class Player(BasePlayer):
 
         pending_orders = state.get_pending_orders()
         if len(pending_orders) != 0:
-            order = pending_orders[0]
+            order = random.choice(pending_orders)
             path = nx.shortest_path(graph, station, order.get_node())
             if self.path_is_valid(state, path):
                 commands.append(self.send_command(order, path))
