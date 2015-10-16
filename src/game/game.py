@@ -21,7 +21,8 @@ def timeout(timeout):
             def newFunc():
                 try:
                     res[0] = func(*args, **kwargs)
-                except Exception, e:
+                except Exception as e:
+                    log.error(traceback.format_exc(e))
                     res[0] = e
             t = Thread(target=newFunc)
             t.daemon = True
@@ -58,8 +59,7 @@ class Game:
         func = timeout(timeout=INIT_TIMEOUT)(initialize_player)
         try:
             player = func(deepcopy(self.state))
-        except Exception as exception:
-            log.error(traceback.format_exc(exception))
+        except:
             exit()
 
         self.player = player
@@ -192,10 +192,10 @@ class Game:
     # Take the world through a time step
     def step(self):
         if self.is_over():
-            log.warning("Attempted to step after game was over")
+            log.warning("Attempted to step after game is over")
             return
 
-        log.info("~~~~~~~ TIME %d ~~~~~~~" % self.state.get_time())
+        log.info("~~~~~~~ TIME %04d ~~~~~~~" % self.state.get_time())
 
         G = self.state.get_graph()
 
@@ -222,14 +222,13 @@ class Game:
                 G.edge[u][v]['in_use'] = False
 
         # Remove all negative money orders
-        positive = lambda order: self.state.money_from(order) >= 0
+        positive = lambda order: self.state.money_from(order) > 0
         self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
         func = timeout(timeout=STEP_TIMEOUT)(self.player.step)
         try:
             commands = func(deepcopy(self.state))
-        except Exception as exception:
-            log.error(traceback.format_exc(exception))
+        except:
             commands = []
 
         self.process_commands(commands)

@@ -56,6 +56,7 @@ class State:
         self.time += 1
 
     def money_from(self, order):
-        return order.get_money() - \
+        total = order.get_money() - \
             (self.get_time() - order.get_time_created()) * \
             DECAY_FACTOR
+        return max(total, 0)

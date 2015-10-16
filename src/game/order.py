@@ -27,8 +27,7 @@ class Order:
         order_id += 1
 
     def __repr__(self):
-        return "node %s, money %s, id %s" % (str(self.node), str(self.money), str(self.id))
-        #return "Order %d" % self.id
+        return "(id %s, node %s, money %s)" % (str(self.id), str(self.node), str(self.money))
 
     def get_node(self): return self.node
     def get_money(self): return self.money

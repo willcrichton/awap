@@ -9,7 +9,7 @@ class Player(BasePlayer):
     """
 
     # You can set up static state here
-    sample_step_counter = 0
+    has_built_station = False
 
     def __init__(self, state):
         """
@@ -22,6 +22,13 @@ class Player(BasePlayer):
         """
 
         return
+
+    def path_is_valid(self, state, path):
+        graph = state.get_graph()
+        for i in range(0, len(path) - 1):
+            if graph.edge[path[i]][path[i + 1]]['in_use']:
+                return False
+        return True
 
     def step(self, state):
         """
@@ -44,12 +51,16 @@ class Player(BasePlayer):
         graph = state.get_graph()
         station = graph.nodes()[0]
 
-        commands = [self.build_command(station)]
-        commands.extend([self.send_command(order,
-                                           nx.shortest_path(graph, station,
-                                                            order.get_node()))
-                         for order in state.get_pending_orders()])
+        commands = []
+        if not self.has_built_station:
+            commands.append(self.build_command(station))
+            self.has_built_station = True
 
-        self.sample_step_counter += 1
+        pending_orders = state.get_pending_orders()
+        if len(pending_orders) != 0:
+            order = pending_orders[0]
+            path = nx.shortest_path(graph, station, order.get_node())
+            if self.path_is_valid(state, path):
+                commands.append(self.send_command(order, path))
 
         return commands

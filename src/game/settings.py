@@ -1,6 +1,6 @@
 import logging as log
 
-LOG_LEVEL = log.INFO    # change this to log.WARNING or log.ERROR to suppress
+LOG_LEVEL = log.DEBUG   # change this to DEBUG, WARNING, ERROR to suppress
                         # info/warning messages
 
 INIT_TIMEOUT = 10.0     # Number of seconds your Player can take to load
