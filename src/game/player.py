@@ -23,6 +23,7 @@ class Player(BasePlayer):
 
         return
 
+    # Checks if we can use a given path
     def path_is_valid(self, state, path):
         graph = state.get_graph()
         for i in range(0, len(path) - 1):
@@ -45,7 +46,7 @@ class Player(BasePlayer):
         """
 
         # We have implemented a naive bot for you that builds a single station
-        # and tries to find the shortest path from it to the pending orders.
+        # and tries to find the shortest path from it to first pending order.
         # We recommend making it a bit smarter ;-)
 
         graph = state.get_graph()
