@@ -13,6 +13,23 @@ from threading import Thread
 from settings import *
 from graphs import generate_graph
 
+import ctypes
+
+def terminate_thread(thread):
+    if not thread.isAlive():
+        return
+
+    exc = ctypes.py_object(SystemExit)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+        ctypes.c_long(thread.ident), exc)
+    if res == 0:
+        raise ValueError("nonexistent thread id")
+    elif res > 1:
+        # """if it returns a number greater than one, you're in trouble,
+        # and you should call it again with exc=NULL to revert the effect"""
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+
 def timeout(timeout):
     def deco(func):
         @functools.wraps(func)
@@ -25,13 +42,13 @@ def timeout(timeout):
                     log.error(traceback.format_exc(e))
                     res[0] = e
             t = Thread(target=newFunc)
-            t.daemon = True
             try:
                 t.start()
                 t.join(timeout)
             except Exception, je:
                 print 'error starting thread'
                 raise je
+            terminate_thread(t)
             ret = res[0]
             if isinstance(ret, BaseException):
                 raise ret
