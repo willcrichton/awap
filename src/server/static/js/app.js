@@ -186,6 +186,10 @@ $(function() {
         $('#container').css('height', window.innerHeight);
 
         if (LOG != '') {
+            if (LOG.error !== undefined) {
+                $('body').append('<div class="error">This team has not completed this round or did not run correctly.</div>');
+                return;
+            }
             var svg = renderGraph(LOG.graph);
             var curStep = 0;
 

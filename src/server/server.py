@@ -9,11 +9,18 @@ LOG_SERVER = 'http://128.237.157.112:5000'
 @app.route('/')
 def home():
     team = request.args.get('team', '')
+    rnd = request.args.get('round', '')
     log = json.dumps('')
     if team != '':
-        log = requests.get(LOG_SERVER + '/data', params={'team': team}).text
-        compressed = re.findall(r'== START GAME OUTPUT --(.*)-- END GAME OUTPUT ==', log)[0]
-        log = zlib.decompress(base64.b64decode(compressed))
+        params = {'team': team, 'round': rnd}
+        log = requests.get(LOG_SERVER + '/data', params=params).text
+        compressed = re.findall(r'== START GAME OUTPUT --(.*)-- END GAME OUTPUT ==', log)
+        if len(compressed) > 0:
+            log = zlib.decompress(base64.b64decode(compressed[0]))
+        else:
+            log = json.dumps({
+                'error': ''
+            })
     return render_template('index.html', log=log)
 
 @app.route('/tournament')
@@ -31,7 +38,10 @@ def graph():
 
 @app.route('/teams')
 def teams():
-    return requests.get(LOG_SERVER + '/teams').text
+    try:
+        return requests.get(LOG_SERVER + '/teams').text
+    except:
+        return json.dumps({'error': 'Not available'})
 
 def run_server(g):
     global game
