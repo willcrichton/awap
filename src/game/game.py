@@ -186,6 +186,7 @@ class Game:
 
                 for (u, v) in self.path_to_edges(path):
                     G.edge[u][v]['in_use'] = True
+                    G.edge[v][u]['in_use'] = True
 
                 order.set_time_started(self.state.get_time())
 
@@ -220,6 +221,7 @@ class Game:
 
             for (u, v) in self.path_to_edges(path):
                 G.edge[u][v]['in_use'] = False
+                G.edge[v][u]['in_use'] = False
 
         # Remove all negative money orders
         positive = lambda order: self.state.money_from(order) > 0
