@@ -62,7 +62,8 @@ class Game:
         func = timeout(timeout=INIT_TIMEOUT)(initialize_player)
         try:
             player = func(deepcopy(self.state))
-        except:
+        except Exception as e:
+            log.error(traceback.format_exc(e))
             exit()
 
         self.player = player
@@ -242,9 +243,11 @@ class Game:
 
         func = timeout(timeout=STEP_TIMEOUT)(self.player.step)
         state_copy = deepcopy(self.state)
+        state_copy.graph = state_copy.graph.copy()
         try:
             commands = func(state_copy)
-        except:
+        except Exception as e:
+            log.error(traceback.format_exc(e))
             commands = []
 
         self.process_commands(commands)
