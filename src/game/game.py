@@ -40,10 +40,13 @@ def timeout(timeout):
     return deco
 
 class Game:
-    def __init__(self, player_module_path):
+    def __init__(self, player_module_path, seed):
         log.basicConfig(level=LOG_LEVEL,
                         format='%(levelname)7s:%(filename)s:%(lineno)03d :: %(message)s')
+
         self.random = random.Random()
+        self.random.seed(seed)
+
         self.state = State(generate_graph())
         G = self.state.get_graph()
         for (u, v) in G.edges():
@@ -63,7 +66,6 @@ class Game:
             exit()
 
         self.player = player
-        self.random.seed('I am an order seed!')
 
         hubs = deepcopy(G.nodes())
         random.shuffle(hubs)

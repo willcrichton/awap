@@ -7,7 +7,7 @@ def print_usage():
     exit(1)
 
 def make_game():
-    return Game("game.player")
+    return Game("game.player", 'I am a random seed!')
 
 def main():
     if len(sys.argv) == 1: print_usage()
