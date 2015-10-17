@@ -65,6 +65,10 @@ class Game:
         self.player = player
         self.random.seed('I am an order seed!')
 
+        hubs = deepcopy(G.nodes())
+        random.shuffle(hubs)
+        self.hubs = hubs[:HUBS]
+
     def to_dict(self):
         G = self.state.get_graph()
         dict = self.state.to_dict()
@@ -90,7 +94,7 @@ class Game:
             return None
 
         graph = self.state.get_graph()
-        node = self.random.choice(graph.nodes())
+        node = self.random.choice(self.hubs)
 
         # Perform a random walk on a Gaussian distance from the hub
         for i in range(int(abs(self.random.gauss(0, ORDER_VAR)))):

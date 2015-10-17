@@ -11,7 +11,7 @@
 ```
 sudo pip install virtualenv
 git clone git@github.com:willcrichton/awap-2015.git
-cd awap
+cd awap-2015
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
