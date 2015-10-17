@@ -6,11 +6,14 @@ from settings import *
 def node_index(row, col, row_size):
     return row * row_size + col
 
+GRAPH_SEED = 'I am a graph seed!'
+
 # A very visualizable grid graph (GRAPH_SIZE should be a square)
 def grid_graph():
     random.seed(GRAPH_SEED)
     width = int(round(math.sqrt(GRAPH_SIZE)))
     if width**2 != GRAPH_SIZE:
+        print width, GRAPH_SIZE
         raise ValueError("GRAPH_SIZE must be a square for grid_graph")
 
     # Generate the base grid (no diagonals added yet)
@@ -53,6 +56,5 @@ def generate_graph():
     # Try these included graphs! Play around with the constants!
     # Feel free to define your own graph for testing.
 
+    #return nx.random_regular_graph(5, GRAPH_SIZE, seed=GRAPH_SEED)
     return grid_graph()
-    # return nx.connected_watts_strogatz_graph(GRAPH_SIZE, 5, 0.3, seed=GRAPH_SEED)
-    # return nx.random_regular_graph(5, GRAPH_SIZE, seed=GRAPH_SEED)

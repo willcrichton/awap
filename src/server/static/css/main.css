@@ -3,6 +3,10 @@
     padding: 0;
 }
 
+svg {
+    cursor: all-scroll;
+}
+
 .link {
     fill: none;
     stroke: #666;
@@ -38,7 +42,7 @@ text {
     background: white;
     border: 1px solid black;
     margin: 0 auto;
-    width: 120px;
+    width: 130px;
     height: 300px;
     padding: 10px 0;
     position: absolute;
@@ -57,4 +61,10 @@ text {
 
 #controls input {
     width: 80%;
+}
+
+.patch {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
 }

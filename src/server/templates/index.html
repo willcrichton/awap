@@ -3,9 +3,16 @@
 <form id="controls" class="form-inline" onsubmit="return false">
   <div><button id="step" class="btn btn-default">Step</button></div>
   <div><button id="play" class="btn btn-default">Play</button></div>
-  <div><input type="number" id="speed" value="1" step="any" min="0"></div>
+  <div><input type="number" id="speed" value="1" step="any" min="1"></div>
   <div><span id="time">Time: 0</span></div>
   <div><span id="money">Money: 0</span></div>
+  <div><br /></div>
+  <div style="text-align:left;padding-left:20px;">
+    <div><div class="patch" style="background:#00f"></div> Has order</div>
+    <div><div class="patch" style="background:#f00"></div> Station</div>
+    <div><div class="patch" style="background:#0f0"></div> Edge in use</div>
+    <div><div class="patch" style="background:rgb(255,157,0)"></div> Order pos</div>
+  </div>
 </form>
 {% endblock %}
 {% block scripts %}

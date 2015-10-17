@@ -18,7 +18,7 @@ class Player(BasePlayer):
         on the input graph, engage in whatever pre-computation you need. This
         function must take less than Settings.INIT_TIMEOUT seconds.
         --- Parameters ---
-        state : dict
+        state : State
             The initial state of the game. See state.py for more information.
         """
 
@@ -38,10 +38,10 @@ class Player(BasePlayer):
         time step. This function must take less than Settings.STEP_TIMEOUT
         seconds.
         --- Parameters ---
-        state : dict
+        state : State
             The state of the game. See state.py for more information.
         --- Returns ---
-        commands : command list
+        commands : dict list
             Each command should be generated via self.send_command or
             self.build_command. The commands are evaluated in order.
         """
