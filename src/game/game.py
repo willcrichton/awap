@@ -188,6 +188,14 @@ class Game:
                 self.state.incr_money(-cost)
                 G.node[node]['is_station'] = True
 
+                on_node = filter(lambda (i, x): x.get_node() == node,
+                                 enumerate(self.state.get_pending_orders()))
+                indices = map(lambda (i, x): i, on_node)
+                for (_, order) in on_node:
+                    self.state.incr_money(self.state.money_from(order))
+                self.state.pending_orders = [order for i, order in enumerate(self.state.get_pending_orders()) if i not in indices]
+
+
             # Satisfying an order ("send"ing a train)
             elif command_type == 'send':
                 if 'order' not in command or 'path' not in command:
