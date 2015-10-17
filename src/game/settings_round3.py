@@ -10,11 +10,11 @@ GAME_LENGTH = 1000      # Number of steps in a game
 STARTING_MONEY = 1000   # Starting money value
 INIT_BUILD_COST = 1000  # Initial cost to build a widget station
 BUILD_FACTOR = 1.5      # Multiplicative factor for each subsequent station
-GRAPH_SIZE = 900        # Graph size
-HUBS = 5                # Number of hubs where orders are centered around
+GRAPH_SIZE = 1600       # Graph size
+HUBS = 15               # Number of hubs where orders are centered around
 ORDER_CHANCE = 0.9      # Chance that some order will be created at a step
-ORDER_VAR = 3.0         # Stddev for the Gaussian used to generate random walk
-DECAY_FACTOR = 8.0      # Amount that order value decays per step
+ORDER_VAR = 10.0        # Stddev for the Gaussian used to generate random walk
+DECAY_FACTOR = 5.0      # Amount that order value decays per step
 SCORE_MEAN = 100.0      # Mean for score distribution of an order
 SCORE_VAR = 50.0        # Stddev for score distribution of an order
 

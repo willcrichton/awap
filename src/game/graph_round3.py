@@ -6,7 +6,7 @@ from settings import *
 def node_index(row, col, row_size):
     return row * row_size + col
 
-GRAPH_SEED = 'tuber is awesome'
+GRAPH_SEED = 'san franhattan tuber'
 
 # A very visualizable grid graph (GRAPH_SIZE should be a square)
 def grid_graph():
