@@ -68,7 +68,7 @@ class Game:
         self.player = player
 
         hubs = deepcopy(G.nodes())
-        random.shuffle(hubs)
+        self.random.shuffle(hubs)
         self.hubs = hubs[:HUBS]
 
     def to_dict(self):
@@ -183,10 +183,17 @@ class Game:
                     continue
 
                 pending_orders = self.state.get_pending_orders()
+                found = False
                 for i in range(0, len(pending_orders)):
                     if pending_orders[i].id == order.id:
+                        order = pending_orders[i]
                         del(pending_orders[i])
+                        found = True
                         break
+
+                if not found:
+                    log.warning("Attempted to start an order %s that doesn't exist" % order)
+                    continue
 
                 self.state.get_active_orders().append((order, path))
 
@@ -234,8 +241,9 @@ class Game:
         self.state.pending_orders = filter(positive, self.state.get_pending_orders())
 
         func = timeout(timeout=STEP_TIMEOUT)(self.player.step)
+        state_copy = deepcopy(self.state)
         try:
-            commands = func(deepcopy(self.state))
+            commands = func(state_copy)
         except:
             commands = []
 
