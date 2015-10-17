@@ -25,7 +25,7 @@ $(function() {
 
         // Iterate the force constraint
         force.start();
-        for (var i = 0; i < 1000; i++) { force.tick(); }
+        for (var i = 0; i < 100; i++) { force.tick(); }
         force.stop();
 
         // Create d3 object and find the appropriate SVG elements
@@ -63,7 +63,7 @@ $(function() {
             .selectAll('node')
             .data(nodes)
             .enter()
-            .append('g')
+            .append('g');
 
         node.append('circle')
             .attr('class', 'node')

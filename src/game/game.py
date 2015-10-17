@@ -63,7 +63,7 @@ class Game:
             exit()
 
         self.player = player
-        self.random.seed(ORDER_SEED)
+        self.random.seed('I am an order seed!')
 
     def to_dict(self):
         G = self.state.get_graph()
@@ -105,7 +105,7 @@ class Game:
     # TODO: CHANGEME??
     def build_cost(self):
         current = len([i for i, x in self.state.graph.node.iteritems() if x['is_station']])
-        return BUILD_COST * (BUILD_FACTOR ** current)
+        return INIT_BUILD_COST * (BUILD_FACTOR ** current)
 
     # Converts a list of nodes into a list of edge pairs
     # e.g. [0, 1, 2] -> [(0, 1), (1, 2)]

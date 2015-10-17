@@ -10,7 +10,7 @@
 
 ```
 sudo pip install virtualenv
-git clone git@github.com:willcrichton/awap.git
+git clone git@github.com:willcrichton/awap-2015.git
 cd awap
 virtualenv venv
 source venv/bin/activate
@@ -49,3 +49,11 @@ To step through your algorithm and see it work, do
 ```
 
 Then visit [http://localhost:5000](http://localhost:5000) in your browser.
+
+## Submitting for the competition
+
+To submit your algorithm for scoring, go to Autolab: [https://autolab.cs.cmu.edu/courses/15097-f15/assessments/awapcompetition](https://autolab.cs.cmu.edu/courses/15097-f15/assessments/awapcompetition)
+
+Then click "Submit File" and upload `src/game/player.py`. Do not upload anything else (e.g. a zip/tar file, a different Python file, etc.). Your Autolab submission history will now have a new entry. If your score is -1, then your code did not compile or run correctly. Click on your score to see the error logs. Note that **you can only import from src/game/ or the Python 2.7 standard library**. You cannot use any custom packages besides networkx.
+
+Submissions are closed at 7:00pm. Please submit your final bot early (like 6pm) to ensure that it works on our servers--the queue times will grow as we get close to 7:00pm.
