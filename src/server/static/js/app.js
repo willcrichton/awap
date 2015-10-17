@@ -121,8 +121,10 @@ $(function() {
                 var path = data[1];
 
                 for (var i = 0; i < path.length - 1; ++i) {
-                    if (d.target.index == path[i] &&
-                        d.source.index == path[i + 1]) {
+                    if ((d.target.index == path[i] &&
+                         d.source.index == path[i + 1]) ||
+                        (d.source.index == path[i] &&
+                         d.target.index == path[i + 1])) {
                         c += ' in-use';
 
                         if (state.time - order.time_started == i + 1) {
